@@ -52,7 +52,9 @@ def normalize_llm_task(data: Dict[str, Any]) -> Dict[str, Any]:
         "deliverables": {
             "language": deliverables.get("language") or "any",
             "must_generate": _ensure_list(deliverables.get("must_generate")),
-            "files_to_create_or_edit": _ensure_list(deliverables.get("files_to_create_or_edit")),
+            "files_to_create_or_edit": _ensure_list(
+                deliverables.get("files_to_create_or_edit")
+            ),
         },
         "interfaces": {
             "inputs": _ensure_list(interfaces.get("inputs")),
@@ -73,7 +75,9 @@ def normalize_llm_task(data: Dict[str, Any]) -> Dict[str, Any]:
         "notes_for_llm": {
             "constraints": _ensure_list(notes.get("constraints")),
             "style": _ensure_list(notes.get("style")),
-            "language_specific_hints": _ensure_list(notes.get("language_specific_hints")),
+            "language_specific_hints": _ensure_list(
+                notes.get("language_specific_hints")
+            ),
         },
     }
 
@@ -113,9 +117,17 @@ def _parse_sections(lines: List[str]) -> Dict[str, List[str]]:
         sections.setdefault(name, [])
 
     _SECTION_HEADERS = {
-        "TITLE", "GOAL", "CURRENT", "DESIRED", "INPUTS", "OUTPUTS",
-        "RULES (MUST)", "RULES (MUST NOT)", "EDGE CASES",
-        "ACCEPTANCE TESTS", "DELIVERABLES",
+        "TITLE",
+        "GOAL",
+        "CURRENT",
+        "DESIRED",
+        "INPUTS",
+        "OUTPUTS",
+        "RULES (MUST)",
+        "RULES (MUST NOT)",
+        "EDGE CASES",
+        "ACCEPTANCE TESTS",
+        "DELIVERABLES",
     }
 
     for line in lines:
@@ -144,16 +156,32 @@ def _create_empty_task_data() -> Dict[str, Any]:
     return {
         "task": {"title": "", "one_line_goal": ""},
         "context": {"product_area": "", "current_behavior": "", "desired_behavior": ""},
-        "deliverables": {"language": "any", "must_generate": [], "files_to_create_or_edit": []},
+        "deliverables": {
+            "language": "any",
+            "must_generate": [],
+            "files_to_create_or_edit": [],
+        },
         "interfaces": {"inputs": [], "outputs": []},
-        "rules": {"must": [], "must_not": [], "assumptions": [], "edge_cases": [], "performance": []},
+        "rules": {
+            "must": [],
+            "must_not": [],
+            "assumptions": [],
+            "edge_cases": [],
+            "performance": [],
+        },
         "acceptance": {"tests": [], "done_definition": []},
         "examples": [],
-        "notes_for_llm": {"constraints": [], "style": [], "language_specific_hints": []},
+        "notes_for_llm": {
+            "constraints": [],
+            "style": [],
+            "language_specific_hints": [],
+        },
     }
 
 
-def _apply_simple_sections(sections: Dict[str, List[str]], data: Dict[str, Any]) -> None:
+def _apply_simple_sections(
+    sections: Dict[str, List[str]], data: Dict[str, Any]
+) -> None:
     """Apply simple section key mappings to data."""
     for section_name, path in _SECTION_KEYS.items():
         content_lines = sections.get(section_name)
@@ -167,7 +195,9 @@ def _apply_simple_sections(sections: Dict[str, List[str]], data: Dict[str, Any])
             parent[path[-1]] = value
 
 
-def _apply_bullet_sections(sections: Dict[str, List[str]], data: Dict[str, Any]) -> None:
+def _apply_bullet_sections(
+    sections: Dict[str, List[str]], data: Dict[str, Any]
+) -> None:
     """Apply bullet list sections to data."""
     if sections.get("INPUTS"):
         data["interfaces"]["inputs"] = _parse_bullets(sections["INPUTS"])
@@ -223,12 +253,14 @@ def _load_yaml(raw: str, path: Path) -> Dict[str, Any]:
         col = e.problem_mark.column if e.problem_mark else "?"
         raise ValueError(
             f"YAML syntax error at line {line}, column {col}: {e.problem}\n"
-            f"Hint: Check indentation in {path}")
+            f"Hint: Check indentation in {path}"
+        )
     except ParserError as e:
         line = e.problem_mark.line + 1 if e.problem_mark else "?"
         raise ValueError(
             f"YAML parse error at line {line}: {e.problem}\n"
-            f"Hint: Verify YAML structure in {path}")
+            f"Hint: Verify YAML structure in {path}"
+        )
     except Exception as e:
         raise ValueError(f"YAML error in {path}: {e}")
 
@@ -237,7 +269,8 @@ def _load_yaml(raw: str, path: Path) -> Dict[str, Any]:
     if not isinstance(loaded, dict):
         raise ValueError(
             f"YAML must be a mapping/object, got {type(loaded).__name__} in {path}\n"
-            f"Hint: File should start with 'key: value' pairs")
+            f"Hint: File should start with 'key: value' pairs"
+        )
     return loaded
 
 
@@ -274,13 +307,14 @@ def load_input(path: Path) -> Dict[str, Any]:
     return parse_llm_task_text(raw)
 
 
-
 def create_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="llm-task-generator",
         description="Generate normalized llm_task.yaml from simplified task spec (text/YAML/JSON).",
     )
-    p.add_argument("-i", "--input", required=True, help="Input file: .txt/.md/.yaml/.yml/.json")
+    p.add_argument(
+        "-i", "--input", required=True, help="Input file: .txt/.md/.yaml/.yml/.json"
+    )
     p.add_argument("-o", "--output", required=True, help="Output YAML file path")
     p.add_argument(
         "--validate-only",

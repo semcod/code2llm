@@ -12,7 +12,7 @@ class HTMLRenderer:
         files_json = json.dumps(files, ensure_ascii=False)
         return self._TEMPLATE.format(files_json=files_json)
 
-    _TEMPLATE = '''<!DOCTYPE html>
+    _TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -634,4 +634,4 @@ class HTMLRenderer:
         }}
     </script>
 </body>
-</html>'''
+</html>"""

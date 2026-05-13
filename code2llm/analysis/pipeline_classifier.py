@@ -12,17 +12,51 @@ from code2llm.analysis.type_inference import TypeInferenceEngine
 
 # Module-to-domain mapping heuristics
 DOMAIN_KEYWORDS: Dict[str, List[str]] = {
-    "NLP": ["nlp", "natural", "language", "intent", "entity",
-            "query", "normalize", "tokenize", "match"],
-    "Analysis": ["analysis", "analyzer", "analyse", "analyze",
-                 "metric", "complexity", "cfg", "dfg", "call_graph"],
-    "Export": ["export", "exporter", "render", "format", "output",
-               "toon", "mermaid", "json_export", "yaml_export"],
-    "Refactor": ["refactor", "smell", "suggest", "fix", "patch",
-                 "template", "prompt", "engine"],
+    "NLP": [
+        "nlp",
+        "natural",
+        "language",
+        "intent",
+        "entity",
+        "query",
+        "normalize",
+        "tokenize",
+        "match",
+    ],
+    "Analysis": [
+        "analysis",
+        "analyzer",
+        "analyse",
+        "analyze",
+        "metric",
+        "complexity",
+        "cfg",
+        "dfg",
+        "call_graph",
+    ],
+    "Export": [
+        "export",
+        "exporter",
+        "render",
+        "format",
+        "output",
+        "toon",
+        "mermaid",
+        "json_export",
+        "yaml_export",
+    ],
+    "Refactor": [
+        "refactor",
+        "smell",
+        "suggest",
+        "fix",
+        "patch",
+        "template",
+        "prompt",
+        "engine",
+    ],
     "Core": ["core", "config", "model", "base", "util", "helper"],
-    "IO": ["io", "file", "path", "read", "write", "load", "save",
-           "cache", "storage"],
+    "IO": ["io", "file", "path", "read", "write", "load", "save", "cache", "storage"],
 }
 
 
@@ -32,9 +66,7 @@ class PipelineClassifier:
     def __init__(self, type_engine: Optional[TypeInferenceEngine] = None):
         self._type_engine = type_engine or TypeInferenceEngine()
 
-    def classify_domain(
-        self, path: List[str], funcs: Dict[str, FunctionInfo]
-    ) -> str:
+    def classify_domain(self, path: List[str], funcs: Dict[str, FunctionInfo]) -> str:
         """Classify pipeline domain by analyzing module names and function names."""
         scores: Dict[str, int] = defaultdict(int)
 

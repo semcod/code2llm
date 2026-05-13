@@ -32,7 +32,9 @@ class MapExporter(BaseExporter):
     m=methods
     """
 
-    def export(self, result: AnalysisResult, output_path: str, **kwargs) -> Optional[Path]:
+    def export(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Export analysis result to .map format."""
         lines: List[str] = []
         lines.extend(render_header(result, output_path, is_excluded_path))
@@ -44,7 +46,8 @@ class MapExporter(BaseExporter):
             f.write("\n".join(lines) + "\n")
         return path
 
-    def export_to_yaml(self, result: AnalysisResult, output_path: str, **kwargs) -> None:
+    def export_to_yaml(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> None:
         """Export analysis result to map.toon.yaml format (structured YAML)."""
         export_to_yaml(result, output_path, is_excluded_path)
-

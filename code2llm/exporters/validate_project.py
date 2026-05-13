@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 
-def validate_project_yaml(output_dir: Path, verbose: bool = False) -> Tuple[bool, List[str]]:
+def validate_project_yaml(
+    output_dir: Path, verbose: bool = False
+) -> Tuple[bool, List[str]]:
     """Validate project.yaml against generated views in output_dir.
 
     Returns (is_valid, list_of_issues).
@@ -26,6 +28,7 @@ def validate_project_yaml(output_dir: Path, verbose: bool = False) -> Tuple[bool
     # Load project.yaml
     try:
         import yaml as _yaml
+
         with open(yaml_path, "r", encoding="utf-8") as f:
             data = _yaml.safe_load(f)
     except Exception as e:

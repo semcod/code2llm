@@ -28,15 +28,27 @@ def test_export_project_toon_writes_file(tmp_path):
             "alerts": [],
         },
         "modules": [
-            {"path": "sample.py", "lines": 10, "classes": 0, "methods": 1, "cc_max": 1, "inbound_deps": 0},
+            {
+                "path": "sample.py",
+                "lines": 10,
+                "classes": 0,
+                "methods": 1,
+                "cc_max": 1,
+                "inbound_deps": 0,
+            },
         ],
         "hotspots": [],
         "refactoring": {},
         "evolution": [],
     }
 
-    with patch("code2llm.exporters.project_yaml.evolution.load_previous_evolution", return_value=[]), \
-         patch("code2llm.cli_exports.formats.ProjectYAMLExporter._build_project_yaml", return_value=fake_data):
+    with patch(
+        "code2llm.exporters.project_yaml.evolution.load_previous_evolution",
+        return_value=[],
+    ), patch(
+        "code2llm.cli_exports.formats.ProjectYAMLExporter._build_project_yaml",
+        return_value=fake_data,
+    ):
         output_path = _export_project_toon(args, result, tmp_path)
 
     assert output_path == tmp_path / "project.toon.yaml"
@@ -53,18 +65,19 @@ def test_export_single_project_all_triggers_project_toon(tmp_path):
     result = MagicMock()
     source_path = Path("/tmp/source")
 
-    with patch("code2llm.cli_exports.orchestrator._export_registry_formats"), \
-         patch("code2llm.cli_exports.orchestrator._export_mermaid"), \
-         patch("code2llm.cli_exports.orchestrator._export_context_fallback"), \
-         patch("code2llm.cli_exports.orchestrator._export_project_toon") as project_toon_mock, \
-         patch("code2llm.cli_exports.orchestrator._export_readme"), \
-         patch("code2llm.cli_exports.orchestrator._export_index_html"):
+    with patch("code2llm.cli_exports.orchestrator._export_registry_formats"), patch(
+        "code2llm.cli_exports.orchestrator._export_mermaid"
+    ), patch("code2llm.cli_exports.orchestrator._export_context_fallback"), patch(
+        "code2llm.cli_exports.orchestrator._export_project_toon"
+    ) as project_toon_mock, patch(
+        "code2llm.cli_exports.orchestrator._export_readme"
+    ), patch("code2llm.cli_exports.orchestrator._export_index_html"):
         _export_single_project(
             args,
             result,
             tmp_path,
-            ['toon', 'map', 'context', 'mermaid', 'evolution'],
-            requested_formats=['all'],
+            ["toon", "map", "context", "mermaid", "evolution"],
+            requested_formats=["all"],
             source_path=source_path,
         )
 

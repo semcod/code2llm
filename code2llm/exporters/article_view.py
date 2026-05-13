@@ -34,9 +34,9 @@ class ArticleViewGenerator(ViewGeneratorMixin):
         stats = proj.get("stats", {})
         return [
             "---",
-            f"title: \"Project Health Report: {proj.get('name', '?')}\"",
+            f'title: "Project Health Report: {proj.get("name", "?")}"',
             f"date: {datetime.now().strftime('%Y-%m-%d')}",
-            f"tool: code2llm",
+            "tool: code2llm",
             "---",
             "",
             f"# Project Health Report: {proj.get('name', '?')}",
@@ -104,7 +104,9 @@ class ArticleViewGenerator(ViewGeneratorMixin):
             "",
         ]
         for h in hotspots[:5]:
-            lines.append(f"- **{h['name']}** (fan-out: {h['fan_out']}) — {h.get('note', '')}")
+            lines.append(
+                f"- **{h['name']}** (fan-out: {h['fan_out']}) — {h.get('note', '')}"
+            )
         lines.append("")
         return lines
 
@@ -115,8 +117,12 @@ class ArticleViewGenerator(ViewGeneratorMixin):
             return []
         lines = ["## Refactoring Roadmap", ""]
         for i, p in enumerate(priorities[:7], 1):
-            impact_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(p.get("impact"), "⚪")
-            lines.append(f"{i}. {impact_icon} **{p.get('action', '?')}** (effort: {p.get('effort', '?')})")
+            impact_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(
+                p.get("impact"), "⚪"
+            )
+            lines.append(
+                f"{i}. {impact_icon} **{p.get('action', '?')}** (effort: {p.get('effort', '?')})"
+            )
         lines.append("")
         return lines
 
@@ -141,9 +147,13 @@ class ArticleViewGenerator(ViewGeneratorMixin):
         first, last = evolution[0], evolution[-1]
         cc_delta = (last.get("cc_avg", 0) or 0) - (first.get("cc_avg", 0) or 0)
         if cc_delta < 0:
-            lines.append(f"📈 **CC improved** by {abs(cc_delta):.1f} since {first.get('date', '?')}")
+            lines.append(
+                f"📈 **CC improved** by {abs(cc_delta):.1f} since {first.get('date', '?')}"
+            )
         elif cc_delta > 0:
-            lines.append(f"📉 **CC worsened** by {cc_delta:.1f} since {first.get('date', '?')}")
+            lines.append(
+                f"📉 **CC worsened** by {cc_delta:.1f} since {first.get('date', '?')}"
+            )
         else:
             lines.append(f"➡️ **CC stable** since {first.get('date', '?')}")
         lines.append("")

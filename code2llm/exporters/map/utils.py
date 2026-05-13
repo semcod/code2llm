@@ -27,7 +27,9 @@ def rel_path(fpath: str, project_path: str) -> str:
 def file_line_count(fpath: str) -> int:
     """Count lines in a file."""
     try:
-        return len(Path(fpath).read_text(encoding="utf-8", errors="ignore").splitlines())
+        return len(
+            Path(fpath).read_text(encoding="utf-8", errors="ignore").splitlines()
+        )
     except Exception:
         return 0
 
@@ -60,13 +62,13 @@ def detect_languages(result: AnalysisResult, is_excluded_path) -> Dict[str, int]
             # Fallback: try to detect from file extension
             ext = Path(mi.file).suffix.lower()
             if ext:
-                langs[ext.lstrip('.')] += 1
+                langs[ext.lstrip(".")] += 1
     return dict(langs)
 
 
 __all__ = [
-    'rel_path',
-    'file_line_count',
-    'count_total_lines',
-    'detect_languages',
+    "rel_path",
+    "file_line_count",
+    "count_total_lines",
+    "detect_languages",
 ]

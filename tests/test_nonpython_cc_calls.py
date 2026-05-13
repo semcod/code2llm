@@ -7,7 +7,7 @@ CC values (not all zeros) and call graph edges extracted.
 import tempfile
 from pathlib import Path
 from code2llm.core.analyzer import ProjectAnalyzer
-from code2llm.core.config import Config, FAST_CONFIG
+from code2llm.core.config import FAST_CONFIG
 
 
 class TestTypeScriptComplexityAndCalls:
@@ -79,53 +79,65 @@ export function main(): void {
         result = self._analyze()
         func_names = {f.name for f in result.functions.values()}
         # Should detect class methods (shorthand syntax) + standalone functions
-        assert 'addUser' in func_names, f"addUser not found in {func_names}"
-        assert 'findUser' in func_names, f"findUser not found in {func_names}"
-        assert 'processAll' in func_names, f"processAll not found in {func_names}"
-        assert 'notify' in func_names, f"notify not found in {func_names}"
-        assert 'initService' in func_names, f"initService not found in {func_names}"
-        assert 'main' in func_names, f"main not found in {func_names}"
+        assert "addUser" in func_names, f"addUser not found in {func_names}"
+        assert "findUser" in func_names, f"findUser not found in {func_names}"
+        assert "processAll" in func_names, f"processAll not found in {func_names}"
+        assert "notify" in func_names, f"notify not found in {func_names}"
+        assert "initService" in func_names, f"initService not found in {func_names}"
+        assert "main" in func_names, f"main not found in {func_names}"
 
     def test_ts_complexity_not_zero(self):
         result = self._analyze()
         ccs = {}
         for name, fi in result.functions.items():
-            cc = fi.complexity.get('cyclomatic_complexity', 0)
+            cc = fi.complexity.get("cyclomatic_complexity", 0)
             ccs[fi.name] = cc
 
         # addUser has if/if/else → CC should be > 1
-        assert ccs.get('addUser', 0) > 1, f"addUser CC should be > 1, got {ccs.get('addUser')}"
+        assert ccs.get("addUser", 0) > 1, (
+            f"addUser CC should be > 1, got {ccs.get('addUser')}"
+        )
         # findUser has for/if → CC > 1
-        assert ccs.get('findUser', 0) > 1, f"findUser CC should be > 1, got {ccs.get('findUser')}"
+        assert ccs.get("findUser", 0) > 1, (
+            f"findUser CC should be > 1, got {ccs.get('findUser')}"
+        )
         # processAll has for/if/|| → CC > 1
-        assert ccs.get('processAll', 0) > 1, f"processAll CC should be > 1, got {ccs.get('processAll')}"
+        assert ccs.get("processAll", 0) > 1, (
+            f"processAll CC should be > 1, got {ccs.get('processAll')}"
+        )
         # notify is trivial → CC = 1
-        assert ccs.get('notify', 0) >= 1, f"notify CC should be >= 1, got {ccs.get('notify')}"
+        assert ccs.get("notify", 0) >= 1, (
+            f"notify CC should be >= 1, got {ccs.get('notify')}"
+        )
 
     def test_ts_calls_extracted(self):
         result = self._analyze()
         all_calls = {}
         for name, fi in result.functions.items():
-            simple_calls = [c.rsplit('.', 1)[-1] for c in fi.calls]
+            simple_calls = [c.rsplit(".", 1)[-1] for c in fi.calls]
             all_calls[fi.name] = simple_calls
 
         # processAll calls notify
-        assert 'notify' in all_calls.get('processAll', []), \
+        assert "notify" in all_calls.get("processAll", []), (
             f"processAll should call notify, got {all_calls.get('processAll')}"
+        )
         # main calls initService
-        assert 'initService' in all_calls.get('main', []), \
+        assert "initService" in all_calls.get("main", []), (
             f"main should call initService, got {all_calls.get('main')}"
+        )
 
     def test_ts_cc_avg_not_zero(self):
         result = self._analyze()
         total_cc = sum(
-            fi.complexity.get('cyclomatic_complexity', 0)
+            fi.complexity.get("cyclomatic_complexity", 0)
             for fi in result.functions.values()
         )
         count = len(result.functions)
         assert count > 0
         avg = total_cc / count
-        assert avg > 1.0, f"Average CC should be > 1.0 for non-trivial code, got {avg:.2f}"
+        assert avg > 1.0, (
+            f"Average CC should be > 1.0 for non-trivial code, got {avg:.2f}"
+        )
 
 
 class TestGoComplexityAndCalls:
@@ -173,21 +185,26 @@ func main() {
 
     def test_go_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # Start has if/for/if → CC > 1
-        assert ccs.get('Start', 0) > 1, f"Start CC should be > 1, got {ccs.get('Start')}"
+        assert ccs.get("Start", 0) > 1, (
+            f"Start CC should be > 1, got {ccs.get('Start')}"
+        )
         # main has if → CC > 1
-        assert ccs.get('main', 0) > 1, f"main CC should be > 1, got {ccs.get('main')}"
+        assert ccs.get("main", 0) > 1, f"main CC should be > 1, got {ccs.get('main')}"
 
     def test_go_calls_extracted(self):
         result = self._analyze()
         all_calls = {}
         for fi in result.functions.values():
-            all_calls[fi.name] = [c.rsplit('.', 1)[-1] for c in fi.calls]
+            all_calls[fi.name] = [c.rsplit(".", 1)[-1] for c in fi.calls]
         # main calls NewServer
-        assert 'NewServer' in all_calls.get('main', []), \
+        assert "NewServer" in all_calls.get("main", []), (
             f"main should call NewServer, got {all_calls.get('main')}"
+        )
 
 
 class TestRustComplexityAndCalls:
@@ -238,12 +255,14 @@ fn main() {
 
     def test_rust_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # set has if/|| → CC > 1
-        assert ccs.get('set', 0) > 1, f"set CC should be > 1, got {ccs.get('set')}"
+        assert ccs.get("set", 0) > 1, f"set CC should be > 1, got {ccs.get('set')}"
         # get has if → CC > 1
-        assert ccs.get('get', 0) > 1, f"get CC should be > 1, got {ccs.get('get')}"
+        assert ccs.get("get", 0) > 1, f"get CC should be > 1, got {ccs.get('get')}"
 
 
 class TestJavaComplexityAndCalls:
@@ -296,14 +315,22 @@ public class UserService {
 
     def test_java_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # addUser has if/&& → CC > 1
-        assert ccs.get('addUser', 0) > 1, f"addUser CC should be > 1, got {ccs.get('addUser')}"
+        assert ccs.get("addUser", 0) > 1, (
+            f"addUser CC should be > 1, got {ccs.get('addUser')}"
+        )
         # findUser has for/if → CC > 1
-        assert ccs.get('findUser', 0) > 1, f"findUser CC should be > 1, got {ccs.get('findUser')}"
+        assert ccs.get("findUser", 0) > 1, (
+            f"findUser CC should be > 1, got {ccs.get('findUser')}"
+        )
         # countActive has for/if/||/&& → CC > 1
-        assert ccs.get('countActive', 0) > 1, f"countActive CC should be > 1, got {ccs.get('countActive')}"
+        assert ccs.get("countActive", 0) > 1, (
+            f"countActive CC should be > 1, got {ccs.get('countActive')}"
+        )
 
     def test_java_calls_extracted(self):
         result = self._analyze()
@@ -378,23 +405,31 @@ int main() {
     def test_cpp_classes_detected(self):
         result = self._analyze()
         class_names = {c.name for c in result.classes.values()}
-        assert 'StringHelper' in class_names, f"StringHelper not found in {class_names}"
+        assert "StringHelper" in class_names, f"StringHelper not found in {class_names}"
 
     def test_cpp_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # isValid has if/for/if → CC > 1
-        assert ccs.get('isValid', 0) > 1, f"isValid CC should be > 1, got {ccs.get('isValid')}"
+        assert ccs.get("isValid", 0) > 1, (
+            f"isValid CC should be > 1, got {ccs.get('isValid')}"
+        )
         # transform has if/else → CC > 1
-        assert ccs.get('transform', 0) > 1, f"transform CC should be > 1, got {ccs.get('transform')}"
+        assert ccs.get("transform", 0) > 1, (
+            f"transform CC should be > 1, got {ccs.get('transform')}"
+        )
         # main has if → CC > 1
-        assert ccs.get('main', 0) > 1, f"main CC should be > 1, got {ccs.get('main')}"
+        assert ccs.get("main", 0) > 1, f"main CC should be > 1, got {ccs.get('main')}"
 
     def test_cpp_includes_extracted(self):
         result = self._analyze()
         imports = list(result.modules.values())[0].imports if result.modules else []
-        assert any('iostream' in imp for imp in imports), "iostream should be in includes"
+        assert any("iostream" in imp for imp in imports), (
+            "iostream should be in includes"
+        )
 
 
 class TestCSharpComplexityAndCalls:
@@ -458,23 +493,31 @@ namespace MyApp.Services
     def test_cs_classes_detected(self):
         result = self._analyze()
         class_names = {c.name for c in result.classes.values()}
-        assert 'UserService' in class_names, f"UserService not found in {class_names}"
+        assert "UserService" in class_names, f"UserService not found in {class_names}"
 
     def test_cs_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # AddUser has if/&&/! → CC > 1
-        assert ccs.get('AddUser', 0) > 1, f"AddUser CC should be > 1, got {ccs.get('AddUser')}"
+        assert ccs.get("AddUser", 0) > 1, (
+            f"AddUser CC should be > 1, got {ccs.get('AddUser')}"
+        )
         # FindUser has foreach/if → CC > 1
-        assert ccs.get('FindUser', 0) > 1, f"FindUser CC should be > 1, got {ccs.get('FindUser')}"
+        assert ccs.get("FindUser", 0) > 1, (
+            f"FindUser CC should be > 1, got {ccs.get('FindUser')}"
+        )
         # CountUsers has foreach/if/||/&& → CC > 1
-        assert ccs.get('CountUsers', 0) > 1, f"CountUsers CC should be > 1, got {ccs.get('CountUsers')}"
+        assert ccs.get("CountUsers", 0) > 1, (
+            f"CountUsers CC should be > 1, got {ccs.get('CountUsers')}"
+        )
 
     def test_cs_usings_extracted(self):
         result = self._analyze()
         imports = list(result.modules.values())[0].imports if result.modules else []
-        assert any('System' in imp for imp in imports), "System should be in usings"
+        assert any("System" in imp for imp in imports), "System should be in usings"
 
 
 class TestPhpComplexityAndCalls:
@@ -541,24 +584,36 @@ function helper($x) {
     def test_php_classes_detected(self):
         result = self._analyze()
         class_names = {c.name for c in result.classes.values()}
-        assert 'UserRepository' in class_names, f"UserRepository not found in {class_names}"
+        assert "UserRepository" in class_names, (
+            f"UserRepository not found in {class_names}"
+        )
 
     def test_php_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # findById has if/||/throw → CC > 1
-        assert ccs.get('findById', 0) > 1, f"findById CC should be > 1, got {ccs.get('findById')}"
+        assert ccs.get("findById", 0) > 1, (
+            f"findById CC should be > 1, got {ccs.get('findById')}"
+        )
         # findAllActive has if/while/if/|| → CC > 1
-        assert ccs.get('findAllActive', 0) > 1, f"findAllActive CC should be > 1, got {ccs.get('findAllActive')}"
+        assert ccs.get("findAllActive", 0) > 1, (
+            f"findAllActive CC should be > 1, got {ccs.get('findAllActive')}"
+        )
         # validate has && → CC > 1
-        assert ccs.get('validate', 0) > 1, f"validate CC should be > 1, got {ccs.get('validate')}"
+        assert ccs.get("validate", 0) > 1, (
+            f"validate CC should be > 1, got {ccs.get('validate')}"
+        )
 
     def test_php_namespace_extracted(self):
         result = self._analyze()
         # Should detect namespaced classes
         qualified_names = list(result.classes.keys())
-        assert any('MyApp' in qn for qn in qualified_names), "Namespace MyApp should be in qualified names"
+        assert any("MyApp" in qn for qn in qualified_names), (
+            "Namespace MyApp should be in qualified names"
+        )
 
 
 class TestRubyComplexityAndCalls:
@@ -621,22 +676,32 @@ end
     def test_ruby_classes_detected(self):
         result = self._analyze()
         class_names = {c.name for c in result.classes.values()}
-        assert 'StringProcessor' in class_names, f"StringProcessor not found in {class_names}"
+        assert "StringProcessor" in class_names, (
+            f"StringProcessor not found in {class_names}"
+        )
 
     def test_ruby_complexity_not_zero(self):
         result = self._analyze()
-        ccs = {fi.name: fi.complexity.get('cyclomatic_complexity', 0)
-               for fi in result.functions.values()}
+        ccs = {
+            fi.name: fi.complexity.get("cyclomatic_complexity", 0)
+            for fi in result.functions.values()
+        }
         # Note: Ruby uses 'def...end' not braces, so body extraction is limited
         # Functions with obvious control flow should have CC > 1
         # transform has if/elsif/if
-        assert ccs.get('transform', 0) > 1, f"transform CC should be > 1, got {ccs.get('transform')}"
+        assert ccs.get("transform", 0) > 1, (
+            f"transform CC should be > 1, got {ccs.get('transform')}"
+        )
         # batch_process has if/if
-        assert ccs.get('batch_process', 0) > 1, f"batch_process CC should be > 1, got {ccs.get('batch_process')}"
+        assert ccs.get("batch_process", 0) > 1, (
+            f"batch_process CC should be > 1, got {ccs.get('batch_process')}"
+        )
         # global_helper uses ternary
-        assert ccs.get('global_helper', 0) > 1, f"global_helper CC should be > 1, got {ccs.get('global_helper')}"
+        assert ccs.get("global_helper", 0) > 1, (
+            f"global_helper CC should be > 1, got {ccs.get('global_helper')}"
+        )
 
     def test_ruby_requires_extracted(self):
         result = self._analyze()
         imports = list(result.modules.values())[0].imports if result.modules else []
-        assert any('json' in imp for imp in imports), "json should be in requires"
+        assert any("json" in imp for imp in imports), "json should be in requires"

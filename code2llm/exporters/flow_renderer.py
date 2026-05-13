@@ -6,7 +6,12 @@ Zawiera funkcje renderujące poszczególne sekcje formatu flow.toon.
 from collections import defaultdict
 from typing import Any, Dict, List
 
-from .flow_constants import CC_HIGH, FAN_OUT_THRESHOLD, HUB_SPLIT_RECOMMENDATIONS, HUB_TYPE_THRESHOLD
+from .flow_constants import (
+    CC_HIGH,
+    FAN_OUT_THRESHOLD,
+    HUB_SPLIT_RECOMMENDATIONS,
+    HUB_TYPE_THRESHOLD,
+)
 
 
 class FlowRenderer:
@@ -21,8 +26,7 @@ class FlowRenderer:
         result: AnalysisResult = ctx["result"]
         nfuncs = len(ctx["funcs"])
         npipelines = len(ctx["pipelines"])
-        nhubs = sum(1 for t in ctx["type_usage"]
-                    if t["consumed"] >= HUB_TYPE_THRESHOLD)
+        nhubs = sum(1 for t in ctx["type_usage"] if t["consumed"] >= HUB_TYPE_THRESHOLD)
         return [
             f"# {Path(result.project_path).name if result.project_path else 'project'}/flow"
             f" | {nfuncs} func | {npipelines} pipelines"
@@ -47,10 +51,7 @@ class FlowRenderer:
             domain_tag = f"[{pl.get('domain', '?')}]"
             entry_type = pl.get("entry_type", "?")
             exit_type = pl.get("exit_type", "?")
-            lines.append(
-                f"  {pl['name']} {domain_tag}:"
-                f" {entry_type} → {exit_type}"
-            )
+            lines.append(f"  {pl['name']} {domain_tag}: {entry_type} → {exit_type}")
             for stage in pl["stages"]:
                 cc_marker = "  !!" if stage["cc"] >= CC_HIGH else ""
                 entry_lbl = " ▶" if stage.get("is_entry") else ""
@@ -80,10 +81,7 @@ class FlowRenderer:
 
         lines = [f"TRANSFORMS (fan-out ≥{FAN_OUT_THRESHOLD}):"]
         for t in transforms:
-            lines.append(
-                f"  {t['signature']:<55s} fan={t['fan_out']:<3}"
-                f"  {t['label']}"
-            )
+            lines.append(f"  {t['signature']:<55s} fan={t['fan_out']:<3}  {t['label']}")
         return lines
 
     @staticmethod
@@ -119,12 +117,10 @@ class FlowRenderer:
         # Count type sources
         type_info = ctx.get("type_info", {})
         n_annotated = sum(
-            1 for ti in type_info.values()
-            if ti.get("source") == "annotation"
+            1 for ti in type_info.values() if ti.get("source") == "annotation"
         )
         n_inferred = sum(
-            1 for ti in type_info.values()
-            if ti.get("source") == "inferred"
+            1 for ti in type_info.values() if ti.get("source") == "inferred"
         )
         n_total = len(type_info)
 
@@ -147,15 +143,16 @@ class FlowRenderer:
             lines.append("  HUB TYPES (consumed ≥10):")
             for h in hubs:
                 lines.append(
-                    f"    {h['type']} → {h['consumed']} consumers"
-                    f" → split into:"
+                    f"    {h['type']} → {h['consumed']} consumers → split into:"
                 )
                 recs = HUB_SPLIT_RECOMMENDATIONS.get(h["type"], [])
                 if recs:
                     for rec in recs:
                         lines.append(f"      - {rec}")
                 else:
-                    lines.append("      - (analyze consumers to suggest sub-interfaces)")
+                    lines.append(
+                        "      - (analyze consumers to suggest sub-interfaces)"
+                    )
 
         return lines
 
@@ -167,9 +164,7 @@ class FlowRenderer:
 
         for category, funcs in se.items():
             if funcs:
-                lines.append(
-                    f"  {category + ':':<10s} {', '.join(funcs[:10])}"
-                )
+                lines.append(f"  {category + ':':<10s} {', '.join(funcs[:10])}")
 
         # Pipeline purity summary
         pipelines = ctx["pipelines"]
@@ -177,12 +172,12 @@ class FlowRenderer:
             lines.append("")
             lines.append("  PIPELINE PURITY:")
             for pl in pipelines:
-                ratio = pl["pure_count"] / pl["total_stages"] if pl["total_stages"] else 0
+                ratio = (
+                    pl["pure_count"] / pl["total_stages"] if pl["total_stages"] else 0
+                )
                 bar_len = int(ratio * 4)
                 bar = "█" * bar_len + "░" * (4 - bar_len)
                 pct = int(ratio * 100)
-                lines.append(
-                    f"    {pl['name']:<15s} {bar} {pct}% pure"
-                )
+                lines.append(f"    {pl['name']:<15s} {bar} {pct}% pure")
 
         return lines

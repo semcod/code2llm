@@ -16,8 +16,12 @@ def export_to_yaml(result: AnalysisResult, output_path: str, is_excluded_path) -
     project_name = Path(result.project_path).name if result.project_path else "project"
     langs = detect_languages(result, is_excluded_path)
 
-    included_funcs = [fi for fi in result.functions.values() if not is_excluded_path(fi.file)]
-    included_files = [mi for mi in result.modules.values() if not is_excluded_path(mi.file)]
+    included_funcs = [
+        fi for fi in result.functions.values() if not is_excluded_path(fi.file)
+    ]
+    included_files = [
+        mi for mi in result.modules.values() if not is_excluded_path(mi.file)
+    ]
     total_lines = count_total_lines(result, is_excluded_path)
 
     modules_data = [
@@ -41,10 +45,14 @@ def export_to_yaml(result: AnalysisResult, output_path: str, is_excluded_path) -
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        yaml.dump(
+            data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+        )
 
 
-def _build_module_entry(mi: "ModuleInfo", result: AnalysisResult, is_excluded_path) -> Dict[str, Any]:
+def _build_module_entry(
+    mi: "ModuleInfo", result: AnalysisResult, is_excluded_path
+) -> Dict[str, Any]:
     """Build the YAML dict for a single module."""
     rel = rel_path(mi.file, result.project_path)
     lc = file_line_count(mi.file)
@@ -89,18 +97,22 @@ def _build_module_classes_data(mi: "ModuleInfo", result: AnalysisResult) -> List
     return classes_data
 
 
-def _build_module_functions_data(mi: "ModuleInfo", result: AnalysisResult) -> List[Dict]:
+def _build_module_functions_data(
+    mi: "ModuleInfo", result: AnalysisResult
+) -> List[Dict]:
     """Return standalone function list for a module."""
     functions_data: List[Dict] = []
     for fq in mi.functions:
         fi = result.functions.get(fq)
         if fi and not fi.class_name:
-            functions_data.append({
-                "name": fi.name,
-                "args": [a for a in fi.args if a != "self"],
-                "returns": fi.returns or None,
-            })
+            functions_data.append(
+                {
+                    "name": fi.name,
+                    "args": [a for a in fi.args if a != "self"],
+                    "returns": fi.returns or None,
+                }
+            )
     return functions_data
 
 
-__all__ = ['export_to_yaml']
+__all__ = ["export_to_yaml"]

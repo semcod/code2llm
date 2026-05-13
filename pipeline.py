@@ -22,7 +22,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 # Performance: disable pip version check for any subprocess we might spawn
 os.environ.setdefault("PIP_DISABLE_PIP_VERSION_CHECK", "1")
@@ -43,7 +43,10 @@ def _detect_primary_language(project_dir: Path) -> str:
 
     for root, _dirs, files in os.walk(project_dir):
         # Skip common non-source dirs
-        if any(skip in root for skip in [".git", "venv", ".venv", "node_modules", "__pycache__"]):
+        if any(
+            skip in root
+            for skip in [".git", "venv", ".venv", "node_modules", "__pycache__"]
+        ):
             continue
         for f in files:
             ext = Path(f).suffix.lower()
@@ -51,7 +54,9 @@ def _detect_primary_language(project_dir: Path) -> str:
                 ext_counts[ext] += 1
 
     # Aggregate JS/TS
-    js_ts = ext_counts[".ts"] + ext_counts[".tsx"] + ext_counts[".js"] + ext_counts[".jsx"]
+    js_ts = (
+        ext_counts[".ts"] + ext_counts[".tsx"] + ext_counts[".js"] + ext_counts[".jsx"]
+    )
     if js_ts > 0:
         ext_counts["js_ts"] = js_ts
 
@@ -59,7 +64,9 @@ def _detect_primary_language(project_dir: Path) -> str:
     return "python" if primary == ".py" else primary
 
 
-def run_pipeline(project_dir: str = ".", output_dir: str = "./project") -> Dict[str, Any]:
+def run_pipeline(
+    project_dir: str = ".", output_dir: str = "./project"
+) -> Dict[str, Any]:
     """Run unified pipeline in single process.
 
     Returns dict with timings and status for each stage.
@@ -95,7 +102,9 @@ def run_pipeline(project_dir: str = ".", output_dir: str = "./project") -> Dict[
         results["status"]["code2llm"] = "ok"
         results["analysis"] = analysis_result
         results["python_count"] = py_count
-        print(f"✓ code2llm analysis: {timings['code2llm_analysis']:.2f}s ({py_count} Python files)")
+        print(
+            f"✓ code2llm analysis: {timings['code2llm_analysis']:.2f}s ({py_count} Python files)"
+        )
     except Exception as e:
         timings["code2llm_analysis"] = time.perf_counter() - t0
         results["status"]["code2llm"] = f"error: {e}"
@@ -152,10 +161,12 @@ def run_pipeline(project_dir: str = ".", output_dir: str = "./project") -> Dict[
     else:
         # Create placeholder for non-Python projects
         placeholder = out_path / "duplication.toon.yaml"
-        placeholder.write_text("# redup/duplication | 0 groups | skip (non-python project)\n")
+        placeholder.write_text(
+            "# redup/duplication | 0 groups | skip (non-python project)\n"
+        )
         timings["redup"] = time.perf_counter() - t0
         results["status"]["redup"] = "skipped (non-python)"
-        print(f"⚠ redup: skipped (no Python files found)")
+        print("⚠ redup: skipped (no Python files found)")
 
     # Stage 4: vallm validation
     t0 = time.perf_counter()

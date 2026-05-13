@@ -63,7 +63,9 @@ class ContextViewGenerator(ViewGeneratorMixin):
             group = dir_groups[dir_name]
             total_lines = sum(m.get("lines", 0) for m in group)
             total_funcs = sum(m.get("methods", 0) for m in group)
-            lines.append(f"### {dir_name}/ ({len(group)} files, {total_lines}L, {total_funcs} functions)")
+            lines.append(
+                f"### {dir_name}/ ({len(group)} files, {total_lines}L, {total_funcs} functions)"
+            )
             lines.append("")
             for m in sorted(group, key=lambda x: x.get("cc_max", 0), reverse=True)[:5]:
                 fname = Path(m.get("path", "")).name
@@ -86,11 +88,17 @@ class ContextViewGenerator(ViewGeneratorMixin):
                     methods = exp.get("methods", [])
                     flagged = [me for me in methods if me.get("flag")]
                     if flagged or exp.get("cc_avg", 0) >= 5:
-                        lines.append(f"- **{exp['name']}** (class, CC̄={exp.get('cc_avg', 0)})")
+                        lines.append(
+                            f"- **{exp['name']}** (class, CC̄={exp.get('cc_avg', 0)})"
+                        )
                         for me in flagged:
-                            lines.append(f"  - `{me['name']}` CC={me.get('cc', 0)} ⚠ {me.get('flag', '')}")
+                            lines.append(
+                                f"  - `{me['name']}` CC={me.get('cc', 0)} ⚠ {me.get('flag', '')}"
+                            )
                 elif exp.get("type") == "function" and exp.get("flag"):
-                    lines.append(f"- **{exp['name']}** (function, CC={exp.get('cc', 0)}) ⚠ {exp.get('flag', '')}")
+                    lines.append(
+                        f"- **{exp['name']}** (function, CC={exp.get('cc', 0)}) ⚠ {exp.get('flag', '')}"
+                    )
         lines.append("")
         return lines
 
@@ -100,7 +108,9 @@ class ContextViewGenerator(ViewGeneratorMixin):
             return []
         lines = ["## Hotspots (High Fan-Out)", ""]
         for h in hotspots[:7]:
-            lines.append(f"- **{h['name']}** — fan-out={h['fan_out']}: {h.get('note', '')}")
+            lines.append(
+                f"- **{h['name']}** — fan-out={h['fan_out']}: {h.get('note', '')}"
+            )
         lines.append("")
         return lines
 

@@ -6,21 +6,21 @@ Tests cover:
 - SideEffectDetector: IO, cache, mutation, pure classification
 - FlowExporter: enhanced CONTRACTS, DATA_TYPES, SIDE_EFFECTS rendering
 """
-import os
+
 import textwrap
-import tempfile
 import pytest
 from pathlib import Path
 
 from code2llm.core.models import AnalysisResult, FunctionInfo, ModuleInfo
 from code2llm.analysis.type_inference import TypeInferenceEngine
-from code2llm.analysis.side_effects import SideEffectDetector, SideEffectInfo
+from code2llm.analysis.side_effects import SideEffectDetector
 from code2llm.exporters.flow_exporter import FlowExporter
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def typed_source(tmp_path):
@@ -85,8 +85,17 @@ def untyped_source(tmp_path):
     return str(src)
 
 
-def _make_fi(name, file, line=1, args=None, returns=None, calls=None,
-             class_name=None, module="test_mod", complexity=None):
+def _make_fi(
+    name,
+    file,
+    line=1,
+    args=None,
+    returns=None,
+    calls=None,
+    class_name=None,
+    module="test_mod",
+    complexity=None,
+):
     """Helper to create FunctionInfo."""
     return FunctionInfo(
         name=name,
@@ -107,8 +116,8 @@ def _make_fi(name, file, line=1, args=None, returns=None, calls=None,
 # TypeInferenceEngine tests
 # ---------------------------------------------------------------------------
 
-class TestTypeInferenceEngine:
 
+class TestTypeInferenceEngine:
     def test_extracts_return_annotation(self, typed_source):
         engine = TypeInferenceEngine()
         fi = _make_fi("analyze_file", typed_source, line=7, args=["path", "verbose"])
@@ -170,10 +179,12 @@ class TestTypeInferenceEngine:
     def test_batch_extract(self, typed_source):
         engine = TypeInferenceEngine()
         funcs = {
-            "m.analyze_file": _make_fi("analyze_file", typed_source, line=7,
-                                       args=["path", "verbose"]),
-            "m.normalize": _make_fi("normalize", typed_source, line=12,
-                                    args=["text", "lang"]),
+            "m.analyze_file": _make_fi(
+                "analyze_file", typed_source, line=7, args=["path", "verbose"]
+            ),
+            "m.normalize": _make_fi(
+                "normalize", typed_source, line=12, args=["text", "lang"]
+            ),
         }
         results = engine.extract_all_types(funcs)
 
@@ -186,12 +197,17 @@ class TestTypeInferenceEngine:
 # SideEffectDetector tests
 # ---------------------------------------------------------------------------
 
-class TestSideEffectDetector:
 
+class TestSideEffectDetector:
     def test_detects_io(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("analyze_file", typed_source, line=7,
-                       args=["path", "verbose"], calls=["open"])
+        fi = _make_fi(
+            "analyze_file",
+            typed_source,
+            line=7,
+            args=["path", "verbose"],
+            calls=["open"],
+        )
         info = detector.analyze_function(fi)
 
         assert info.classification == "IO"
@@ -199,8 +215,7 @@ class TestSideEffectDetector:
 
     def test_detects_pure(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("normalize", typed_source, line=12,
-                       args=["text", "lang"])
+        fi = _make_fi("normalize", typed_source, line=12, args=["text", "lang"])
         info = detector.analyze_function(fi)
 
         assert info.classification == "pure"
@@ -208,8 +223,13 @@ class TestSideEffectDetector:
 
     def test_detects_mutation(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("process", typed_source, line=25,
-                       args=["self", "data"], class_name="DataProcessor")
+        fi = _make_fi(
+            "process",
+            typed_source,
+            line=25,
+            args=["self", "data"],
+            class_name="DataProcessor",
+        )
         info = detector.analyze_function(fi)
 
         assert info.classification == "mutation"
@@ -217,16 +237,26 @@ class TestSideEffectDetector:
 
     def test_detects_write_io(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("save_results", typed_source, line=16,
-                       args=["results", "output"], calls=["open"])
+        fi = _make_fi(
+            "save_results",
+            typed_source,
+            line=16,
+            args=["results", "output"],
+            calls=["open"],
+        )
         info = detector.analyze_function(fi)
 
         assert info.classification == "IO"
 
     def test_side_effect_summary(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("save_results", typed_source, line=16,
-                       args=["results", "output"], calls=["open"])
+        fi = _make_fi(
+            "save_results",
+            typed_source,
+            line=16,
+            args=["results", "output"],
+            calls=["open"],
+        )
         info = detector.analyze_function(fi)
 
         summary = info.side_effect_summary
@@ -235,10 +265,10 @@ class TestSideEffectDetector:
     def test_batch_analyze(self, typed_source):
         detector = SideEffectDetector()
         funcs = {
-            "m.analyze_file": _make_fi("analyze_file", typed_source, line=7,
-                                       args=["path"], calls=["open"]),
-            "m.normalize": _make_fi("normalize", typed_source, line=12,
-                                    args=["text"]),
+            "m.analyze_file": _make_fi(
+                "analyze_file", typed_source, line=7, args=["path"], calls=["open"]
+            ),
+            "m.normalize": _make_fi("normalize", typed_source, line=12, args=["text"]),
         }
         results = detector.analyze_all(funcs)
 
@@ -248,16 +278,18 @@ class TestSideEffectDetector:
     def test_heuristic_fallback(self):
         """When source file doesn't exist, fall back to heuristic."""
         detector = SideEffectDetector()
-        fi = _make_fi("save_data", "/nonexistent/file.py",
-                       args=["data"], calls=["write"])
+        fi = _make_fi(
+            "save_data", "/nonexistent/file.py", args=["data"], calls=["write"]
+        )
         info = detector.analyze_function(fi)
 
         assert info.classification == "IO"
 
     def test_to_dict(self, typed_source):
         detector = SideEffectDetector()
-        fi = _make_fi("analyze_file", typed_source, line=7,
-                       args=["path"], calls=["open"])
+        fi = _make_fi(
+            "analyze_file", typed_source, line=7, args=["path"], calls=["open"]
+        )
         info = detector.analyze_function(fi)
         d = info.to_dict()
 
@@ -270,8 +302,8 @@ class TestSideEffectDetector:
 # FlowExporter integration tests
 # ---------------------------------------------------------------------------
 
-class TestFlowExporterSprint2:
 
+class TestFlowExporterSprint2:
     @pytest.fixture
     def sample_result(self, typed_source):
         """Create AnalysisResult with typed functions."""
@@ -280,37 +312,51 @@ class TestFlowExporterSprint2:
         result.modules["test_mod"] = ModuleInfo(
             name="test_mod",
             file=typed_source,
-            functions=["test_mod.analyze_file", "test_mod.normalize",
-                        "test_mod.compute_metrics", "test_mod.save_results",
-                        "test_mod.pure_transform"],
+            functions=[
+                "test_mod.analyze_file",
+                "test_mod.normalize",
+                "test_mod.compute_metrics",
+                "test_mod.save_results",
+                "test_mod.pure_transform",
+            ],
         )
 
         result.functions["test_mod.analyze_file"] = _make_fi(
-            "analyze_file", typed_source, line=7,
+            "analyze_file",
+            typed_source,
+            line=7,
             args=["path", "verbose"],
             calls=["open", "test_mod.normalize"],
             complexity={"cyclomatic_complexity": 8},
         )
         result.functions["test_mod.normalize"] = _make_fi(
-            "normalize", typed_source, line=12,
+            "normalize",
+            typed_source,
+            line=12,
             args=["text", "lang"],
             calls=["test_mod.compute_metrics"],
             complexity={"cyclomatic_complexity": 3},
         )
         result.functions["test_mod.compute_metrics"] = _make_fi(
-            "compute_metrics", typed_source, line=15,
+            "compute_metrics",
+            typed_source,
+            line=15,
             args=["result"],
             calls=["test_mod.save_results"],
             complexity={"cyclomatic_complexity": 5},
         )
         result.functions["test_mod.save_results"] = _make_fi(
-            "save_results", typed_source, line=16,
+            "save_results",
+            typed_source,
+            line=16,
             args=["results", "output"],
             calls=[],
             complexity={"cyclomatic_complexity": 2},
         )
         result.functions["test_mod.pure_transform"] = _make_fi(
-            "pure_transform", typed_source, line=20,
+            "pure_transform",
+            typed_source,
+            line=20,
             args=["items"],
             calls=[],
             complexity={"cyclomatic_complexity": 1},
@@ -372,13 +418,13 @@ class TestFlowExporterSprint2:
         lines = ["from typing import Any\n\n"]
         funcs = {}
         for i in range(12):
-            lines.append(
-                f"def consumer_{i}(result: Any) -> None:\n"
-                f"    pass\n\n"
-            )
+            lines.append(f"def consumer_{i}(result: Any) -> None:\n    pass\n\n")
             fi = _make_fi(
-                f"consumer_{i}", str(src), line=3 + i * 3,
-                args=["result"], complexity={"cyclomatic_complexity": 1},
+                f"consumer_{i}",
+                str(src),
+                line=3 + i * 3,
+                args=["result"],
+                complexity={"cyclomatic_complexity": 1},
             )
             funcs[fi.qualified_name] = fi
         src.write_text("".join(lines))
@@ -406,8 +452,8 @@ class TestFlowExporterSprint2:
 # Edge case tests
 # ---------------------------------------------------------------------------
 
-class TestEdgeCases:
 
+class TestEdgeCases:
     def test_empty_result(self, tmp_path):
         exporter = FlowExporter()
         result = AnalysisResult(project_path="/empty")
@@ -423,8 +469,11 @@ class TestEdgeCases:
         exporter = FlowExporter()
         result = AnalysisResult(project_path="/test")
         result.functions["m.foo"] = _make_fi(
-            "foo", "/nonexistent/path.py", args=["x"],
-            calls=[], complexity={"cyclomatic_complexity": 1},
+            "foo",
+            "/nonexistent/path.py",
+            args=["x"],
+            calls=[],
+            complexity={"cyclomatic_complexity": 1},
         )
         output = tmp_path / "flow.toon"
         exporter.export(result, str(output))

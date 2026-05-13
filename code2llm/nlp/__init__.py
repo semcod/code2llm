@@ -14,7 +14,7 @@ from .config import NLPConfig, FAST_NLP_CONFIG, PRECISE_NLP_CONFIG
 
 __all__ = [
     "NLPPipeline",
-    "QueryNormalizer", 
+    "QueryNormalizer",
     "IntentMatcher",
     "EntityResolver",
     "NLPConfig",

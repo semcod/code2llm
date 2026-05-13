@@ -21,7 +21,11 @@ from typing import Dict
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from benchmarks.benchmark_constants import KNOWN_PROBLEMS, KNOWN_PIPELINES, KNOWN_HUB_TYPES
+from benchmarks.benchmark_constants import (
+    KNOWN_PROBLEMS,
+    KNOWN_PIPELINES,
+    KNOWN_HUB_TYPES,
+)
 from benchmarks.format_evaluator import FormatScore, evaluate_format
 from benchmarks.project_generator import create_ground_truth_project
 from benchmarks.reporting import build_report, print_results, save_report
@@ -49,9 +53,9 @@ def _generate_format_outputs(result, output_dir: Path) -> Dict[str, FormatScore]
 
     format_configs = {
         "analysis.toon": ("code2llm.exporters.toon", "ToonExporter"),
-        "flow.toon":     ("code2llm.exporters.flow_exporter", "FlowExporter"),
-        "project.map":   ("code2llm.exporters.map_exporter", "MapExporter"),
-        "context.md":    ("code2llm.exporters.llm_exporter", "LLMPromptExporter"),
+        "flow.toon": ("code2llm.exporters.flow_exporter", "FlowExporter"),
+        "project.map": ("code2llm.exporters.map_exporter", "MapExporter"),
+        "context.md": ("code2llm.exporters.llm_exporter", "LLMPromptExporter"),
     }
 
     for filename, (module_path, class_name) in format_configs.items():
@@ -70,7 +74,9 @@ def _generate_format_outputs(result, output_dir: Path) -> Dict[str, FormatScore]
                 s = evaluate_format(filename, content, out_path)
                 s.generation_time = gen_time
                 scores[filename] = s
-                print(f"  ✓ {filename}: {out_path.stat().st_size:,} bytes, {gen_time:.2f}s")
+                print(
+                    f"  ✓ {filename}: {out_path.stat().st_size:,} bytes, {gen_time:.2f}s"
+                )
             else:
                 print(f"  ✗ {filename}: file not created")
                 scores[filename] = FormatScore(name=filename)
@@ -107,19 +113,25 @@ def run_benchmark() -> Dict:
     try:
         from code2llm import ProjectAnalyzer, Config
 
-        print(f"\n→ Running code2llm analysis...")
+        print("\n→ Running code2llm analysis...")
         start = time.time()
         cfg = Config()
         cfg.filters.exclude_patterns = [
-            '*__pycache__*', '*.pyc', '*venv*', '*.venv*',
-            '*node_modules*', '*.git*',
+            "*__pycache__*",
+            "*.pyc",
+            "*venv*",
+            "*.venv*",
+            "*node_modules*",
+            "*.git*",
         ]
         cfg.filters.skip_private = False
         cfg.filters.min_function_lines = 1
         analyzer = ProjectAnalyzer(cfg)
         result = analyzer.analyze_project(str(project_path))
         analysis_time = time.time() - start
-        print(f"  Analysis: {analysis_time:.2f}s, {result.get_function_count()} functions")
+        print(
+            f"  Analysis: {analysis_time:.2f}s, {result.get_function_count()} functions"
+        )
 
         scores = _generate_format_outputs(result, output_dir)
 

@@ -20,11 +20,7 @@ Implementation has been split into:
   - mermaid/flow_full.py - flow_full.mmd full debug view
 """
 
-from pathlib import Path
-from typing import Optional
-
 from .base import BaseExporter, export_format
-from code2llm.core.models import AnalysisResult
 
 from .mermaid import (
     # Classic

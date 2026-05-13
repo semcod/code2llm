@@ -23,4 +23,4 @@ def render_module_list(result: AnalysisResult, is_excluded_path) -> List[str]:
     return lines
 
 
-__all__ = ['render_module_list']
+__all__ = ["render_module_list"]

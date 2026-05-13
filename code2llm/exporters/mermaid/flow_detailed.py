@@ -2,7 +2,14 @@
 
 from code2llm.core.models import AnalysisResult
 
-from .utils import readable_id, safe_module, resolve_callee, write_file, get_cc, build_name_index
+from .utils import (
+    readable_id,
+    safe_module,
+    resolve_callee,
+    write_file,
+    get_cc,
+    build_name_index,
+)
 from ..mermaid_flow_helpers import (
     _entry_points,
     _filtered_functions,
@@ -14,8 +21,9 @@ from ..mermaid_flow_helpers import (
 from .flow_compact import should_skip_module, is_entry_point
 
 
-def export_flow_detailed(result: AnalysisResult, output_path: str,
-                        include_examples: bool = False) -> None:
+def export_flow_detailed(
+    result: AnalysisResult, output_path: str, include_examples: bool = False
+) -> None:
     """Export detailed per-module view (~150 nodes).
 
     Shows all significant functions per module with CC annotations.
@@ -51,7 +59,15 @@ def export_flow_detailed(result: AnalysisResult, output_path: str,
         sort_funcs=True,
         max_funcs=40,
     )
-    _render_flow_edges(lines, filtered_funcs, readable_id, resolve_callee, calls_per_function=10, limit=200, name_index=name_index)
+    _render_flow_edges(
+        lines,
+        filtered_funcs,
+        readable_id,
+        resolve_callee,
+        calls_per_function=10,
+        limit=200,
+        name_index=name_index,
+    )
     _render_flow_styles(
         lines,
         filtered_funcs,
@@ -65,4 +81,4 @@ def export_flow_detailed(result: AnalysisResult, output_path: str,
     write_file(output_path, lines)
 
 
-__all__ = ['export_flow_detailed']
+__all__ = ["export_flow_detailed"]

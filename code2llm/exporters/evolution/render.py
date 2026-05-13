@@ -21,14 +21,16 @@ def render_next(ctx: Dict[str, Any]) -> List[str]:
 
     # 1. God modules → split
     for gm in ctx["god_modules"][:3]:
-        actions.append({
-            "priority": "!!",
-            "action": "SPLIT",
-            "target": gm["file"],
-            "why": f"{gm['lines']}L, {gm['classes']} classes, max CC={gm['max_cc']}",
-            "effort": "~4h",
-            "impact_score": gm["lines"] * gm["max_cc"],
-        })
+        actions.append(
+            {
+                "priority": "!!",
+                "action": "SPLIT",
+                "target": gm["file"],
+                "why": f"{gm['lines']}L, {gm['classes']} classes, max CC={gm['max_cc']}",
+                "effort": "~4h",
+                "impact_score": gm["lines"] * gm["max_cc"],
+            }
+        )
 
     # 2. High CC functions → split
     for f in ctx["funcs"][:20]:
@@ -36,26 +38,30 @@ def render_next(ctx: Dict[str, Any]) -> List[str]:
             display = f["name"]
             if f["class_name"]:
                 display = f"{f['class_name']}.{f['name']}"
-            actions.append({
-                "priority": "!!" if f["cc"] >= 25 else "!",
-                "action": "SPLIT-FUNC",
-                "target": f"{display}  CC={f['cc']}  fan={f['fan_out']}",
-                "why": f"CC={f['cc']} exceeds {CC_SPLIT_THRESHOLD}",
-                "effort": "~1h",
-                "impact_score": f["impact"],
-            })
+            actions.append(
+                {
+                    "priority": "!!" if f["cc"] >= 25 else "!",
+                    "action": "SPLIT-FUNC",
+                    "target": f"{display}  CC={f['cc']}  fan={f['fan_out']}",
+                    "why": f"CC={f['cc']} exceeds {CC_SPLIT_THRESHOLD}",
+                    "effort": "~1h",
+                    "impact_score": f["impact"],
+                }
+            )
 
     # 3. Hub types → interface segregation
     for ht in ctx["hub_types"][:3]:
         if ht["consumers"] >= 20:
-            actions.append({
-                "priority": "!",
-                "action": "INTERFACE-SPLIT",
-                "target": f"{ht['type']}  consumed:{ht['consumers']}",
-                "why": f"Hub type with {ht['consumers']} consumers → split interface",
-                "effort": "~6h",
-                "impact_score": ht["consumers"] * 10,
-            })
+            actions.append(
+                {
+                    "priority": "!",
+                    "action": "INTERFACE-SPLIT",
+                    "target": f"{ht['type']}  consumed:{ht['consumers']}",
+                    "why": f"Hub type with {ht['consumers']} consumers → split interface",
+                    "effort": "~6h",
+                    "impact_score": ht["consumers"] * 10,
+                }
+            )
 
     # Sort by impact and limit
     actions.sort(key=lambda x: x["impact_score"], reverse=True)
@@ -66,15 +72,9 @@ def render_next(ctx: Dict[str, Any]) -> List[str]:
 
     lines = [f"NEXT[{len(actions)}] (ranked by impact):"]
     for i, a in enumerate(actions, 1):
-        lines.append(
-            f"  [{i}] {a['priority']:2s} {a['action']:15s} {a['target']}"
-        )
-        lines.append(
-            f"      WHY: {a['why']}"
-        )
-        lines.append(
-            f"      EFFORT: {a['effort']}  IMPACT: {a['impact_score']}"
-        )
+        lines.append(f"  [{i}] {a['priority']:2s} {a['action']:15s} {a['target']}")
+        lines.append(f"      WHY: {a['why']}")
+        lines.append(f"      EFFORT: {a['effort']}  IMPACT: {a['impact_score']}")
         lines.append("")
 
     return lines
@@ -86,9 +86,7 @@ def render_risks(ctx: Dict[str, Any]) -> List[str]:
 
     # God module splits may break imports
     for gm in ctx["god_modules"][:3]:
-        risks.append(
-            f"⚠ Splitting {gm['file']} may break {gm['funcs']} import paths"
-        )
+        risks.append(f"⚠ Splitting {gm['file']} may break {gm['funcs']} import paths")
 
     # Hub type splits change public API
     for ht in ctx["hub_types"][:2]:
@@ -176,20 +174,22 @@ def render_history(ctx: Dict[str, Any], output_path: str) -> List[str]:
                     lines.append(f"  prev CC̄={prev_avg} → now CC̄={ctx['avg_cc']}")
                     break
             else:
-                lines.append(f"  previous evolution.toon.yaml found but no metrics parsed")
+                lines.append(
+                    "  previous evolution.toon.yaml found but no metrics parsed"
+                )
         except Exception:
-            lines.append(f"  (could not read previous evolution.toon.yaml)")
+            lines.append("  (could not read previous evolution.toon.yaml)")
     else:
-        lines.append(f"  (first run — no previous data)")
+        lines.append("  (first run — no previous data)")
 
     return lines
 
 
 __all__ = [
-    'render_header',
-    'render_next',
-    'render_risks',
-    'render_metrics_target',
-    'render_patterns',
-    'render_history',
+    "render_header",
+    "render_next",
+    "render_risks",
+    "render_metrics_target",
+    "render_patterns",
+    "render_history",
 ]

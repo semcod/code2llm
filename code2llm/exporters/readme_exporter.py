@@ -26,16 +26,30 @@ from .readme import (
 @export_format("readme", description="README documentation format", extension=".md")
 class READMEExporter(BaseExporter):
     """Export README.md with documentation of all generated files."""
-    
-    def export(self, analysis_result: Any, output_path: str, **kwargs) -> Optional[Path]:
+
+    def export(
+        self, analysis_result: Any, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Generate README.md documentation."""
         output_dir = Path(output_path).parent
-        project_path = analysis_result.project_path if hasattr(analysis_result, 'project_path') else './'
+        project_path = (
+            analysis_result.project_path
+            if hasattr(analysis_result, "project_path")
+            else "./"
+        )
 
         # Collect statistics
-        total_functions = len(analysis_result.functions) if hasattr(analysis_result, 'functions') else 0
-        total_classes = len(analysis_result.classes) if hasattr(analysis_result, 'classes') else 0
-        total_modules = len(analysis_result.modules) if hasattr(analysis_result, 'modules') else 0
+        total_functions = (
+            len(analysis_result.functions)
+            if hasattr(analysis_result, "functions")
+            else 0
+        )
+        total_classes = (
+            len(analysis_result.classes) if hasattr(analysis_result, "classes") else 0
+        )
+        total_modules = (
+            len(analysis_result.modules) if hasattr(analysis_result, "modules") else 0
+        )
 
         # Read existing files to extract insights
         insights = extract_insights(output_dir)
@@ -61,6 +75,6 @@ class READMEExporter(BaseExporter):
         )
 
         path = self._ensure_dir(output_path)
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(readme_content)
         return path

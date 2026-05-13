@@ -20,14 +20,20 @@ class DuplicatesMetricsComputer:
         """Detect duplicate classes by comparing method-name sets."""
         dupes: List[Dict[str, Any]] = []
         # Filter out excluded classes first
-        class_list = [(q, c) for q, c in result.classes.items() if not _is_excluded(c.file)]
+        class_list = [
+            (q, c) for q, c in result.classes.items() if not _is_excluded(c.file)
+        ]
 
         for i, (qa, ca) in enumerate(class_list):
-            dupes.extend(self._check_class_for_duplicates(i, qa, ca, class_list, result))
+            dupes.extend(
+                self._check_class_for_duplicates(i, qa, ca, class_list, result)
+            )
 
         return dupes
 
-    def _check_class_for_duplicates(self, i: int, qa: str, ca: ClassInfo, class_list: List, result: AnalysisResult) -> List[Dict[str, Any]]:
+    def _check_class_for_duplicates(
+        self, i: int, qa: str, ca: ClassInfo, class_list: List, result: AnalysisResult
+    ) -> List[Dict[str, Any]]:
         """Check a single class for duplicates."""
         methods_a = {m.split(".")[-1] for m in ca.methods}
         if len(methods_a) < 3:
@@ -43,13 +49,24 @@ class DuplicatesMetricsComputer:
             if len(methods_b) < 3:
                 continue
 
-            duplicate_info = self._calculate_duplicate_info(qa, ca, qb, cb, methods_a, methods_b, result)
+            duplicate_info = self._calculate_duplicate_info(
+                qa, ca, qb, cb, methods_a, methods_b, result
+            )
             if duplicate_info:
                 dupes.append(duplicate_info)
 
         return dupes
 
-    def _calculate_duplicate_info(self, qa: str, ca: ClassInfo, qb: str, cb: ClassInfo, methods_a: Set[str], methods_b: Set[str], result: AnalysisResult) -> Optional[Dict[str, Any]]:
+    def _calculate_duplicate_info(
+        self,
+        qa: str,
+        ca: ClassInfo,
+        qb: str,
+        cb: ClassInfo,
+        methods_a: Set[str],
+        methods_b: Set[str],
+        result: AnalysisResult,
+    ) -> Optional[Dict[str, Any]]:
         """Calculate duplicate information between two classes."""
         overlap = methods_a & methods_b
         union = methods_a | methods_b
@@ -66,7 +83,8 @@ class DuplicatesMetricsComputer:
 
             return {
                 "class_name": ca.name,
-                "qualA": qa, "qualB": qb,
+                "qualA": qa,
+                "qualB": qb,
                 "fileA": _rel_path(ca.file, result.project_path),
                 "fileB": _rel_path(cb.file, result.project_path),
                 "methodsA": sorted(methods_a),

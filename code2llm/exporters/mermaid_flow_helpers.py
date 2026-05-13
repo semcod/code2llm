@@ -14,7 +14,8 @@ def _filtered_functions(
     if include_examples:
         return dict(result.functions)
     return {
-        name: fi for name, fi in result.functions.items()
+        name: fi
+        for name, fi in result.functions.items()
         if not should_skip_module(module_of(name), include_examples)
     }
 
@@ -26,8 +27,7 @@ def _entry_points(
 ) -> List[str]:
     """Collect entry points in a stable order."""
     return [
-        name for name, fi in filtered_funcs.items()
-        if is_entry_point(name, fi, result)
+        name for name, fi in filtered_funcs.items() if is_entry_point(name, fi, result)
     ]
 
 
@@ -44,11 +44,11 @@ def _group_functions_by_module(
 
 def _classify_architecture_module(func_name: str, module: str) -> str:
     """Assign a function to a compact architecture bucket."""
-    if 'cli' in module.lower():
-        return 'CLI'
-    if 'exporter' in module.lower() or 'export' in func_name.lower():
-        return 'Exporters'
-    return 'Core'
+    if "cli" in module.lower():
+        return "CLI"
+    if "exporter" in module.lower() or "export" in func_name.lower():
+        return "Exporters"
+    return "Core"
 
 
 def _group_architecture_functions(
@@ -57,9 +57,9 @@ def _group_architecture_functions(
 ) -> Dict[str, List[str]]:
     """Group functions into the compact architecture buckets."""
     arch_modules: Dict[str, List[str]] = {
-        'CLI': [],
-        'Core': [],
-        'Exporters': [],
+        "CLI": [],
+        "Core": [],
+        "Exporters": [],
     }
     for func_name in funcs:
         bucket = _classify_architecture_module(func_name, module_of(func_name))
@@ -106,7 +106,7 @@ def _append_flow_node(
     if func_name in entry_points:
         lines.append(f'        {sid}["{short}"]')
     elif cc >= high_threshold:
-        lines.append(f'        {sid}{{{{{short} CC={cc}}}}}')
+        lines.append(f"        {sid}{{{{{short} CC={cc}}}}}")
     elif cc >= med_threshold:
         lines.append(f'        {sid}("{short} CC={cc}")')
     else:
@@ -133,9 +133,13 @@ def _render_module_subgraphs(
 
         ordered_funcs = module_funcs
         if sort_funcs:
-            ordered_funcs = sorted(module_funcs, key=lambda x: (-get_cc(x[1]), x[1].name))
+            ordered_funcs = sorted(
+                module_funcs, key=lambda x: (-get_cc(x[1]), x[1].name)
+            )
 
-        visible_funcs = ordered_funcs if max_funcs is None else ordered_funcs[:max_funcs]
+        visible_funcs = (
+            ordered_funcs if max_funcs is None else ordered_funcs[:max_funcs]
+        )
         for func_name, fi in visible_funcs:
             _append_flow_node(
                 lines,
@@ -169,7 +173,11 @@ def _render_flow_edges(
     for func_name, fi in funcs.items():
         src = readable_id(func_name)
         for callee in fi.calls[:calls_per_function]:
-            resolved = resolve(callee, funcs, name_index) if name_index else resolve(callee, funcs)
+            resolved = (
+                resolve(callee, funcs, name_index)
+                if name_index
+                else resolve(callee, funcs)
+            )
             if resolved and resolved != func_name:
                 dst = readable_id(resolved)
                 edge = (src, dst)
@@ -253,7 +261,9 @@ def _render_architecture_view(
         for func_name in key_funcs[:15]:
             fi = filtered_funcs.get(func_name)
             if fi:
-                _append_flow_node(lines, func_name, fi, 30, entry_set, readable_id, get_cc)
+                _append_flow_node(
+                    lines, func_name, fi, 30, entry_set, readable_id, get_cc
+                )
 
         if len(key_funcs) > 15:
             lines.append(f'        ...["+{len(key_funcs) - 15} more"]')

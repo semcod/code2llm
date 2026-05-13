@@ -6,7 +6,6 @@ These pin the contract that the user cares about:
   - Running twice with no changes is a full cache hit.
 """
 
-import os
 from pathlib import Path
 
 import pytest
@@ -41,6 +40,7 @@ def _run_full_analysis(project_dir: Path, cache_root: Path):
     # Patch _DEFAULT_ROOT via a thin PersistentCache subclass injected
     # into the analyzer module path. Simpler: monkey-patch the class.
     from code2llm.core import analyzer as analyzer_mod
+
     orig = analyzer_mod.PersistentCache
 
     class _PC(orig):  # type: ignore[misc, valid-type]
@@ -95,7 +95,9 @@ def test_run_hash_changes_when_file_deleted(project):
     _run_full_analysis(project_dir, cache_root)
 
     pc2 = _cache_for(project_dir, cache_root)
-    assert "b.py" not in pc2._manifest["files"], "deleted files must be pruned from manifest"
+    assert "b.py" not in pc2._manifest["files"], (
+        "deleted files must be pruned from manifest"
+    )
     h2 = pc2._compute_run_hash({"fmt": "toon"})
     assert h1 != h2, "deleting a file must change the export-cache run hash"
 
@@ -110,4 +112,6 @@ def test_run_hash_stable_when_nothing_changes(project):
 
     pc2 = _cache_for(project_dir, cache_root)
     h2 = pc2._compute_run_hash({"fmt": "toon"})
-    assert h1 == h2, "identical project state must yield identical run hash (full cache hit)"
+    assert h1 == h2, (
+        "identical project state must yield identical run hash (full cache hit)"
+    )

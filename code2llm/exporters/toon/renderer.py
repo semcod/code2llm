@@ -22,7 +22,7 @@ MAX_FUNCTIONS_SHOWN = 50
 
 class ToonRenderer:
     """Renders all sections for TOON export."""
-    
+
     def render_header(self, ctx: Dict[str, Any]) -> List[str]:
         """Render header section."""
         result: AnalysisResult = ctx["result"]
@@ -47,6 +47,7 @@ class ToonRenderer:
     def _detect_language_label(result: AnalysisResult) -> str:
         """Build language breakdown label like 'typescript:463,javascript:10,rust:1'."""
         from .helpers import _is_excluded
+
         langs: Dict[str, int] = defaultdict(int)
         for mi in result.modules.values():
             if _is_excluded(mi.file):
@@ -60,7 +61,7 @@ class ToonRenderer:
             if not detected:
                 ext = Path(mi.file).suffix.lower()
                 if ext:
-                    langs[ext.lstrip('.')] += 1
+                    langs[ext.lstrip(".")] += 1
         if not langs:
             return "unknown"
         sorted_langs = sorted(langs.items(), key=lambda x: -x[1])
@@ -128,7 +129,14 @@ class ToonRenderer:
         all_pkgs = sorted({p for pair in matrix for p in pair})
         if not all_pkgs:
             return []
-        pkg_activity = [(p, pkg_fan.get(p, {}).get("fan_in", 0) + pkg_fan.get(p, {}).get("fan_out", 0)) for p in all_pkgs]
+        pkg_activity = [
+            (
+                p,
+                pkg_fan.get(p, {}).get("fan_in", 0)
+                + pkg_fan.get(p, {}).get("fan_out", 0),
+            )
+            for p in all_pkgs
+        ]
         pkg_activity.sort(key=lambda x: x[1], reverse=True)
         return [p for p, _ in pkg_activity[:MAX_COUPLING_PACKAGES]]
 
@@ -139,17 +147,21 @@ class ToonRenderer:
         hdr = f"{'':>{pad}}  " + "  ".join(f"{p:>{col_w}}" for p in top_pkgs)
         return ["COUPLING:", hdr]
 
-    def _render_coupling_rows(self, top_pkgs: List[str], matrix: Dict, pkg_fan: Dict, lines: List[str]) -> None:
+    def _render_coupling_rows(
+        self, top_pkgs: List[str], matrix: Dict, pkg_fan: Dict, lines: List[str]
+    ) -> None:
         """Render one matrix row per source package."""
         col_w = max(max(len(p) for p in top_pkgs), 6)
         pad = max(len(p) for p in top_pkgs) + 2
         for src in top_pkgs:
             row_parts = self._build_coupling_row(src, top_pkgs, matrix, col_w)
             tag = self._coupling_row_tag(src, pkg_fan)
-            lines.append(f"  {src:>{pad-2}}  " + "  ".join(row_parts) + tag)
+            lines.append(f"  {src:>{pad - 2}}  " + "  ".join(row_parts) + tag)
 
     @staticmethod
-    def _build_coupling_row(src: str, top_pkgs: List[str], matrix: Dict, col_w: int) -> List[str]:
+    def _build_coupling_row(
+        src: str, top_pkgs: List[str], matrix: Dict, col_w: int
+    ) -> List[str]:
         """Build cell values for a single coupling matrix row."""
         row_parts = []
         for dst in top_pkgs:
@@ -176,7 +188,9 @@ class ToonRenderer:
         return ""
 
     @staticmethod
-    def _render_coupling_summary(ctx: Dict[str, Any], pkg_fan: Dict, lines: List[str]) -> None:
+    def _render_coupling_summary(
+        ctx: Dict[str, Any], pkg_fan: Dict, lines: List[str]
+    ) -> None:
         """Render coupling summary: cycles, hubs, smells."""
         ncycles = len(ctx["cycles"])
         lines.append(f"  CYCLES: {'none' if ncycles == 0 else ncycles}")
@@ -204,12 +218,14 @@ class ToonRenderer:
         for pkg in pkg_order:
             self._render_layer_package(pkg, packages[pkg], pkg_fan, ctx, lines)
             self._render_layer_files(pkg, files, dup_files, lines)
-            lines.append(f"  │")
+            lines.append("  │")
 
         self._render_zero_line_files(files, lines)
         return lines
 
-    def _render_layer_package(self, pkg: str, pd: Dict, pkg_fan: Dict, ctx: Dict, lines: List[str]) -> None:
+    def _render_layer_package(
+        self, pkg: str, pd: Dict, pkg_fan: Dict, ctx: Dict, lines: List[str]
+    ) -> None:
         """Render a single package header line in LAYERS."""
         fi = pkg_fan.get(pkg, {}).get("fan_in", 0)
         fo = pkg_fan.get(pkg, {}).get("fan_out", 0)
@@ -221,14 +237,16 @@ class ToonRenderer:
         if pkg_dups:
             markers += "  ×DUP"
         lines.append(
-            f"  {pkg + '/':30s}  CC̄={pd['avg_cc']:<5}  "
-            f"←in:{fi}  →out:{fo}{markers}"
+            f"  {pkg + '/':30s}  CC̄={pd['avg_cc']:<5}  ←in:{fi}  →out:{fo}{markers}"
         )
 
-    def _render_layer_files(self, pkg: str, files: Dict, dup_files: set, lines: List[str]) -> None:
+    def _render_layer_files(
+        self, pkg: str, files: Dict, dup_files: set, lines: List[str]
+    ) -> None:
         """Render file rows for a single package in LAYERS."""
         pkg_files = [
-            (fpath, fm) for fpath, fm in files.items()
+            (fpath, fm)
+            for fpath, fm in files.items()
             if fm["rel"].startswith(pkg + "/") or (pkg == "." and "/" not in fm["rel"])
         ]
         pkg_files.sort(key=lambda x: x[1]["lines"], reverse=True)
@@ -243,7 +261,11 @@ class ToonRenderer:
         if short.endswith(".py"):
             short = short[:-3]
         lc, mcc, fin = fm["lines"], fm["max_cc"], fm["fan_in"]
-        severity = "!! " if (lc >= GOD_MODULE_LINES or mcc >= CC_WARNING) else ("!  " if mcc >= CC_CRITICAL else "")
+        severity = (
+            "!! "
+            if (lc >= GOD_MODULE_LINES or mcc >= CC_WARNING)
+            else ("!  " if mcc >= CC_CRITICAL else "")
+        )
         dup_mark = "  ×DUP" if rel in dup_files else ""
         return (
             f"  │ {severity}{short:24s} {lc:>5}L  {fm['class_count']}C  {fm['methods']:>3}m"
@@ -327,7 +349,9 @@ class ToonRenderer:
                 cc_bins["low"] += 1
 
         pct_crit = round(cc_bins["critical"] / total * 100) if total else 0
-        pct_high = round((cc_bins["critical"] + cc_bins["high"]) / total * 100) if total else 0
+        pct_high = (
+            round((cc_bins["critical"] + cc_bins["high"]) / total * 100) if total else 0
+        )
 
         lines.append("")
         lines.append("  summary:")
@@ -348,7 +372,7 @@ class ToonRenderer:
         for i, s in enumerate(spots, 1):
             lines.append(
                 f"  #{i:<2} {s['name']:35s}  fan={s['fan_out']:<3}"
-                f"  \"{s['description']}\""
+                f'  "{s["description"]}"'
             )
         return lines
 
@@ -387,7 +411,7 @@ class ToonRenderer:
     def render_pipelines(self, ctx: Dict[str, Any]) -> List[str]:
         """Render PIPELINES section - data flow pipelines from entry points."""
         result: AnalysisResult = ctx["result"]
-        
+
         # Find entry points and their downstream pipelines
         pipelines = []
         for func_name, func_info in result.functions.items():
@@ -395,15 +419,17 @@ class ToonRenderer:
             if not func_info.called_by and func_info.calls:
                 chain = self._trace_pipeline(func_name, result, depth=0)
                 if chain:
-                    pipelines.append({
-                        "entry": func_name.split(".")[-1],
-                        "chain": chain,
-                        "purity": self._calculate_purity(chain, result),
-                    })
-        
+                    pipelines.append(
+                        {
+                            "entry": func_name.split(".")[-1],
+                            "chain": chain,
+                            "purity": self._calculate_purity(chain, result),
+                        }
+                    )
+
         if not pipelines:
             return ["PIPELINES[0]: none detected"]
-        
+
         lines = [f"PIPELINES[{len(pipelines)}]:"]
         for i, pipe in enumerate(pipelines[:5], 1):  # Max 5 pipelines
             purity_pct = int(pipe["purity"] * 100)
@@ -412,42 +438,44 @@ class ToonRenderer:
                 chain_str += f" → ...({len(pipe['chain']) - 4} more)"
             lines.append(f"  [{i}] Src [{pipe['entry']}]: {chain_str}")
             lines.append(f"      PURITY: {purity_pct}% pure")
-        
+
         return lines
-    
-    def _trace_pipeline(self, start_func: str, result: AnalysisResult, depth: int) -> List[str]:
+
+    def _trace_pipeline(
+        self, start_func: str, result: AnalysisResult, depth: int
+    ) -> List[str]:
         """Trace a pipeline starting from an entry point."""
         if depth > 10:  # Prevent infinite recursion
             return []
-        
+
         chain = []
         current = start_func
         visited = set()
-        
+
         while current and current not in visited and len(chain) < 20:
             visited.add(current)
             func_info = result.functions.get(current)
             if not func_info:
                 break
-            
+
             chain.append(current.split(".")[-1])
-            
+
             # Follow the first call that's not a builtin
             next_func = None
             for callee in func_info.calls:
                 if callee in result.functions:
                     next_func = callee
                     break
-            
+
             current = next_func
-        
+
         return chain
-    
+
     def _calculate_purity(self, chain: List[str], result: AnalysisResult) -> float:
         """Calculate purity ratio (functions without side effects)."""
         if not chain:
             return 0.0
-        
+
         pure_count = 0
         for func_name in chain:
             full_name = None
@@ -455,12 +483,12 @@ class ToonRenderer:
                 if fi.name == func_name:
                     full_name = qname
                     break
-            
+
             if full_name:
                 func_info = result.functions.get(full_name)
-                if func_info and not getattr(func_info, 'has_side_effects', False):
+                if func_info and not getattr(func_info, "has_side_effects", False):
                     pure_count += 1
-        
+
         return pure_count / len(chain)
 
     def render_external(self, ctx: Dict[str, Any]) -> List[str]:

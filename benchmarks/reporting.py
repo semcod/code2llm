@@ -7,7 +7,7 @@ oraz zapisywania raportów JSON.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from .benchmark_constants import KNOWN_PROBLEMS, KNOWN_PIPELINES
 from .format_evaluator import FormatScore
@@ -23,7 +23,9 @@ def _print_header() -> None:
 def _print_scores_table(scores: Dict[str, FormatScore]) -> None:
     """Wydrukuj tabelę wyników formatów."""
     # Nagłówek
-    print(f"\n{'Format':<18} {'Problems':>9} {'Pipelines':>10} {'Hub Types':>10} {'Structure':>10} {'TOTAL':>8} {'Size':>8}")
+    print(
+        f"\n{'Format':<18} {'Problems':>9} {'Pipelines':>10} {'Hub Types':>10} {'Structure':>10} {'TOTAL':>8} {'Size':>8}"
+    )
     print("─" * 75)
 
     sorted_scores = sorted(scores.values(), key=lambda s: s.total_score, reverse=True)
@@ -32,9 +34,11 @@ def _print_scores_table(scores: Dict[str, FormatScore]) -> None:
     for i, s in enumerate(sorted_scores):
         medal = medals[min(i, 3)]
         size_str = f"{s.size_bytes:,}" if s.size_bytes else "N/A"
-        print(f"{medal} {s.name:<15} {s.problem_score:>8.0f}% {s.pipeline_score:>9.0f}%"
-              f" {s.hub_type_score:>9.0f}% {s.structural_score:>9.0f}%"
-              f" {s.total_score:>7.1f}% {size_str:>8}")
+        print(
+            f"{medal} {s.name:<15} {s.problem_score:>8.0f}% {s.pipeline_score:>9.0f}%"
+            f" {s.hub_type_score:>9.0f}% {s.structural_score:>9.0f}%"
+            f" {s.total_score:>7.1f}% {size_str:>8}"
+        )
 
 
 def _print_problems_detail(scores: Dict[str, FormatScore]) -> None:
@@ -52,7 +56,10 @@ def _print_problems_detail(scores: Dict[str, FormatScore]) -> None:
         print(f"{label:<20}", end="")
         for s in sorted_scores:
             detected = s.problems_detected.get(problem_key, False)
-            print(f" {'  ✓  detected':^16}" if detected else f" {'  ✗  missed':^16}", end="")
+            print(
+                f" {'  ✓  detected':^16}" if detected else f" {'  ✗  missed':^16}",
+                end="",
+            )
         print()
 
 
@@ -70,7 +77,10 @@ def _print_pipelines_detail(scores: Dict[str, FormatScore]) -> None:
         print(f"{pipeline_name:<20}", end="")
         for s in sorted_scores:
             detected = s.pipelines_detected.get(pipeline_name, False)
-            print(f" {'  ✓  detected':^16}" if detected else f" {'  ✗  missed':^16}", end="")
+            print(
+                f" {'  ✓  detected':^16}" if detected else f" {'  ✗  missed':^16}",
+                end="",
+            )
         print()
 
 
@@ -113,7 +123,9 @@ def _print_gap_analysis(scores: Dict[str, FormatScore]) -> None:
     for s in sorted_scores:
         missed = [k for k, v in s.problems_detected.items() if not v]
         if missed:
-            print(f"\n  {s.name} ({s.total_score:.0f}%) — missed {len(missed)} problems:")
+            print(
+                f"\n  {s.name} ({s.total_score:.0f}%) — missed {len(missed)} problems:"
+            )
             for m in missed:
                 print(f"    ✗ {m}: {KNOWN_PROBLEMS[m]}")
 

@@ -71,6 +71,6 @@ if __name__ == "__main__":
 
 
 __all__ = [
-    'create_parser',
-    'main',
+    "create_parser",
+    "main",
 ]

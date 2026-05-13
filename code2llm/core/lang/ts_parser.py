@@ -16,26 +16,26 @@ _TS_AVAILABLE = False
 
 # Extension -> (grammar module name, language getter)
 EXTENSION_MAP = {
-    '.py': ('tree_sitter_python', 'language'),
-    '.js': ('tree_sitter_javascript', 'language'),
-    '.jsx': ('tree_sitter_javascript', 'language'),
-    '.mjs': ('tree_sitter_javascript', 'language'),
-    '.cjs': ('tree_sitter_javascript', 'language'),
-    '.ts': ('tree_sitter_typescript', 'language_typescript'),
-    '.tsx': ('tree_sitter_typescript', 'language_tsx'),
-    '.go': ('tree_sitter_go', 'language'),
-    '.rs': ('tree_sitter_rust', 'language'),
-    '.java': ('tree_sitter_java', 'language'),
-    '.c': ('tree_sitter_c', 'language'),
-    '.h': ('tree_sitter_c', 'language'),
-    '.cpp': ('tree_sitter_cpp', 'language'),
-    '.cc': ('tree_sitter_cpp', 'language'),
-    '.cxx': ('tree_sitter_cpp', 'language'),
-    '.hpp': ('tree_sitter_cpp', 'language'),
-    '.hxx': ('tree_sitter_cpp', 'language'),
-    '.cs': ('tree_sitter_c_sharp', 'language'),
-    '.php': ('tree_sitter_php', 'language_php'),
-    '.rb': ('tree_sitter_ruby', 'language'),
+    ".py": ("tree_sitter_python", "language"),
+    ".js": ("tree_sitter_javascript", "language"),
+    ".jsx": ("tree_sitter_javascript", "language"),
+    ".mjs": ("tree_sitter_javascript", "language"),
+    ".cjs": ("tree_sitter_javascript", "language"),
+    ".ts": ("tree_sitter_typescript", "language_typescript"),
+    ".tsx": ("tree_sitter_typescript", "language_tsx"),
+    ".go": ("tree_sitter_go", "language"),
+    ".rs": ("tree_sitter_rust", "language"),
+    ".java": ("tree_sitter_java", "language"),
+    ".c": ("tree_sitter_c", "language"),
+    ".h": ("tree_sitter_c", "language"),
+    ".cpp": ("tree_sitter_cpp", "language"),
+    ".cc": ("tree_sitter_cpp", "language"),
+    ".cxx": ("tree_sitter_cpp", "language"),
+    ".hpp": ("tree_sitter_cpp", "language"),
+    ".hxx": ("tree_sitter_cpp", "language"),
+    ".cs": ("tree_sitter_c_sharp", "language"),
+    ".php": ("tree_sitter_php", "language_php"),
+    ".rb": ("tree_sitter_ruby", "language"),
 }
 
 
@@ -44,6 +44,7 @@ def _init_tree_sitter() -> bool:
     global _TS_AVAILABLE
     try:
         import tree_sitter
+
         _TS_AVAILABLE = True
         return True
     except ImportError:
@@ -66,6 +67,7 @@ def _get_language(ext: str) -> Optional[Any]:
 
     try:
         import importlib
+
         mod = importlib.import_module(module_name)
         lang_fn = getattr(mod, lang_attr, None)
         if callable(lang_fn):
@@ -91,6 +93,7 @@ def _get_parser(ext: str) -> Optional[Any]:
 
     try:
         from tree_sitter import Parser
+
         parser = Parser(lang)
         _PARSERS[ext] = parser
         return parser
@@ -150,7 +153,7 @@ def get_parser() -> TreeSitterParser:
 
 def parse_source(content: str, ext: str) -> Optional[Any]:
     """Convenience function: parse string content for given extension."""
-    return get_parser().parse(content.encode('utf-8'), ext)
+    return get_parser().parse(content.encode("utf-8"), ext)
 
 
 def is_available() -> bool:

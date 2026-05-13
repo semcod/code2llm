@@ -8,18 +8,18 @@ from code2llm.core.lang.base import extract_calls_regex, _extract_declarations
 
 def _extract_ruby_body(content: str, start_line: int) -> str:
     """Extract Ruby function body from def to corresponding end."""
-    lines = content.split('\n')
+    lines = content.split("\n")
     if start_line < 1 or start_line > len(lines):
-        return ''
+        return ""
 
     def_line_idx = start_line - 1
     while def_line_idx < len(lines):
-        if re.match(r'^\s*def\s+', lines[def_line_idx]):
+        if re.match(r"^\s*def\s+", lines[def_line_idx]):
             break
         def_line_idx += 1
 
     if def_line_idx >= len(lines):
-        return ''
+        return ""
 
     def_indent = len(lines[def_line_idx]) - len(lines[def_line_idx].lstrip())
     body_lines = []
@@ -30,25 +30,29 @@ def _extract_ruby_body(content: str, start_line: int) -> str:
         line = lines[i]
         stripped = line.strip()
 
-        if line.startswith('end') and len(line) == 3 or line.startswith('end '):
+        if line.startswith("end") and len(line) == 3 or line.startswith("end "):
             nested_depth -= 1
             if nested_depth == 0:
                 break
-        elif re.match(r'^\s*(def|if|unless|while|until|for|case|begin|class|module)\b', line):
+        elif re.match(
+            r"^\s*(def|if|unless|while|until|for|case|begin|class|module)\b", line
+        ):
             nested_depth += 1
 
         body_lines.append(line)
         i += 1
 
-    return '\n'.join(body_lines)
+    return "\n".join(body_lines)
 
 
 _RUBY_CC_PATTERN = re.compile(
-    r'\b(?:if|unless|while|until|for|case|when)\b|&&|\|\||\?\s*[^:]*\s*:'
+    r"\b(?:if|unless|while|until|for|case|when)\b|&&|\|\||\?\s*[^:]*\s*:"
 )
 
 
-def _adjust_ruby_module_qualnames(result: Dict, module_name: str, current_module) -> None:
+def _adjust_ruby_module_qualnames(
+    result: Dict, module_name: str, current_module
+) -> None:
     """Re-qualify class and function names when they live inside a Ruby module."""
     if not current_module:
         return
@@ -57,88 +61,92 @@ def _adjust_ruby_module_qualnames(result: Dict, module_name: str, current_module
     new_prefix = f"{module_name}{mod_prefix}."
 
     new_classes = {}
-    for qname, cls in list(result['classes'].items()):
+    for qname, cls in list(result["classes"].items()):
         new_qname = qname.replace(old_prefix, new_prefix, 1)
         cls.qualified_name = new_qname
         new_classes[new_qname] = cls
-    result['classes'] = new_classes
-    result['module'].classes = list(new_classes.keys())
+    result["classes"] = new_classes
+    result["module"].classes = list(new_classes.keys())
 
     new_functions = {}
-    for qname, func in list(result['functions'].items()):
+    for qname, func in list(result["functions"].items()):
         new_qname = qname.replace(old_prefix, new_prefix, 1)
         func.qualified_name = new_qname
         new_functions[new_qname] = func
-    result['functions'] = new_functions
-    result['module'].functions = list(new_functions.keys())
+    result["functions"] = new_functions
+    result["module"].functions = list(new_functions.keys())
 
 
-def analyze_ruby(content: str, file_path: str, module_name: str,
-                 ext: str, stats: Dict) -> Dict:
+def analyze_ruby(
+    content: str, file_path: str, module_name: str, ext: str, stats: Dict
+) -> Dict:
     """Analyze Ruby files using shared extraction."""
-    
+
     patterns = {
-        'import': re.compile(r'^\s*require\s*["\']([^"\']+)["\']'),
-        'class': re.compile(r'^\s*class\s+(\w+)(?:\s*<\s*(\w+))?'),
-        'function': re.compile(r'^\s*def\s+(?:self\.)?(\w+[?!]?)'),
+        "import": re.compile(r'^\s*require\s*["\']([^"\']+)["\']'),
+        "class": re.compile(r"^\s*class\s+(\w+)(?:\s*<\s*(\w+))?"),
+        "function": re.compile(r"^\s*def\s+(?:self\.)?(\w+[?!]?)"),
     }
-    
+
     lang_config = {
-        'index_files': (),
-        'brace_track': False,  # Ruby uses 'end' keywords, not braces
-        'reserved': {'if', 'unless', 'while', 'until', 'for', 'class', 'module'},
+        "index_files": (),
+        "brace_track": False,  # Ruby uses 'end' keywords, not braces
+        "reserved": {"if", "unless", "while", "until", "for", "class", "module"},
     }
-    
+
     result = _extract_declarations(
-        content, file_path, module_name,
-        patterns, stats, lang_config
+        content, file_path, module_name, patterns, stats, lang_config
     )
-    
+
     # Ruby-specific: handle module nesting
-    lines = content.split('\n')
+    lines = content.split("\n")
     current_module = None
     module_depth = 0
-    
+
     for line_no, line in enumerate(lines, 1):
         raw_line = line
         line = line.strip()
-        if not line or line.startswith('#'):
+        if not line or line.startswith("#"):
             continue
-        
+
         # Track module scope
-        mod_match = re.match(r'^\s*module\s+(\w+)', line)
+        mod_match = re.match(r"^\s*module\s+(\w+)", line)
         if mod_match:
             current_module = mod_match.group(1)
             # Count control structures for depth
-            control_starts = len(re.findall(r'\b(def|class|module|if|unless|while|until|for|begin|case)\b', line))
+            control_starts = len(
+                re.findall(
+                    r"\b(def|class|module|if|unless|while|until|for|begin|case)\b", line
+                )
+            )
             module_depth = control_starts
             continue
-        
+
         # Track end to exit module scope
-        if line.startswith('end'):
+        if line.startswith("end"):
             if current_module and module_depth > 0:
                 module_depth -= 1
                 if module_depth == 0:
                     current_module = None
-    
+
     _adjust_ruby_module_qualnames(result, module_name, current_module)
-    
+
     # Ruby-specific complexity calculation
-    for func_info in result['functions'].values():
+    for func_info in result["functions"].values():
         body = _extract_ruby_body(content, func_info.line)
         if not body:
             cc = 1
         else:
             cc = 1 + len(_RUBY_CC_PATTERN.findall(body))
-        rank = 'A' if cc <= 5 else ('B' if cc <= 10 else ('C' if cc <= 20 else 'D'))
+        rank = "A" if cc <= 5 else ("B" if cc <= 10 else ("C" if cc <= 20 else "D"))
         func_info.complexity = {
-            'cyclomatic_complexity': cc,
-            'cc_rank': rank,
+            "cyclomatic_complexity": cc,
+            "cc_rank": rank,
         }
-    
+
     extract_calls_regex(content, module_name, result)
 
-    stats['files_processed'] += 1
+    stats["files_processed"] += 1
     return result
 
 
@@ -148,16 +156,12 @@ def analyze_ruby(content: str, file_path: str, module_name: str,
 class RubyParser:
     """Ruby language parser - registered via @register_language in __init__.py."""
 
-    supported_extensions = ('.rb', '.rbw')
-    language_name = 'Ruby'
+    supported_extensions = (".rb", ".rbw")
+    language_name = "Ruby"
 
     def analyze(
-        self,
-        content: str,
-        file_path: str,
-        module_name: str,
-        stats: Dict
+        self, content: str, file_path: str, module_name: str, stats: Dict
     ) -> Dict:
         """Analyze Ruby file content."""
         # Delegate to the existing legacy function for now
-        return analyze_ruby(content, file_path, module_name, '.rb', stats)
+        return analyze_ruby(content, file_path, module_name, ".rb", stats)

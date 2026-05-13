@@ -12,31 +12,75 @@ from .source_classifier import (
 )
 
 
-_SKIP_DIR_NAMES = frozenset({
-    '.git', '.svn', '.hg',
-    '.vscode', '.idea', '.github',
-    '__pycache__', '.venv', 'venv', 'env', 'fresh_env', 'test-env',
-    '.tox', '.pytest_cache', '.mypy_cache', '.ruff_cache', '.pyqual',
-    'node_modules',
-    'build', 'dist', 'target', 'out',
-    '.eggs', 'egg-info',
-    'htmlcov', '.coverage', '.cache',
-    'lib', 'lib64', 'site-packages', 'include', 'bin', 'share',
-    '.code2llm_cache',
-    'tests', 'test',
-    'coverage', '.nyc_output',
-    # Backup and auto-generated directories that often contain venvs
-    '.algitex', '.backup', 'backups', '.bak', 'bak',
-    # Additional venv patterns
-    'virtualenv', '.virtualenv', 'envs', '.envs', 'venv-', '.venv-',
-    # CI/CD and deployment artifacts
-    '.terraform', '.serverless', '.netlify', '.vercel',
-}) | ARCHIVE_DIR_NAMES | GENERATED_OUTPUT_DIR_NAMES
+_SKIP_DIR_NAMES = (
+    frozenset(
+        {
+            ".git",
+            ".svn",
+            ".hg",
+            ".vscode",
+            ".idea",
+            ".github",
+            "__pycache__",
+            ".venv",
+            "venv",
+            "env",
+            "fresh_env",
+            "test-env",
+            ".tox",
+            ".pytest_cache",
+            ".mypy_cache",
+            ".ruff_cache",
+            ".pyqual",
+            "node_modules",
+            "build",
+            "dist",
+            "target",
+            "out",
+            ".eggs",
+            "egg-info",
+            "htmlcov",
+            ".coverage",
+            ".cache",
+            "lib",
+            "lib64",
+            "site-packages",
+            "include",
+            "bin",
+            "share",
+            ".code2llm_cache",
+            "tests",
+            "test",
+            "coverage",
+            ".nyc_output",
+            # Backup and auto-generated directories that often contain venvs
+            ".algitex",
+            ".backup",
+            "backups",
+            ".bak",
+            "bak",
+            # Additional venv patterns
+            "virtualenv",
+            ".virtualenv",
+            "envs",
+            ".envs",
+            "venv-",
+            ".venv-",
+            # CI/CD and deployment artifacts
+            ".terraform",
+            ".serverless",
+            ".netlify",
+            ".vercel",
+        }
+    )
+    | ARCHIVE_DIR_NAMES
+    | GENERATED_OUTPUT_DIR_NAMES
+)
 
 
 class FastFileFilter:
     """Fast file filtering with pattern matching."""
-    
+
     def __init__(self, config: FilterConfig, project_path: Path = None):
         self.config = config
         self.project_path = project_path
@@ -46,7 +90,7 @@ class FastFileFilter:
         self._regex_excludes = []
         for p in config.exclude_patterns:
             p_lower = p.lower()
-            if any(c in p_lower for c in ('*', '?', '[')):
+            if any(c in p_lower for c in ("*", "?", "[")):
                 self._regex_excludes.append(re.compile(fnmatch.translate(p_lower)))
             else:
                 self._simple_excludes.append(p_lower)
@@ -55,7 +99,7 @@ class FastFileFilter:
         self._regex_includes = []
         for p in config.include_patterns:
             p_lower = p.lower()
-            if any(c in p_lower for c in ('*', '?', '[')):
+            if any(c in p_lower for c in ("*", "?", "[")):
                 self._regex_includes.append(re.compile(fnmatch.translate(p_lower)))
             else:
                 self._simple_includes.append(p_lower)
@@ -64,11 +108,11 @@ class FastFileFilter:
         self._gitignore_parser = None
         if config.gitignore_enabled and project_path:
             self._gitignore_parser = load_gitignore_patterns(project_path)
-    
+
     def should_skip_dir(self, dirname: str) -> bool:
         """Fast O(1) check: skip this directory entirely during tree walk?"""
         lower = dirname.lower()
-        return lower.startswith('.') or lower in _SKIP_DIR_NAMES
+        return lower.startswith(".") or lower in _SKIP_DIR_NAMES
 
     def _passes_gitignore(self, file_path: str) -> bool:
         """Check if file passes gitignore patterns (True = pass, False = excluded)."""
@@ -95,9 +139,8 @@ class FastFileFilter:
         if not self._simple_includes and not self._regex_includes:
             return True  # No includes defined = include all
 
-        return (
-            any(p in path_lower for p in self._simple_includes) or
-            any(r.match(path_lower) for r in self._regex_includes)
+        return any(p in path_lower for p in self._simple_includes) or any(
+            r.match(path_lower) for r in self._regex_includes
         )
 
     def should_process(self, file_path: str) -> bool:
@@ -109,16 +152,18 @@ class FastFileFilter:
             return False
 
         return (
-            self._passes_gitignore(file_path) and
-            self._passes_excludes(path_lower, basename_lower) and
-            self._passes_includes(path_lower)
+            self._passes_gitignore(file_path)
+            and self._passes_excludes(path_lower, basename_lower)
+            and self._passes_includes(path_lower)
         )
-    
+
     def _passes_line_count(self, line_count: int) -> bool:
         """Check if function passes line count threshold."""
         return line_count >= self.config.min_function_lines
 
-    def _passes_visibility(self, is_private: bool, is_property: bool, is_accessor: bool) -> bool:
+    def _passes_visibility(
+        self, is_private: bool, is_property: bool, is_accessor: bool
+    ) -> bool:
         """Check if function passes visibility filters."""
         if self.config.skip_private and is_private:
             return False
@@ -128,10 +173,15 @@ class FastFileFilter:
             return False
         return True
 
-    def should_skip_function(self, line_count: int, is_private: bool = False,
-                            is_property: bool = False, is_accessor: bool = False) -> bool:
+    def should_skip_function(
+        self,
+        line_count: int,
+        is_private: bool = False,
+        is_property: bool = False,
+        is_accessor: bool = False,
+    ) -> bool:
         """Check if function should be skipped."""
         return not (
-            self._passes_line_count(line_count) and
-            self._passes_visibility(is_private, is_property, is_accessor)
+            self._passes_line_count(line_count)
+            and self._passes_visibility(is_private, is_property, is_accessor)
         )

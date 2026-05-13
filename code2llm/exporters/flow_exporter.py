@@ -16,7 +16,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .base import BaseExporter, export_format
-from .flow_constants import CC_HIGH, FAN_OUT_THRESHOLD, HUB_TYPE_THRESHOLD, is_excluded_path
+from .flow_constants import (
+    CC_HIGH,
+    FAN_OUT_THRESHOLD,
+    HUB_TYPE_THRESHOLD,
+    is_excluded_path,
+)
 from .flow_renderer import FlowRenderer
 from code2llm.core.models import AnalysisResult, FunctionInfo
 from code2llm.analysis.type_inference import TypeInferenceEngine
@@ -45,7 +50,9 @@ class FlowExporter(BaseExporter):
         )
         self._renderer = FlowRenderer()
 
-    def export(self, result: AnalysisResult, output_path: str, **kwargs) -> Optional[Path]:
+    def export(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Export analysis result to flow.toon format."""
         ctx = self._build_context(result)
 
@@ -77,7 +84,8 @@ class FlowExporter(BaseExporter):
 
         # Build function lookup excluding venv etc.
         funcs = {
-            qname: fi for qname, fi in result.functions.items()
+            qname: fi
+            for qname, fi in result.functions.items()
             if not self._is_excluded(fi.file)
         }
         ctx["funcs"] = funcs
@@ -116,15 +124,17 @@ class FlowExporter(BaseExporter):
         """Convert Pipeline dataclass to dict for rendering."""
         stages = []
         for s in pipeline.stages:
-            stages.append({
-                "name": s.name,
-                "qualified": s.qualified_name,
-                "signature": s.signature,
-                "cc": s.cc,
-                "purity": s.purity,
-                "is_entry": s.is_entry,
-                "is_exit": s.is_exit,
-            })
+            stages.append(
+                {
+                    "name": s.name,
+                    "qualified": s.qualified_name,
+                    "signature": s.signature,
+                    "cc": s.cc,
+                    "purity": s.purity,
+                    "is_entry": s.is_entry,
+                    "is_exit": s.is_exit,
+                }
+            )
 
         bn = pipeline.bottleneck
         return {
@@ -151,13 +161,15 @@ class FlowExporter(BaseExporter):
         for qname, fi in funcs.items():
             fan_out = len(set(fi.calls))
             if fan_out >= FAN_OUT_THRESHOLD:
-                transforms.append({
-                    "name": fi.name,
-                    "qualified": qname,
-                    "fan_out": fan_out,
-                    "signature": self._type_engine.get_typed_signature(fi),
-                    "label": self._transform_label(fi, fan_out),
-                })
+                transforms.append(
+                    {
+                        "name": fi.name,
+                        "qualified": qname,
+                        "fan_out": fan_out,
+                        "signature": self._type_engine.get_typed_signature(fi),
+                        "label": self._transform_label(fi, fan_out),
+                    }
+                )
         transforms.sort(key=lambda x: x["fan_out"], reverse=True)
         return transforms[:15]
 
@@ -176,8 +188,7 @@ class FlowExporter(BaseExporter):
     # type usage — consumed/produced counts (AST-based, Sprint 2)
     # ------------------------------------------------------------------
     def _compute_type_usage(
-        self, funcs: Dict[str, FunctionInfo],
-        type_info: Dict[str, Dict[str, Any]]
+        self, funcs: Dict[str, FunctionInfo], type_info: Dict[str, Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Count how many functions consume/produce each type using AST data."""
         consumed: Dict[str, int] = defaultdict(int)
@@ -210,13 +221,15 @@ class FlowExporter(BaseExporter):
             p = produced.get(t, 0)
             total = c + p
             label = self._type_label(t, c, p)
-            type_list.append({
-                "type": t,
-                "consumed": c,
-                "produced": p,
-                "total": total,
-                "label": label,
-            })
+            type_list.append(
+                {
+                    "type": t,
+                    "consumed": c,
+                    "produced": p,
+                    "total": total,
+                    "label": label,
+                }
+            )
 
         type_list.sort(key=lambda x: x["total"], reverse=True)
         return type_list[:20]
@@ -226,7 +239,7 @@ class FlowExporter(BaseExporter):
         # Remove Optional[], List[], Dict[] wrappers for base type
         for wrapper in ["Optional[", "List[", "Dict[", "Set[", "Tuple["]:
             if t.startswith(wrapper) and t.endswith("]"):
-                t = t[len(wrapper):-1]
+                t = t[len(wrapper) : -1]
         return t if t and t not in ("None", "Any") else ""
 
     def _type_label(self, t: str, consumed: int, produced: int) -> str:
@@ -246,8 +259,7 @@ class FlowExporter(BaseExporter):
     # side effect classification (AST-based, Sprint 2)
     # ------------------------------------------------------------------
     def _classify_side_effects(
-        self, funcs: Dict[str, FunctionInfo],
-        se_info: Dict[str, SideEffectInfo]
+        self, funcs: Dict[str, FunctionInfo], se_info: Dict[str, SideEffectInfo]
     ) -> Dict[str, List[str]]:
         """Classify functions by side-effect type using AST analysis."""
         io_funcs: List[str] = []
@@ -282,10 +294,11 @@ class FlowExporter(BaseExporter):
     # contracts per pipeline (enhanced, Sprint 2)
     # ------------------------------------------------------------------
     def _compute_contracts(
-        self, pipelines: List[Dict[str, Any]],
+        self,
+        pipelines: List[Dict[str, Any]],
         funcs: Dict[str, FunctionInfo],
         type_info: Dict[str, Dict[str, Any]],
-        se_info: Dict[str, SideEffectInfo]
+        se_info: Dict[str, SideEffectInfo],
     ) -> List[Dict[str, Any]]:
         """Build rich contracts for each pipeline stage with IN/OUT/SIDE-EFFECT."""
         contracts = []
@@ -301,17 +314,20 @@ class FlowExporter(BaseExporter):
                 contract = self._build_stage_contract(fi, ti, se, stage)
                 stages_contracts.append(contract)
 
-            contracts.append({
-                "pipeline": pipeline["name"],
-                "stages": stages_contracts,
-            })
+            contracts.append(
+                {
+                    "pipeline": pipeline["name"],
+                    "stages": stages_contracts,
+                }
+            )
         return contracts
 
     def _build_stage_contract(
-        self, fi: FunctionInfo,
+        self,
+        fi: FunctionInfo,
         ti: Dict[str, Any],
         se: Optional[SideEffectInfo],
-        stage: Dict[str, Any]
+        stage: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Build a rich contract for a single pipeline stage."""
         # IN types

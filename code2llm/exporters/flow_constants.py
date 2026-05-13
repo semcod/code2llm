@@ -12,21 +12,40 @@ HUB_TYPE_THRESHOLD = 10
 
 # Wzorce do wykluczenia (venv, cache, etc.)
 EXCLUDE_PATTERNS = {
-    'venv', '.venv', 'env', '.env', 'publish-env', 'test-env',
-    'site-packages', 'node_modules', '__pycache__', '.git',
-    'dist', 'build', 'egg-info', '.tox', '.mypy_cache',
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "publish-env",
+    "test-env",
+    "site-packages",
+    "node_modules",
+    "__pycache__",
+    ".git",
+    "dist",
+    "build",
+    "egg-info",
+    ".tox",
+    ".mypy_cache",
     # Backup directories that often contain nested venvs
-    '.algitex', '.backup', 'backups', '.bak',
-    # Additional venv patterns  
-    'virtualenv', '.virtualenv', 'envs', '.envs',
+    ".algitex",
+    ".backup",
+    "backups",
+    ".bak",
+    # Additional venv patterns
+    "virtualenv",
+    ".virtualenv",
+    "envs",
+    ".envs",
 }
+
 
 @lru_cache(maxsize=4096)
 def is_excluded_path(path: str) -> bool:
     """Return True if *path* matches any standard exclusion pattern (venv, cache, etc.)."""
     if not path:
         return False
-    parts = set(path.lower().replace('\\', '/').split('/'))
+    parts = set(path.lower().replace("\\", "/").split("/"))
     return bool(parts & EXCLUDE_PATTERNS)
 
 

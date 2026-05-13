@@ -54,15 +54,25 @@ class HTMLDashboardGenerator:
         cc_avg = health.get("cc_avg", 0)
 
         return self._renderer.render(
-            proj=proj, stats=stats, health=health,
-            cc_avg=cc_avg, health_color=health_color, health_label=health_label,
-            evo_chart=evo_chart, lang_data=lang_data,
-            mod_lines_chart=mod_lines_chart, mod_funcs_chart=mod_funcs_chart,
-            alerts_html=alerts_html, hotspots_html=hotspots_html,
-            refactor_html=refactor_html, top_modules_html=top_modules_html,
-            modules=modules, hotspots=hotspots, refactoring=refactoring,
+            proj=proj,
+            stats=stats,
+            health=health,
+            cc_avg=cc_avg,
+            health_color=health_color,
+            health_label=health_label,
+            evo_chart=evo_chart,
+            lang_data=lang_data,
+            mod_lines_chart=mod_lines_chart,
+            mod_funcs_chart=mod_funcs_chart,
+            alerts_html=alerts_html,
+            hotspots_html=hotspots_html,
+            refactor_html=refactor_html,
+            top_modules_html=top_modules_html,
+            modules=modules,
+            hotspots=hotspots,
+            refactoring=refactoring,
         )
 
 
 # Backward compatibility re-exports
-__all__ = ['HTMLDashboardGenerator', 'DashboardDataBuilder', 'DashboardRenderer']
+__all__ = ["HTMLDashboardGenerator", "DashboardDataBuilder", "DashboardRenderer"]

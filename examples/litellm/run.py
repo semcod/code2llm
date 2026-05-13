@@ -31,8 +31,15 @@ def run_analysis(project_path: str) -> dict:
     """Run code2llm and return analysis outputs."""
     with tempfile.TemporaryDirectory() as tmpdir:
         cmd = [
-            sys.executable, "-m", "code2llm",
-            project_path, "-f", "evolution,context", "-o", tmpdir, "--no-png"
+            sys.executable,
+            "-m",
+            "code2llm",
+            project_path,
+            "-f",
+            "evolution,context",
+            "-o",
+            tmpdir,
+            "--no-png",
         ]
         print(f"🔍 Analyzing: {project_path}")
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -93,9 +100,15 @@ Be specific and actionable. Include code snippets where helpful."""
 
 
 def main():
-    parser = argparse.ArgumentParser(description="code2llm + LiteLLM refactoring advisor")
+    parser = argparse.ArgumentParser(
+        description="code2llm + LiteLLM refactoring advisor"
+    )
     parser.add_argument("project", help="Path to Python project")
-    parser.add_argument("--model", default=DEFAULT_MODEL, help=f"LiteLLM model (default: {DEFAULT_MODEL})")
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"LiteLLM model (default: {DEFAULT_MODEL})",
+    )
     args = parser.parse_args()
 
     # Step 1: Analyze

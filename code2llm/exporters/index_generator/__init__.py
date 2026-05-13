@@ -35,8 +35,8 @@ class IndexHTMLGenerator:
         """Generate index.html in the output directory."""
         files = self._scanner.scan()
         html = self._renderer.render(files)
-        index_path = self.output_dir / 'index.html'
-        with open(index_path, 'w', encoding='utf-8') as f:
+        index_path = self.output_dir / "index.html"
+        with open(index_path, "w", encoding="utf-8") as f:
             f.write(html)
         return index_path
 
@@ -63,11 +63,11 @@ def generate_index_html(output_dir: Path) -> Path:
 
 
 __all__ = [
-    'IndexHTMLGenerator',
-    'FileScanner',
-    'HTMLRenderer',
-    'generate_index_html',
-    'get_file_types',
-    'get_default_file_info',
-    'FILE_TYPES',
+    "IndexHTMLGenerator",
+    "FileScanner",
+    "HTMLRenderer",
+    "generate_index_html",
+    "get_file_types",
+    "get_default_file_info",
+    "FILE_TYPES",
 ]

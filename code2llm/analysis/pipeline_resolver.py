@@ -83,7 +83,8 @@ class PipelineResolver:
             return None
 
         same_class = [
-            qn for qn in candidates
+            qn
+            for qn in candidates
             if caller and caller.class_name and f".{caller.class_name}." in qn
         ]
         if len(same_class) == 1:

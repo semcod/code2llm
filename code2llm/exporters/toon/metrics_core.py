@@ -74,14 +74,19 @@ class CoreMetricsComputer:
     def _new_file_record(rel: str, line_count: int) -> Dict[str, Any]:
         """Create a fresh file metrics record."""
         return {
-            "rel": rel, "lines": line_count,
-            "classes": set(), "methods": 0,
-            "cc_scores": [], "max_cc": 0.0,
+            "rel": rel,
+            "lines": line_count,
+            "classes": set(),
+            "methods": 0,
+            "cc_scores": [],
+            "max_cc": 0.0,
             "fan_in": 0,
         }
 
     @staticmethod
-    def _build_suffix_index(result: AnalysisResult) -> Dict[str, List[Tuple[str, FunctionInfo]]]:
+    def _build_suffix_index(
+        result: AnalysisResult,
+    ) -> Dict[str, List[Tuple[str, FunctionInfo]]]:
         """Build reverse lookup: simple_name -> [(qualified_name, FunctionInfo)].
 
         Replaces O(F) scans per call with O(1) dict lookups.
@@ -129,8 +134,11 @@ class CoreMetricsComputer:
             pkg = _package_of(fm["rel"])
             if pkg not in pkgs:
                 pkgs[pkg] = {
-                    "files": [], "total_lines": 0,
-                    "cc_scores": [], "fan_in": 0, "fan_out": 0,
+                    "files": [],
+                    "total_lines": 0,
+                    "cc_scores": [],
+                    "fan_in": 0,
+                    "fan_out": 0,
                 }
             pkgs[pkg]["files"].append(fm["rel"])
             pkgs[pkg]["total_lines"] += fm["lines"]
@@ -153,31 +161,34 @@ class CoreMetricsComputer:
             node_count = len(fi.cfg_nodes) if fi.cfg_nodes else 0
             # count exits
             exits = 0
-            for nid in (fi.cfg_nodes or []):
+            for nid in fi.cfg_nodes or []:
                 nd = result.nodes.get(nid)
                 if nd and getattr(nd, "type", "") in ("EXIT", "RETURN"):
                     exits += 1
             # traits
             from .helpers import _traits_from_cfg
+
             traits = _traits_from_cfg(fi, result)
             fan_out = len(set(fi.calls))
             fan_in = len(set(fi.called_by))
 
-            funcs.append({
-                "name": fi.name,
-                "qualified": qname,
-                "cc": cc,
-                "nodes": node_count,
-                "exits": exits,
-                "traits": traits,
-                "file": fi.file,
-                "rel_file": _rel_path(fi.file, result.project_path),
-                "module": fi.module,
-                "class_name": fi.class_name,
-                "fan_out": fan_out,
-                "fan_in": fan_in,
-                "reachability": fi.reachability,
-            })
+            funcs.append(
+                {
+                    "name": fi.name,
+                    "qualified": qname,
+                    "cc": cc,
+                    "nodes": node_count,
+                    "exits": exits,
+                    "traits": traits,
+                    "file": fi.file,
+                    "rel_file": _rel_path(fi.file, result.project_path),
+                    "module": fi.module,
+                    "class_name": fi.class_name,
+                    "fan_out": fan_out,
+                    "fan_in": fan_in,
+                    "reachability": fi.reachability,
+                }
+            )
         funcs.sort(key=lambda x: x["cc"], reverse=True)
         return funcs
 
@@ -198,17 +209,19 @@ class CoreMetricsComputer:
             avg_cc = round(sum(method_ccs) / len(method_ccs), 1) if method_ccs else 0.0
             max_cc = max(method_ccs) if method_ccs else 0.0
 
-            classes.append({
-                "name": ci.name,
-                "qualified": qname,
-                "file": ci.file,
-                "rel_file": _rel_path(ci.file, result.project_path),
-                "module": ci.module,
-                "methods": method_names,
-                "method_count": mc,
-                "avg_cc": avg_cc,
-                "max_cc": max_cc,
-            })
+            classes.append(
+                {
+                    "name": ci.name,
+                    "qualified": qname,
+                    "file": ci.file,
+                    "rel_file": _rel_path(ci.file, result.project_path),
+                    "module": ci.module,
+                    "methods": method_names,
+                    "method_count": mc,
+                    "avg_cc": avg_cc,
+                    "max_cc": max_cc,
+                }
+            )
         classes.sort(key=lambda x: x["method_count"], reverse=True)
         return classes
 
@@ -235,7 +248,9 @@ class CoreMetricsComputer:
                 func_to_module[qname] = fi.module
         return func_to_module
 
-    def _build_coupling_matrix(self, result: AnalysisResult, func_to_module: Dict[str, str]) -> Dict[Tuple[str, str], int]:
+    def _build_coupling_matrix(
+        self, result: AnalysisResult, func_to_module: Dict[str, str]
+    ) -> Dict[Tuple[str, str], int]:
         """Build coupling matrix from cross-module calls."""
         matrix: Dict[Tuple[str, str], int] = defaultdict(int)
 
@@ -263,8 +278,11 @@ class CoreMetricsComputer:
         return matrix
 
     def _resolve_callee_module(
-        self, callee: str, func_to_module: Dict[str, str],
-        src_pkg: str, suffix_idx: Dict[str, List[Tuple[str, str]]],
+        self,
+        callee: str,
+        func_to_module: Dict[str, str],
+        src_pkg: str,
+        suffix_idx: Dict[str, List[Tuple[str, str]]],
     ) -> Optional[str]:
         """Resolve callee to a known function module (O(1) via suffix index)."""
         callee_mod = func_to_module.get(callee)
@@ -283,11 +301,13 @@ class CoreMetricsComputer:
 
         return None
 
-    def _compute_package_fan(self, matrix: Dict[Tuple[str, str], int]) -> Dict[str, Dict[str, int]]:
+    def _compute_package_fan(
+        self, matrix: Dict[Tuple[str, str], int]
+    ) -> Dict[str, Dict[str, int]]:
         """Compute fan-in / fan-out per package."""
         pkg_fan: Dict[str, Dict[str, int]] = {}
         all_pkgs = set()
-        for (s, d) in matrix:
+        for s, d in matrix:
             all_pkgs.add(s)
             all_pkgs.add(d)
         for pkg in all_pkgs:

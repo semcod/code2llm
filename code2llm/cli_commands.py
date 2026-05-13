@@ -11,14 +11,15 @@ from .core.config import DEFAULT_CACHE_MAX_AGE_DAYS, KB
 
 def handle_special_commands() -> Optional[int]:
     """Handle special sub-commands (llm-flow, llm-context, report, cache)."""
-    if len(sys.argv) > 1 and sys.argv[1] == 'llm-flow':
+    if len(sys.argv) > 1 and sys.argv[1] == "llm-flow":
         from .generators.llm_flow import main as llm_flow_main
+
         return llm_flow_main(sys.argv[2:])
-    if len(sys.argv) > 1 and sys.argv[1] == 'llm-context':
+    if len(sys.argv) > 1 and sys.argv[1] == "llm-context":
         return generate_llm_context(sys.argv[2:])
-    if len(sys.argv) > 1 and sys.argv[1] == 'report':
+    if len(sys.argv) > 1 and sys.argv[1] == "report":
         return handle_report_command(sys.argv[2:])
-    if len(sys.argv) > 1 and sys.argv[1] == 'cache':
+    if len(sys.argv) > 1 and sys.argv[1] == "cache":
         return handle_cache_command(sys.argv[2:])
     return None
 
@@ -34,49 +35,67 @@ def handle_cache_command(args_list) -> int:
     """
     import os
     import time
-    from .core.persistent_cache import PersistentCache, get_all_projects, clear_all, _DEFAULT_ROOT
+    from .core.persistent_cache import (
+        PersistentCache,
+        get_all_projects,
+        clear_all,
+        _DEFAULT_ROOT,
+    )
 
-    parser = argparse.ArgumentParser(prog='code2llm cache')
-    parser.add_argument('action', choices=['status', 'clear', 'gc'], help='Cache action')
-    parser.add_argument('--all', action='store_true', dest='all_projects',
-                        help='Apply to all cached projects (clear only)')
-    parser.add_argument('--max-age', type=int, default=DEFAULT_CACHE_MAX_AGE_DAYS, metavar='DAYS',
-                        help=f'Max age in days for gc (default: {DEFAULT_CACHE_MAX_AGE_DAYS})')
+    parser = argparse.ArgumentParser(prog="code2llm cache")
+    parser.add_argument(
+        "action", choices=["status", "clear", "gc"], help="Cache action"
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        dest="all_projects",
+        help="Apply to all cached projects (clear only)",
+    )
+    parser.add_argument(
+        "--max-age",
+        type=int,
+        default=DEFAULT_CACHE_MAX_AGE_DAYS,
+        metavar="DAYS",
+        help=f"Max age in days for gc (default: {DEFAULT_CACHE_MAX_AGE_DAYS})",
+    )
     args = parser.parse_args(args_list)
 
-    if args.action == 'status':
+    if args.action == "status":
         projects = get_all_projects()
         root = _DEFAULT_ROOT
-        total_mb = sum(p.get('cache_size_bytes', 0) for p in projects) / (KB * KB)
+        total_mb = sum(p.get("cache_size_bytes", 0) for p in projects) / (KB * KB)
         print(f"Cache: {root}")
         print(f"  Projects: {len(projects)}   Total: {total_mb:.1f} MB")
         for p in projects:
-            size_mb = p.get('cache_size_bytes', 0) / (KB * KB)
-            updated = p.get('updated_at', 0)
+            size_mb = p.get("cache_size_bytes", 0) / (KB * KB)
+            updated = p.get("updated_at", 0)
             age_min = int((time.time() - updated) / 60) if updated else 0
-            age_str = f"{age_min}m ago" if age_min < 120 else f"{age_min//60}h ago"
-            exports = p.get('exports', 0)
-            files = p.get('files_cached', 0)
+            age_str = f"{age_min}m ago" if age_min < 120 else f"{age_min // 60}h ago"
+            exports = p.get("exports", 0)
+            files = p.get("files_cached", 0)
             print(f"\n  {p.get('project', '?')}")
-            print(f"    Files: {files}   Exports: {exports}   Size: {size_mb:.1f} MB   Last: {age_str}")
+            print(
+                f"    Files: {files}   Exports: {exports}   Size: {size_mb:.1f} MB   Last: {age_str}"
+            )
         return 0
 
-    if args.action == 'clear':
+    if args.action == "clear":
         if args.all_projects:
             clear_all()
             print("Cleared entire cache.")
         else:
-            project_dir = os.path.realpath('.')
+            project_dir = os.path.realpath(".")
             c = PersistentCache(project_dir)
             c.clear()
             print(f"Cleared cache for {project_dir}")
         return 0
 
-    if args.action == 'gc':
+    if args.action == "gc":
         projects = get_all_projects()
         total_removed = 0
         for p in projects:
-            project_dir = p.get('project')
+            project_dir = p.get("project")
             if project_dir and Path(project_dir).exists():
                 c = PersistentCache(project_dir)
                 removed = c.gc(max_age_days=args.max_age)
@@ -100,29 +119,33 @@ def handle_report_command(args_list) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(
-        prog='code2llm report',
-        description='Generate views from an existing project.yaml (legacy, single source of truth)',
+        prog="code2llm report",
+        description="Generate views from an existing project.yaml (legacy, single source of truth)",
     )
     parser.add_argument(
-        '--input', '-i',
-        default='./project.yaml',
-        help='Path to legacy project.yaml (default: ./project.yaml)',
+        "--input",
+        "-i",
+        default="./project.yaml",
+        help="Path to legacy project.yaml (default: ./project.yaml)",
     )
     parser.add_argument(
-        '--format', '-f',
-        dest='report_format',
-        default='all',
-        help='Output format: toon, context, article, html, all (default: all)',
+        "--format",
+        "-f",
+        dest="report_format",
+        default="all",
+        help="Output format: toon, context, article, html, all (default: all)",
     )
     parser.add_argument(
-        '-o', '--output',
-        default='.',
-        help='Output directory (default: current directory)',
+        "-o",
+        "--output",
+        default=".",
+        help="Output directory (default: current directory)",
     )
     parser.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='Verbose output',
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose output",
     )
 
     args = parser.parse_args(args_list)
@@ -130,7 +153,10 @@ def handle_report_command(args_list) -> int:
     input_path = Path(args.input)
     if not input_path.exists():
         print(f"Error: project.yaml not found: {input_path}", file=sys.stderr)
-        print("If you still need it, use the legacy 'code2llm <source> -f project-yaml' export.", file=sys.stderr)
+        print(
+            "If you still need it, use the legacy 'code2llm <source> -f project-yaml' export.",
+            file=sys.stderr,
+        )
         return 1
 
     output_dir = Path(args.output)
@@ -193,7 +219,7 @@ def validate_chunked_output(output_dir: Path, args) -> bool:
         print(f"✗ No chunk directories found in: {output_dir}", file=sys.stderr)
         return False
 
-    required_files = ['analysis.toon.yaml', 'context.md', 'evolution.toon.yaml']
+    required_files = ["analysis.toon.yaml", "context.md", "evolution.toon.yaml"]
     issues, valid_chunks = _validate_chunks(chunk_dirs, required_files)
 
     _print_validation_summary(chunk_dirs, valid_chunks, issues)
@@ -247,7 +273,9 @@ def _get_file_sizes(chunk_dir: Path, required_files: list[str]) -> str:
     sizes = []
     for req_file in required_files:
         size = (chunk_dir / req_file).stat().st_size
-        sizes.append(f"{req_file}:{size//KB}KB" if size > KB else f"{req_file}:{size}B")
+        sizes.append(
+            f"{req_file}:{size // KB}KB" if size > KB else f"{req_file}:{size}B"
+        )
     return ", ".join(sizes)
 
 
@@ -258,9 +286,11 @@ def _print_chunk_errors(chunk_name: str, chunk_issues: list[str]) -> None:
         print(f"    {issue}")
 
 
-def _print_validation_summary(chunk_dirs: list, valid_chunks: list, issues: list) -> None:
+def _print_validation_summary(
+    chunk_dirs: list, valid_chunks: list, issues: list
+) -> None:
     """Print validation summary report."""
-    print(f"\n📊 Validation Summary:")
+    print("\n📊 Validation Summary:")
     print(f"  Total chunks: {len(chunk_dirs)}")
     print(f"  Valid: {len(valid_chunks)}")
     print(f"  Issues: {len(issues)}")
@@ -276,42 +306,44 @@ def _print_validation_summary(chunk_dirs: list, valid_chunks: list, issues: list
 def generate_llm_context(args_list):
     """Quick command to generate LLM context only."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
-        prog='code2llm llm-context',
-        description='Generate LLM-friendly context for a project'
+        prog="code2llm llm-context",
+        description="Generate LLM-friendly context for a project",
     )
-    parser.add_argument('source', help='Path to Python project')
-    parser.add_argument('-o', '--output', default='./llm_context.md', help='Output file path')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
-    
+    parser.add_argument("source", help="Path to Python project")
+    parser.add_argument(
+        "-o", "--output", default="./llm_context.md", help="Output file path"
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+
     args = parser.parse_args(args_list)
-    
+
     from pathlib import Path
     from . import ProjectAnalyzer, FAST_CONFIG
     from .exporters import ContextExporter
-    
+
     source_path = Path(args.source)
     if not source_path.exists():
         print(f"Error: Source path not found: {source_path}", file=sys.stderr)
         return 1
-    
+
     if args.verbose:
         print(f"Generating LLM context for: {source_path}")
-    
+
     # Use fast config with parallel disabled for stability
     FAST_CONFIG.performance.parallel_enabled = False
-    
+
     analyzer = ProjectAnalyzer(FAST_CONFIG)
     result = analyzer.analyze_project(str(source_path))
-    
+
     exporter = ContextExporter()
     exporter.export(result, args.output)
-    
+
     # Print summary
     print(f"\n✓ LLM context generated: {args.output}")
     print(f"  Functions: {len(result.functions)}")
     print(f"  Classes: {len(result.classes)}")
     print(f"  Modules: {len(result.modules)}")
-    
+
     return 0

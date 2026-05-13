@@ -34,6 +34,6 @@ def _parse_func_label(label: str) -> Optional[str]:
 
 
 __all__ = [
-    '_parse_call_label',
-    '_parse_func_label',
+    "_parse_call_label",
+    "_parse_func_label",
 ]

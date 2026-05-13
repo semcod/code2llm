@@ -43,6 +43,7 @@ _DEFAULT_TTL_DAYS = 1.0
 _ENV_AUTO_CLEANUP = "CODE2LLM_AUTO_CLEANUP"
 _ENV_TTL_DAYS = "CODE2LLM_CACHE_TTL_DAYS"
 
+
 def _pack(obj: Any) -> bytes:
     # Always pickle: analysis results contain dataclasses (ModuleInfo,
     # FunctionInfo, ...) and graph objects that msgpack cannot serialize
@@ -75,9 +76,7 @@ class PersistentCache:
     ):
         self._project_dir = os.path.realpath(project_dir)
         self._root = Path(cache_root or _DEFAULT_ROOT)
-        self._project_hash = hashlib.md5(
-            self._project_dir.encode()
-        ).hexdigest()[:12]
+        self._project_hash = hashlib.md5(self._project_dir.encode()).hexdigest()[:12]
         self._project_cache = self._root / "projects" / self._project_hash
         self._files_dir = self._project_cache / "files"
         self._exports_dir = self._project_cache / "exports"
@@ -150,9 +149,7 @@ class PersistentCache:
     # Batch changed-file detection
     # ------------------------------------------------------------------
 
-    def get_changed_files(
-        self, filepaths: List[str]
-    ) -> Tuple[List[str], List[str]]:
+    def get_changed_files(self, filepaths: List[str]) -> Tuple[List[str], List[str]]:
         """Split *filepaths* into (changed, cached).
 
         Uses L1 (mtime+size) first; falls back to L2 (content hash) when
@@ -257,7 +254,9 @@ class PersistentCache:
         tmp.replace(self._manifest_path)
 
         try:
-            size = sum(f.stat().st_size for f in self._files_dir.iterdir() if f.is_file())
+            size = sum(
+                f.stat().st_size for f in self._files_dir.iterdir() if f.is_file()
+            )
             meta = {
                 "project": self._project_dir,
                 "files_cached": len(self._manifest["files"]),
@@ -274,9 +273,7 @@ class PersistentCache:
         """Total size of this project's cache in MB."""
         try:
             total = sum(
-                f.stat().st_size
-                for f in self._project_cache.rglob("*")
-                if f.is_file()
+                f.stat().st_size for f in self._project_cache.rglob("*") if f.is_file()
             )
             return total / (1024 * 1024)
         except OSError:
@@ -358,7 +355,10 @@ class PersistentCache:
             logger.debug(
                 "auto_cleanup: removed %d exports, %d orphan file entries "
                 "(ttl=%.1fd, project=%s)",
-                removed["exports"], removed["files"], ttl_days, self._project_dir,
+                removed["exports"],
+                removed["files"],
+                ttl_days,
+                self._project_dir,
             )
         return removed
 
@@ -400,7 +400,11 @@ class PersistentCache:
         shutil.rmtree(self._project_cache, ignore_errors=True)
         self._files_dir.mkdir(parents=True, exist_ok=True)
         self._exports_dir.mkdir(parents=True, exist_ok=True)
-        self._manifest = {"version": VERSION, "files": {}, "project_dir": self._project_dir}
+        self._manifest = {
+            "version": VERSION,
+            "files": {},
+            "project_dir": self._project_dir,
+        }
         self._dirty = False
 
     # ------------------------------------------------------------------
@@ -430,6 +434,7 @@ class PersistentCache:
 # ---------------------------------------------------------------------------
 # Module-level helpers for CLI cache commands
 # ---------------------------------------------------------------------------
+
 
 def get_all_projects(cache_root: Optional[str] = None) -> List[Dict[str, Any]]:
     """Return summary dicts for every cached project."""

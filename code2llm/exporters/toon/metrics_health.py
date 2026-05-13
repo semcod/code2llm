@@ -37,25 +37,34 @@ class HealthMetricsComputer:
                 ctx["files"].get(d.get("fileA_abs", ""), {}).get("lines", 0)
                 for d in ctx["duplicates"]
             )
-            issues.append({
-                "severity": "red",
-                "code": "DUP",
-                "message": f"{ndups} classes duplicated ({dup_lines}L wasted)" if dup_lines else f"{ndups} classes duplicated",
-                "impact": f"-{ndups} dup classes",
-            })
+            issues.append(
+                {
+                    "severity": "red",
+                    "code": "DUP",
+                    "message": f"{ndups} classes duplicated ({dup_lines}L wasted)"
+                    if dup_lines
+                    else f"{ndups} classes duplicated",
+                    "impact": f"-{ndups} dup classes",
+                }
+            )
 
     def _check_god_modules_health(self, ctx, issues):
         """Check for god modules (large files with many classes)."""
         GOD_MODULE_LINES = 500
         GOD_MODULE_CLASSES = 4
         for fpath, fm in ctx["files"].items():
-            if fm["lines"] >= GOD_MODULE_LINES and fm["class_count"] >= GOD_MODULE_CLASSES:
-                issues.append({
-                    "severity": "red",
-                    "code": "GOD",
-                    "message": f"{fm['rel']} = {fm['lines']}L, {fm['class_count']} classes, {fm['methods']}m, max CC={fm['max_cc']}",
-                    "impact": "split needed",
-                })
+            if (
+                fm["lines"] >= GOD_MODULE_LINES
+                and fm["class_count"] >= GOD_MODULE_CLASSES
+            ):
+                issues.append(
+                    {
+                        "severity": "red",
+                        "code": "GOD",
+                        "message": f"{fm['rel']} = {fm['lines']}L, {fm['class_count']} classes, {fm['methods']}m, max CC={fm['max_cc']}",
+                        "impact": "split needed",
+                    }
+                )
 
     def _check_smells_health(self, result, issues):
         """Check for code smells: CC, cycles, bottlenecks."""
@@ -67,21 +76,32 @@ class HealthMetricsComputer:
                 if cc_val >= CC_WARNING:
                     fname = smell.context.get("function", smell.name)
                     short = fname.split(".")[-1] if "." in fname else fname
-                    issues.append({
-                        "severity": "yellow", "code": "CC",
-                        "message": f"{short} CC={cc_val} (limit:{CC_WARNING})",
-                        "impact": "split method",
-                    })
+                    issues.append(
+                        {
+                            "severity": "yellow",
+                            "code": "CC",
+                            "message": f"{short} CC={cc_val} (limit:{CC_WARNING})",
+                            "impact": "split method",
+                        }
+                    )
             elif stype == "circular_dependency":
-                issues.append({
-                    "severity": "red", "code": "CYCLE",
-                    "message": smell.description, "impact": "break cycle",
-                })
+                issues.append(
+                    {
+                        "severity": "red",
+                        "code": "CYCLE",
+                        "message": smell.description,
+                        "impact": "break cycle",
+                    }
+                )
             elif stype == "bottleneck":
-                issues.append({
-                    "severity": "yellow", "code": "BTL",
-                    "message": smell.description, "impact": "decouple",
-                })
+                issues.append(
+                    {
+                        "severity": "yellow",
+                        "code": "BTL",
+                        "message": smell.description,
+                        "impact": "decouple",
+                    }
+                )
 
     def _check_high_cc_health(self, ctx, issues):
         """Check for high CC functions not already caught by smells."""
@@ -92,7 +112,11 @@ class HealthMetricsComputer:
             short = fm["name"]
             msg = f"{short} CC={fm['cc']} (limit:{CC_WARNING})"
             if msg not in existing_cc_msgs:
-                issues.append({
-                    "severity": "yellow", "code": "CC",
-                    "message": msg, "impact": "split method",
-                })
+                issues.append(
+                    {
+                        "severity": "yellow",
+                        "code": "CC",
+                        "message": msg,
+                        "impact": "split method",
+                    }
+                )

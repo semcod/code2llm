@@ -4,7 +4,13 @@ from typing import Dict, List, Set, Tuple
 
 from code2llm.core.models import AnalysisResult
 
-from .utils import readable_id, safe_module, resolve_callee, write_file, build_name_index
+from .utils import (
+    readable_id,
+    safe_module,
+    resolve_callee,
+    write_file,
+    build_name_index,
+)
 
 
 def export_calls(result: AnalysisResult, output_path: str) -> None:
@@ -31,6 +37,7 @@ def export_calls(result: AnalysisResult, output_path: str) -> None:
 
     # Group connected nodes by module
     from .utils import module_of
+
     modules: Dict[str, list] = {}
     for fn in connected:
         module = module_of(fn)
@@ -58,4 +65,4 @@ def export_calls(result: AnalysisResult, output_path: str) -> None:
     write_file(output_path, lines)
 
 
-__all__ = ['export_calls']
+__all__ = ["export_calls"]

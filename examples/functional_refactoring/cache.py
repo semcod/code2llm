@@ -3,16 +3,18 @@ Evolutionary Cache - stores and evolves command templates based on usage.
 
 infrastructure/caching/evolutionary_cache.py
 """
+
 import json
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 
 
 @dataclass
 class CacheEntry:
     """Single cache entry with evolution metadata."""
+
     intent: str
     entities: Dict[str, Any]
     result: str
@@ -75,7 +77,7 @@ class EvolutionaryCache:
                 intent=intent,
                 entities=entities,
                 result=result,
-                last_used=datetime.now()
+                last_used=datetime.now(),
             )
         self._save()
 
@@ -84,7 +86,9 @@ class EvolutionaryCache:
         key = self._make_key(intent, entities)
         if key in self._entries:
             self._entries[key].success_count += 1
-            self._entries[key].evolution_score = self._calculate_score(self._entries[key])
+            self._entries[key].evolution_score = self._calculate_score(
+                self._entries[key]
+            )
             self._save()
 
     def report_failure(self, intent: str, entities: Dict[str, Any]) -> None:
@@ -92,7 +96,9 @@ class EvolutionaryCache:
         key = self._make_key(intent, entities)
         if key in self._entries:
             self._entries[key].failure_count += 1
-            self._entries[key].evolution_score = self._calculate_score(self._entries[key])
+            self._entries[key].evolution_score = self._calculate_score(
+                self._entries[key]
+            )
             self._save()
 
     def _make_key(self, intent: str, entities: Dict[str, Any]) -> str:
@@ -116,6 +122,7 @@ class EvolutionaryCache:
         """Remove lowest-scored entry when cache is full."""
         if not self._entries:
             return
-        worst_key = min(self._entries.keys(),
-                        key=lambda k: self._entries[k].evolution_score)
+        worst_key = min(
+            self._entries.keys(), key=lambda k: self._entries[k].evolution_score
+        )
         del self._entries[worst_key]

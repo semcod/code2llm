@@ -4,6 +4,7 @@ from typing import List, Dict, Set, Optional, Any
 
 class BaseModel:
     """Base class for models with automated serialization."""
+
     def to_dict(self, compact: bool = True) -> dict:
         """Convert to dictionary using dataclasses.asdict with filtering."""
         data = asdict(self)
@@ -15,9 +16,10 @@ class BaseModel:
         """Recursively filter out None and empty collections if compact."""
         if isinstance(data, dict):
             return {
-                k: self._filter_compact(v) 
-                for k, v in data.items() 
-                if v is not None and (not isinstance(v, (list, dict, set)) or len(v) > 0)
+                k: self._filter_compact(v)
+                for k, v in data.items()
+                if v is not None
+                and (not isinstance(v, (list, dict, set)) or len(v) > 0)
             }
         elif isinstance(data, (list, tuple, set)):
             return [self._filter_compact(v) for v in data]
@@ -27,6 +29,7 @@ class BaseModel:
 @dataclass
 class FlowNode(BaseModel):
     """Represents a node in the control flow graph."""
+
     id: str
     type: str  # FUNC, CALL, IF, FOR, WHILE, ASSIGN, RETURN, ENTRY, EXIT
     label: str
@@ -42,6 +45,7 @@ class FlowNode(BaseModel):
 @dataclass
 class FlowEdge(BaseModel):
     """Represents an edge in the control flow graph."""
+
     source: str
     target: str
     edge_type: str = "control"  # control, data, call
@@ -52,6 +56,7 @@ class FlowEdge(BaseModel):
 @dataclass
 class FunctionInfo(BaseModel):
     """Information about a function/method."""
+
     name: str
     qualified_name: str
     file: str
@@ -66,23 +71,24 @@ class FunctionInfo(BaseModel):
     args: List[str] = field(default_factory=list)
     returns: Optional[str] = None
     decorators: List[str] = field(default_factory=list)
-    
+
     # CFG info
     cfg_entry: Optional[str] = None
     cfg_exit: Optional[str] = None
     cfg_nodes: List[str] = field(default_factory=list)
     calls: List[str] = field(default_factory=list)
     called_by: List[str] = field(default_factory=list)
-    
+
     # Advanced metrics (Sprint 3)
-    complexity: Dict[str, Any] = field(default_factory=dict) # Cyclomatic, Cognitive
-    centrality: float = 0.0 # Betweenness Centrality
-    reachability: str = "unknown" # reachable, unreachable, unknown
+    complexity: Dict[str, Any] = field(default_factory=dict)  # Cyclomatic, Cognitive
+    centrality: float = 0.0  # Betweenness Centrality
+    reachability: str = "unknown"  # reachable, unreachable, unknown
 
 
 @dataclass
 class ClassInfo(BaseModel):
     """Information about a class."""
+
     name: str
     qualified_name: str
     file: str
@@ -97,6 +103,7 @@ class ClassInfo(BaseModel):
 @dataclass
 class ModuleInfo(BaseModel):
     """Information about a module/package."""
+
     name: str
     file: str
     is_package: bool = False
@@ -110,6 +117,7 @@ class ModuleInfo(BaseModel):
 @dataclass
 class Pattern(BaseModel):
     """Detected behavioral pattern."""
+
     name: str
     type: str  # recursion, state_machine, factory, singleton, strategy, loop
     confidence: float  # 0.0 to 1.0
@@ -122,6 +130,7 @@ class Pattern(BaseModel):
 @dataclass
 class CodeSmell(BaseModel):
     """Represents a detected code smell."""
+
     name: str
     type: str  # god_function, feature_envy, etc.
     file: str
@@ -134,6 +143,7 @@ class CodeSmell(BaseModel):
 @dataclass
 class Mutation(BaseModel):
     """Represents a mutation of a variable/object."""
+
     variable: str
     file: str
     line: int
@@ -145,6 +155,7 @@ class Mutation(BaseModel):
 @dataclass
 class DataFlow(BaseModel):
     """Represents data flow for a variable."""
+
     variable: str
     dependencies: Set[str] = field(default_factory=set)
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -153,43 +164,44 @@ class DataFlow(BaseModel):
 @dataclass
 class AnalysisResult(BaseModel):
     """Complete analysis result for a project."""
+
     project_path: str = ""
     analysis_mode: str = "static"
     stats: Dict[str, int] = field(default_factory=dict)
-    
+
     # Graph data
     nodes: Dict[str, FlowNode] = field(default_factory=dict)
     edges: List[FlowEdge] = field(default_factory=list)
-    
+
     # Code structure
     modules: Dict[str, ModuleInfo] = field(default_factory=dict)
     classes: Dict[str, ClassInfo] = field(default_factory=dict)
     functions: Dict[str, FunctionInfo] = field(default_factory=dict)
-    
+
     # Analysis results
     patterns: List[Pattern] = field(default_factory=list)
     call_graph: Dict[str, List[str]] = field(default_factory=list)
     entry_points: List[str] = field(default_factory=list)
     data_flows: Dict[str, DataFlow] = field(default_factory=dict)
-    
+
     # Refactoring data
     metrics: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     smells: List[CodeSmell] = field(default_factory=list)
     coupling: Dict[str, Any] = field(default_factory=dict)
     mutations: List[Mutation] = field(default_factory=list)
-    
+
     def get_function_count(self) -> int:
         """Get total function count."""
         return len(self.functions)
-    
+
     def get_class_count(self) -> int:
         """Get total class count."""
         return len(self.classes)
-    
+
     def get_node_count(self) -> int:
         """Get total CFG node count."""
         return len(self.nodes)
-    
+
     def get_edge_count(self) -> int:
         """Get total edge count."""
         return len(self.edges)

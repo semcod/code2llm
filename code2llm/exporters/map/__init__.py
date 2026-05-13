@@ -41,20 +41,20 @@ from .yaml_export import export_to_yaml
 
 __all__ = [
     # Utils
-    'rel_path',
-    'file_line_count',
-    'count_total_lines',
-    'detect_languages',
+    "rel_path",
+    "file_line_count",
+    "count_total_lines",
+    "detect_languages",
     # Alerts
-    'build_alerts',
-    'build_hotspots',
-    'load_evolution_trend',
+    "build_alerts",
+    "build_hotspots",
+    "load_evolution_trend",
     # Header
-    'render_header',
+    "render_header",
     # Module list
-    'render_module_list',
+    "render_module_list",
     # Details
-    'render_details',
+    "render_details",
     # YAML export
-    'export_to_yaml',
+    "export_to_yaml",
 ]

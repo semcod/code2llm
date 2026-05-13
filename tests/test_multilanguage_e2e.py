@@ -5,10 +5,9 @@ including TypeScript, JavaScript, Go, Rust, Java, and others.
 """
 
 import tempfile
-import os
 from pathlib import Path
 from code2llm.core.analyzer import ProjectAnalyzer
-from code2llm.core.config import Config, FAST_CONFIG
+from code2llm.core.config import FAST_CONFIG
 
 
 class TestMultiLanguageE2E:
@@ -41,17 +40,22 @@ function initApp(): void {
 
 export { AppComponent, initApp };
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
-            assert len(result.functions) >= 2, f"Expected at least 2 functions, got {len(result.functions)}"
-            assert len(result.classes) >= 1, f"Expected at least 1 class, got {len(result.classes)}"
-            
+
+            assert len(result.functions) >= 2, (
+                f"Expected at least 2 functions, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 1, (
+                f"Expected at least 1 class, got {len(result.classes)}"
+            )
+
             # Check if TypeScript functions are detected
             func_names = [f.name for f in result.functions.values()]
-            assert 'initApp' in func_names or 'render' in func_names, \
+            assert "initApp" in func_names or "render" in func_names, (
                 f"Expected TypeScript functions, got {func_names}"
+            )
 
     def test_javascript_analysis(self):
         """Test JavaScript file analysis."""
@@ -81,12 +85,16 @@ function setupServer() {
 
 module.exports = { UserService, setupServer };
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
-            assert len(result.functions) >= 1, f"Expected at least 1 function, got {len(result.functions)}"
-            assert len(result.classes) >= 1, f"Expected at least 1 class, got {len(result.classes)}"
+
+            assert len(result.functions) >= 1, (
+                f"Expected at least 1 function, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 1, (
+                f"Expected at least 1 class, got {len(result.classes)}"
+            )
 
     def test_go_analysis(self):
         """Test Go file analysis."""
@@ -115,12 +123,16 @@ func main() {
     user.Greet()
 }
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
-            assert len(result.functions) >= 2, f"Expected at least 2 functions, got {len(result.functions)}"
-            assert len(result.classes) >= 1, f"Expected at least 1 struct, got {len(result.classes)}"
+
+            assert len(result.functions) >= 2, (
+                f"Expected at least 2 functions, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 1, (
+                f"Expected at least 1 struct, got {len(result.classes)}"
+            )
 
     def test_rust_analysis(self):
         """Test Rust file analysis."""
@@ -155,12 +167,16 @@ fn main() {
     let config = load_config();
 }
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
-            assert len(result.functions) >= 2, f"Expected at least 2 functions, got {len(result.functions)}"
-            assert len(result.classes) >= 1, f"Expected at least 1 struct, got {len(result.classes)}"
+
+            assert len(result.functions) >= 2, (
+                f"Expected at least 2 functions, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 1, (
+                f"Expected at least 1 struct, got {len(result.classes)}"
+            )
 
     def test_java_analysis(self):
         """Test Java file analysis."""
@@ -203,18 +219,22 @@ class User {
     }
 }
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
-            assert len(result.functions) >= 2, f"Expected at least 2 functions, got {len(result.functions)}"
-            assert len(result.classes) >= 2, f"Expected at least 2 classes, got {len(result.classes)}"
+
+            assert len(result.functions) >= 2, (
+                f"Expected at least 2 functions, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 2, (
+                f"Expected at least 2 classes, got {len(result.classes)}"
+            )
 
     def test_multilanguage_project(self):
         """Test analysis of project with multiple languages."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
-            
+
             # Python file
             (tmpdir / "app.py").write_text("""
 from typing import List
@@ -227,7 +247,7 @@ def main():
     processor = DataProcessor()
     result = processor.process(["a", "b", "c"])
 """)
-            
+
             # TypeScript file
             (tmpdir / "frontend.ts").write_text("""
 interface ApiResponse {
@@ -244,7 +264,7 @@ function initClient(): ApiClient {
     return new ApiClient();
 }
 """)
-            
+
             # Go file
             (tmpdir / "server.go").write_text("""
 package main
@@ -263,89 +283,96 @@ func NewServer(port int) *Server {
     return &Server{port: port}
 }
 """)
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
+
             # Should detect entities from all languages
-            assert len(result.functions) >= 3, f"Expected at least 3 functions, got {len(result.functions)}"
-            assert len(result.classes) >= 3, f"Expected at least 3 classes, got {len(result.classes)}"
+            assert len(result.functions) >= 3, (
+                f"Expected at least 3 functions, got {len(result.functions)}"
+            )
+            assert len(result.classes) >= 3, (
+                f"Expected at least 3 classes, got {len(result.classes)}"
+            )
 
     def test_language_detection_in_output(self):
         """Test that language detection works in output files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
-            
+
             # Create files of different languages
             (tmpdir / "main.ts").write_text("const x = 1;")
             (tmpdir / "app.js").write_text("const y = 2;")
             (tmpdir / "utils.py").write_text("z = 3")
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
+
             # All modules should be present
-            assert len(result.modules) >= 3, f"Expected at least 3 modules, got {len(result.modules)}"
+            assert len(result.modules) >= 3, (
+                f"Expected at least 3 modules, got {len(result.modules)}"
+            )
 
     def test_excluded_directories_not_analyzed(self):
         """Test that node_modules and similar are excluded."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
-            
+
             # Create a valid source file
             (tmpdir / "app.ts").write_text("function main() { console.log('hello'); }")
-            
+
             # Create node_modules with a file
             node_modules = tmpdir / "node_modules"
             node_modules.mkdir()
             (node_modules / "library.ts").write_text("function lib() { return 42; }")
-            
+
             analyzer = ProjectAnalyzer(FAST_CONFIG)
             result = analyzer.analyze_project(tmpdir)
-            
+
             # Should analyze app.ts but not node_modules/library.ts
             assert len(result.functions) >= 1
-            
+
             # Check that node_modules path is not in results
             for mod in result.modules.values():
-                assert "node_modules" not in mod.file, \
+                assert "node_modules" not in mod.file, (
                     f"node_modules should be excluded: {mod.file}"
+                )
 
 
 if __name__ == "__main__":
     # Run tests
     test = TestMultiLanguageE2E()
-    
+
     print("Running test_typescript_analysis...")
     test.test_typescript_analysis()
     print("PASSED")
-    
+
     print("Running test_javascript_analysis...")
     test.test_javascript_analysis()
     print("PASSED")
-    
+
     print("Running test_go_analysis...")
     test.test_go_analysis()
     print("PASSED")
-    
+
     print("Running test_rust_analysis...")
     test.test_rust_analysis()
     print("PASSED")
-    
+
     print("Running test_java_analysis...")
     test.test_java_analysis()
     print("PASSED")
-    
+
     print("Running test_multilanguage_project...")
     test.test_multilanguage_project()
     print("PASSED")
-    
+
     print("Running test_language_detection_in_output...")
     test.test_language_detection_in_output()
     print("PASSED")
-    
+
     print("Running test_excluded_directories_not_analyzed...")
     test.test_excluded_directories_not_analyzed()
     print("PASSED")
-    
+
     print("\nAll E2E tests passed!")

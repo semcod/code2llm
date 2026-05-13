@@ -33,14 +33,13 @@ class BaseExporter(ABC):
     format_name: ClassVar[str] = ""
     description: ClassVar[str] = ""
     file_extension: ClassVar[str] = ""
-    supports_project_yaml: ClassVar[bool] = False  # True if can work from project.yaml data
+    supports_project_yaml: ClassVar[bool] = (
+        False  # True if can work from project.yaml data
+    )
 
     @abstractmethod
     def export(
-        self,
-        result: AnalysisResult,
-        output_path: str,
-        **kwargs: Any
+        self, result: AnalysisResult, output_path: str, **kwargs: Any
     ) -> Optional[Path]:
         """Export analysis result to the specified path.
 
@@ -55,10 +54,7 @@ class BaseExporter(ABC):
         pass
 
     def generate(
-        self,
-        data: Dict[str, Any],
-        output_path: str,
-        **kwargs: Any
+        self, data: Dict[str, Any], output_path: str, **kwargs: Any
     ) -> Optional[Path]:
         """Generate output from project.yaml data (optional).
 
@@ -118,7 +114,7 @@ def export_format(
     name: str,
     description: str = "",
     extension: str = "",
-    supports_project_yaml: bool = False
+    supports_project_yaml: bool = False,
 ):
     """Decorator to register an exporter with the EXPORT_REGISTRY.
 
@@ -135,6 +131,7 @@ def export_format(
                 # implementation
                 pass
     """
+
     def decorator(cls: Type[BaseExporter]) -> Type[BaseExporter]:
         cls.format_name = name
         cls.description = description or f"{name} format"
@@ -142,6 +139,7 @@ def export_format(
         cls.supports_project_yaml = supports_project_yaml
         EXPORT_REGISTRY[name] = cls
         return cls
+
     return decorator
 
 

@@ -20,7 +20,9 @@ def generate_llm_flow(
     entrypoints = _collect_entrypoints(nodes)
 
     known_functions = _collect_functions(nodes)
-    func_summaries = _summarize_functions(nodes, limit_decisions=limit_decisions, limit_calls=limit_calls)
+    func_summaries = _summarize_functions(
+        nodes, limit_decisions=limit_decisions, limit_calls=limit_calls
+    )
 
     reachable = _pick_relevant_functions(
         entrypoints=entrypoints,
@@ -112,6 +114,6 @@ def render_llm_flow_md(flow: Dict[str, Any]) -> str:
 
 
 __all__ = [
-    'generate_llm_flow',
-    'render_llm_flow_md',
+    "generate_llm_flow",
+    "render_llm_flow_md",
 ]

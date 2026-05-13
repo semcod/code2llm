@@ -9,14 +9,36 @@ from ..base import BaseExporter, export_format
 
 from .metrics import MetricsComputer
 from .renderer import ToonRenderer
-from .helpers import _is_excluded, _rel_path, _package_of, _package_of_module, _traits_from_cfg, _dup_file_set, _hotspot_description, _scan_line_counts
+from .helpers import (
+    _is_excluded,
+    _rel_path,
+    _package_of,
+    _package_of_module,
+    _traits_from_cfg,
+    _dup_file_set,
+    _hotspot_description,
+    _scan_line_counts,
+)
 
 # Re-export constants for backward compatibility
 EXCLUDE_PATTERNS = {
-    'venv', '.venv', 'env', '.env', 'publish-env', 'test-env',
-    'site-packages', 'node_modules', '__pycache__', '.git',
-    'dist', 'build', 'egg-info', '.tox', '.mypy_cache',
-    'TODO', 'examples',
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "publish-env",
+    "test-env",
+    "site-packages",
+    "node_modules",
+    "__pycache__",
+    ".git",
+    "dist",
+    "build",
+    "egg-info",
+    ".tox",
+    ".mypy_cache",
+    "TODO",
+    "examples",
 }
 
 MAX_HEALTH_ISSUES = 20
@@ -32,7 +54,9 @@ class ToonExporter(BaseExporter):
         self.metrics_computer = MetricsComputer()
         self.renderer = ToonRenderer()
 
-    def export(self, result: AnalysisResult, output_path: str, **kwargs) -> Optional[Path]:
+    def export(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Export analysis result to toon v2 format."""
         ctx = self.metrics_computer.compute_all_metrics(result)
 
@@ -56,7 +80,9 @@ class ToonExporter(BaseExporter):
             f.write("\n".join(sections) + "\n")
         return path
 
-    def export_to_yaml(self, result: AnalysisResult, output_path: str, **kwargs) -> None:
+    def export_to_yaml(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> None:
         """Export analysis result to toon.yaml format (structured YAML)."""
         ctx = self.metrics_computer.compute_all_metrics(result)
 
@@ -75,7 +101,9 @@ class ToonExporter(BaseExporter):
 
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            yaml.dump(
+                data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+            )
 
     def _build_header_dict(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         """Build header section as dict."""
@@ -117,15 +145,28 @@ class ToonExporter(BaseExporter):
         """Build refactor section as dict."""
         steps = []
         if ctx["duplicates"]:
-            steps.append({"action": "remove_duplicates", "count": len(ctx["duplicates"])})
+            steps.append(
+                {"action": "remove_duplicates", "count": len(ctx["duplicates"])}
+            )
 
         god_issues = [h for h in ctx["health"] if h["code"] == "GOD"]
         for gi in god_issues:
-            steps.append({"action": "split_module", "target": gi["message"].split("=")[0].strip()})
+            steps.append(
+                {
+                    "action": "split_module",
+                    "target": gi["message"].split("=")[0].strip(),
+                }
+            )
 
         cc_issues = [h for h in ctx["health"] if h["code"] == "CC"]
         if cc_issues:
-            steps.append({"action": "split_methods", "count": len(cc_issues), "reason": "high_cc"})
+            steps.append(
+                {
+                    "action": "split_methods",
+                    "count": len(cc_issues),
+                    "reason": "high_cc",
+                }
+            )
 
         if ctx["cycles"]:
             steps.append({"action": "break_cycles", "count": len(ctx["cycles"])})

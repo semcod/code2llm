@@ -5,7 +5,14 @@ from pathlib import Path
 
 from code2llm.core.models import AnalysisResult
 
-from .utils import readable_id, safe_module, resolve_callee, write_file, get_cc, build_name_index
+from .utils import (
+    readable_id,
+    safe_module,
+    resolve_callee,
+    write_file,
+    get_cc,
+    build_name_index,
+)
 
 
 def export_classic(result: AnalysisResult, output_path: str) -> Optional[Path]:
@@ -30,6 +37,7 @@ def export_classic(result: AnalysisResult, output_path: str) -> Optional[Path]:
 def _render_subgraphs(result: AnalysisResult, lines: List[str]) -> None:
     """Render module subgraphs with CC-shaped nodes."""
     from .utils import module_of
+
     modules: Dict[str, list] = {}
     for func_name, fi in result.functions.items():
         module = module_of(func_name)
@@ -43,7 +51,7 @@ def _render_subgraphs(result: AnalysisResult, lines: List[str]) -> None:
             short = fi.name[:35]
             cc = get_cc(fi)
             if cc >= 15:
-                lines.append(f'        {sid}{{{{{short} CC={cc}}}}}')
+                lines.append(f"        {sid}{{{{{short} CC={cc}}}}}")
             elif cc >= 8:
                 lines.append(f'        {sid}("{short} CC={cc}")')
             else:
@@ -51,7 +59,12 @@ def _render_subgraphs(result: AnalysisResult, lines: List[str]) -> None:
         lines.append("    end")
 
 
-def _render_edges(result: AnalysisResult, lines: List[str], name_index: Dict[str, List[str]], limit: int = 600) -> None:
+def _render_edges(
+    result: AnalysisResult,
+    lines: List[str],
+    name_index: Dict[str, List[str]],
+    limit: int = 600,
+) -> None:
     """Render cross-function call edges up to limit."""
     seen_edges: Set[Tuple[str, str]] = set()
     for func_name, fi in result.functions.items():
@@ -90,4 +103,4 @@ def _render_cc_styles(result: AnalysisResult, lines: List[str]) -> None:
         lines.append(f"    class {','.join(med_nodes[:30])} medCC")
 
 
-__all__ = ['export_classic']
+__all__ = ["export_classic"]

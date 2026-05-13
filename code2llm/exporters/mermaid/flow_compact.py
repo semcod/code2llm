@@ -9,7 +9,7 @@ from .utils import readable_id, resolve_callee, write_file, get_cc, build_name_i
 
 
 # Default skip patterns for noise reduction
-SKIP_PATTERNS = ('examples', 'benchmarks', 'demo_langs', 'tests', 'scripts')
+SKIP_PATTERNS = ("examples", "benchmarks", "demo_langs", "tests", "scripts")
 
 
 def should_skip_module(module: str, include_examples: bool = False) -> bool:
@@ -39,24 +39,26 @@ def is_entry_point(func_name: str, fi, result: AnalysisResult) -> bool:
     """Detect if function is an entry point (main, cli, api entry)."""
     name = fi.name
     # Common entry point patterns
-    if name in ('main', 'cli_main', 'run', 'start', 'serve'):
+    if name in ("main", "cli_main", "run", "start", "serve"):
         return True
-    if name.startswith('main_') or name.endswith('_main'):
+    if name.startswith("main_") or name.endswith("_main"):
         return True
     # CLI commands
-    if 'cli' in func_name.lower() and name not in ('__init__', 'create_parser'):
+    if "cli" in func_name.lower() and name not in ("__init__", "create_parser"):
         return True
     # API handlers
-    if func_name.startswith('code2llm.api.'):
+    if func_name.startswith("code2llm.api."):
         return True
     # Entry points have no incoming calls from within the project
     called_funcs = _get_called_funcs(result)
-    if func_name not in called_funcs and name not in ('__init__', '__getattr__'):
+    if func_name not in called_funcs and name not in ("__init__", "__getattr__"):
         return True
     return False
 
 
-def build_callers_graph(result: AnalysisResult, name_index: Dict[str, List[str]]) -> Dict[str, Set[str]]:
+def build_callers_graph(
+    result: AnalysisResult, name_index: Dict[str, List[str]]
+) -> Dict[str, Set[str]]:
     """Build reverse graph: map each function to its callers."""
     callers: Dict[str, Set[str]] = defaultdict(set)
     for func_name, fi in result.functions.items():
@@ -79,7 +81,12 @@ def find_leaves(result: AnalysisResult, name_index: Dict[str, List[str]]) -> Set
     return leaves
 
 
-def _longest_path_dfs(result: AnalysisResult, start: str, visited: Set[str], name_index: Dict[str, List[str]]) -> List[str]:
+def _longest_path_dfs(
+    result: AnalysisResult,
+    start: str,
+    visited: Set[str],
+    name_index: Dict[str, List[str]],
+) -> List[str]:
     """DFS to find longest path from start node."""
     if start in visited:
         return []
@@ -99,7 +106,9 @@ def _longest_path_dfs(result: AnalysisResult, start: str, visited: Set[str], nam
     return [start] + longest
 
 
-def _select_longest_path(result: AnalysisResult, entry_points: List[str], name_index: Dict[str, List[str]]) -> List[str]:
+def _select_longest_path(
+    result: AnalysisResult, entry_points: List[str], name_index: Dict[str, List[str]]
+) -> List[str]:
     """Select the longest path from all entry points."""
     max_path: List[str] = []
     for ep in entry_points:
@@ -124,8 +133,9 @@ def find_critical_path(result: AnalysisResult, entry_points: List[str]) -> Set[s
     return set(max_path)
 
 
-def export_flow_compact(result: AnalysisResult, output_path: str,
-                       include_examples: bool = False) -> None:
+def export_flow_compact(
+    result: AnalysisResult, output_path: str, include_examples: bool = False
+) -> None:
     """Export compact architectural view (~50 nodes).
 
     Shows entry points, high-level modules, and critical path.
@@ -163,8 +173,8 @@ def export_flow_compact(result: AnalysisResult, output_path: str,
 
 
 __all__ = [
-    'export_flow_compact',
-    'should_skip_module',
-    'is_entry_point',
-    'find_critical_path',
+    "export_flow_compact",
+    "should_skip_module",
+    "is_entry_point",
+    "find_critical_path",
 ]

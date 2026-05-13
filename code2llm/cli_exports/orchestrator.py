@@ -14,6 +14,7 @@ from typing import Optional, List, Dict, Any
 # Optional progress bar support
 try:
     from tqdm import tqdm
+
     _HAS_TQDM = True
 except ImportError:
     _HAS_TQDM = False
@@ -40,13 +41,13 @@ from .orchestrator_handlers import (
 def _build_export_config(args, formats: List[str]) -> Dict[str, Any]:
     """Build config dict for export caching."""
     return {
-        'formats': sorted(formats),
-        'png': getattr(args, 'png', False),
-        'no_png': getattr(args, 'no_png', False),
-        'flow_include_examples': getattr(args, 'flow_include_examples', False),
-        'full': getattr(args, 'full', False),
-        'refactor': getattr(args, 'refactor', False),
-        'data_structures': getattr(args, 'data_structures', False),
+        "formats": sorted(formats),
+        "png": getattr(args, "png", False),
+        "no_png": getattr(args, "no_png", False),
+        "flow_include_examples": getattr(args, "flow_include_examples", False),
+        "full": getattr(args, "full", False),
+        "refactor": getattr(args, "refactor", False),
+        "data_structures": getattr(args, "data_structures", False),
     }
 
 
@@ -56,41 +57,41 @@ def _collect_dry_run_files(formats: List[str], output_dir: Path) -> List[Path]:
     for fmt in formats:
         for name in FORMAT_DRY_RUN_FILES.get(fmt, []):
             output_files.append(output_dir / name)
-    output_files.append(output_dir / 'project.toon.yaml')
-    output_files.append(output_dir / 'prompt.txt')
+    output_files.append(output_dir / "project.toon.yaml")
+    output_files.append(output_dir / "prompt.txt")
     return output_files
 
 
-def _show_dry_run_plan(formats: List[str], output_dir: Path, is_chunked: bool, result) -> None:
+def _show_dry_run_plan(
+    formats: List[str], output_dir: Path, is_chunked: bool, result
+) -> None:
     """Display what would be exported in dry-run mode."""
     print("\n📋 DRY-RUN: Would export the following:\n")
 
     output_files = _collect_dry_run_files(formats, output_dir)
 
     size_hint = ""
-    func_count = len(getattr(result, 'functions', []))
+    func_count = len(getattr(result, "functions", []))
     if func_count > 0:
         size_hint = f" (~{func_count * 50 // 1024}KB est.)"
 
     for f in sorted(set(output_files)):
         print(f"  📄 {f}{size_hint}")
 
-    stats = getattr(result, 'stats', {})
+    stats = getattr(result, "stats", {})
     if stats:
-        print(f"\n📊 Based on analysis:")
+        print("\n📊 Based on analysis:")
         print(f"  - Functions: {stats.get('functions_found', 'N/A')}")
         print(f"  - Classes: {stats.get('classes_found', 'N/A')}")
         print(f"  - Files: {stats.get('files_processed', 'N/A')}")
 
-    print(f"\n✅ Dry-run complete. Use without --dry-run to export.\n")
+    print("\n✅ Dry-run complete. Use without --dry-run to export.\n")
 
 
 def _should_skip_export_cache(args, is_chunked: bool) -> bool:
     """Return True when this run must not read or write export cache."""
     return (
-        is_chunked
-        or getattr(args, 'no_cache', False)
-        or getattr(args, 'force', False)
+        is_chunked or getattr(args, "no_cache", False) or getattr(args, "force", False)
     )
 
 
@@ -101,10 +102,10 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     For chunked analysis, exports to subproject subdirectories.
     Supports export-level caching for repeated runs.
     """
-    requested_formats = [f.strip() for f in args.format.split(',')]
-    formats = _expand_all_formats(requested_formats, getattr(args, 'png', False))
-    is_chunked = getattr(args, 'chunk', False)
-    dry_run = getattr(args, 'dry_run', False)
+    requested_formats = [f.strip() for f in args.format.split(",")]
+    formats = _expand_all_formats(requested_formats, getattr(args, "png", False))
+    is_chunked = getattr(args, "chunk", False)
+    dry_run = getattr(args, "dry_run", False)
 
     # Dry-run: show what would be exported without writing
     if dry_run:
@@ -129,9 +130,13 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
 
     try:
         if is_chunked and source_path:
-            _export_chunked(args, result, output_dir, source_path, formats, requested_formats)
+            _export_chunked(
+                args, result, output_dir, source_path, formats, requested_formats
+            )
         else:
-            _export_single(args, result, output_dir, formats, requested_formats, source_path)
+            _export_single(
+                args, result, output_dir, formats, requested_formats, source_path
+            )
 
         # Mark export as complete in cache
         if not skip_cache and source_path:
@@ -149,10 +154,12 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
         sys.exit(1)
 
 
-def _copy_cached_export(cached_dir: Path, output_dir: Path, verbose: bool = False) -> None:
+def _copy_cached_export(
+    cached_dir: Path, output_dir: Path, verbose: bool = False
+) -> None:
     """Copy files from cached export to output directory."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    items = [item for item in cached_dir.iterdir() if item.name != '_complete']
+    items = [item for item in cached_dir.iterdir() if item.name != "_complete"]
 
     # Progress bar for large cache restores
     use_tqdm = _HAS_TQDM and not verbose and len(items) > DEFAULT_PROGRESS_BAR_THRESHOLD
@@ -176,7 +183,7 @@ def _touch_recursive(path: Path) -> None:
     except OSError:
         return
     if path.is_dir():
-        for sub in path.rglob('*'):
+        for sub in path.rglob("*"):
             try:
                 os.utime(sub, None)
             except OSError:
@@ -204,48 +211,53 @@ def _copy_to_cache(output_dir: Path, cache_dir: Path, verbose: bool = False) -> 
 
 def _expand_all_formats(requested: List[str], include_png: bool = False) -> List[str]:
     """Expand 'all' to concrete format list."""
-    if 'all' not in requested:
+    if "all" not in requested:
         return requested[:]
-    formats = ['toon', 'map', 'context', 'evolution', 'mermaid']
+    formats = ["toon", "map", "context", "evolution", "mermaid"]
     return formats
 
 
 def _export_single(
-    args, result, output_dir: Path,
-    formats: List[str], requested_formats: List[str],
-    source_path: Optional[Path] = None
+    args,
+    result,
+    output_dir: Path,
+    formats: List[str],
+    requested_formats: List[str],
+    source_path: Optional[Path] = None,
 ):
     """Export single project results."""
     # Core formats via registry
     _export_registry_formats(args, result, output_dir, formats)
 
     # Special/conditional formats
-    if 'mermaid' in formats:
+    if "mermaid" in formats:
         _export_mermaid(args, result, output_dir)
-    if 'calls' in formats or 'calls_toon' in formats:
+    if "calls" in formats or "calls_toon" in formats:
         _export_calls(args, result, output_dir, formats)
 
     # Evolution always exported for 'all' or 'evolution' (handled by registry)
     # Context fallback only if not explicitly requested
-    if 'context' not in formats and 'all' not in requested_formats:
+    if "context" not in formats and "all" not in requested_formats:
         _export_context_fallback(args, result, output_dir)
 
     # project.toon.yaml for 'all' mode
-    if 'all' in requested_formats:
+    if "all" in requested_formats:
         _export_project_toon(args, result, output_dir)
 
     # Optional exports
     if source_path is not None:
         from .code2logic import _export_code2logic
         from .prompt import _export_prompt_txt
+
         _export_code2logic(args, source_path, output_dir, formats)
         _export_prompt_txt(args, output_dir, requested_formats, source_path)
 
-    if getattr(args, 'refactor', False):
+    if getattr(args, "refactor", False):
         from .formats import _export_refactor_prompts
+
         _export_refactor_prompts(args, result, output_dir)
 
-    if getattr(args, 'data_structures', False):
+    if getattr(args, "data_structures", False):
         _export_data_structures(args, result, output_dir)
 
     # Always export README and index
@@ -257,9 +269,7 @@ def _export_registry_formats(args, result, output_dir: Path, formats: List[str])
     """Export core formats via EXPORT_REGISTRY lookup."""
     # Use progress bar when many formats and not in verbose mode
     use_tqdm = (
-        _HAS_TQDM and
-        not args.verbose and
-        len(formats) > DEFAULT_PROGRESS_BAR_THRESHOLD
+        _HAS_TQDM and not args.verbose and len(formats) > DEFAULT_PROGRESS_BAR_THRESHOLD
     )
 
     format_iterator = formats
@@ -271,7 +281,7 @@ def _export_registry_formats(args, result, output_dir: Path, formats: List[str])
         if exporter_cls is None:
             continue
 
-        filename = FORMAT_FILENAMES.get(fmt, f'{fmt}.export')
+        filename = FORMAT_FILENAMES.get(fmt, f"{fmt}.export")
         label = FORMAT_LABELS.get(fmt, fmt.upper())
         filepath = output_dir / filename
 
@@ -293,18 +303,23 @@ def _export_registry_formats(args, result, output_dir: Path, formats: List[str])
 def _get_format_kwargs(fmt: str, args) -> Dict[str, Any]:
     """Get format-specific kwargs for export."""
     kwargs: Dict[str, Any] = {}
-    if fmt in ('yaml', 'json'):
-        kwargs['compact'] = not args.full
-        kwargs['include_defaults'] = args.full
+    if fmt in ("yaml", "json"):
+        kwargs["compact"] = not args.full
+        kwargs["include_defaults"] = args.full
     return kwargs
 
 
 def _export_chunked(
-    args, result, output_dir: Path, source_path: Path,
-    formats: List[str], requested_formats: List[str]
+    args,
+    result,
+    output_dir: Path,
+    source_path: Path,
+    formats: List[str],
+    requested_formats: List[str],
 ):
     """Export chunked analysis results."""
     from .orchestrator_chunked import _export_chunked as _chunked_impl
+
     _chunked_impl(args, result, output_dir, source_path, formats, requested_formats)
 
 
@@ -318,46 +333,55 @@ def _inject_generation_time(filepath: Path, elapsed: float) -> None:
         name = path.name.lower()
 
         # Only inject into text-based files
-        if suffix not in ('.yaml', '.yml', '.md', '.txt', '.mmd', '.html', '.json', '.export'):
+        if suffix not in (
+            ".yaml",
+            ".yml",
+            ".md",
+            ".txt",
+            ".mmd",
+            ".html",
+            ".json",
+            ".export",
+        ):
             return
 
-        content = path.read_text(encoding='utf-8')
+        content = path.read_text(encoding="utf-8")
         if not content:
             return
 
         tag = f"generated in {elapsed:.2f}s"
 
-        if suffix in ('.mmd', '.export'):
+        if suffix in (".mmd", ".export"):
             # Mermaid uses %% for comments
-            lines = content.split('\n', 1)
+            lines = content.split("\n", 1)
             if len(lines) == 2:
                 content = f"{lines[0]}\n%% {tag}\n{lines[1]}"
             else:
                 content = f"{lines[0]}\n%% {tag}\n"
-        elif suffix in ('.yaml', '.yml', '.txt') or name.endswith('.toon.yaml'):
+        elif suffix in (".yaml", ".yml", ".txt") or name.endswith(".toon.yaml"):
             # YAML/text: insert '# generated in X.XXs' after first line
-            lines = content.split('\n', 1)
+            lines = content.split("\n", 1)
             if len(lines) == 2:
                 content = f"{lines[0]}\n# {tag}\n{lines[1]}"
             else:
                 content = f"{lines[0]}\n# {tag}\n"
-        elif suffix == '.md':
+        elif suffix == ".md":
             # Markdown: insert HTML comment after first line
-            lines = content.split('\n', 1)
+            lines = content.split("\n", 1)
             if len(lines) == 2:
                 content = f"{lines[0]}\n<!-- {tag} -->\n{lines[1]}"
             else:
                 content = f"{lines[0]}\n<!-- {tag} -->\n"
-        elif suffix == '.html':
+        elif suffix == ".html":
             # HTML: insert comment after <!DOCTYPE or <html>
-            content = content.replace('\n', f'\n<!-- {tag} -->\n', 1)
-        elif suffix == '.json':
+            content = content.replace("\n", f"\n<!-- {tag} -->\n", 1)
+        elif suffix == ".json":
             # JSON doesn't support comments — skip
             return
         else:
             return
 
-        path.write_text(content, encoding='utf-8')
+        path.write_text(content, encoding="utf-8")
     except Exception:
         pass  # Never fail the export pipeline for a comment
 

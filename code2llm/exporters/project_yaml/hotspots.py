@@ -20,11 +20,13 @@ def build_hotspots(result: AnalysisResult) -> List[Dict[str, Any]]:
             if fi.class_name:
                 display = f"{fi.class_name}.{fi.name}"
             note = hotspot_note(fi, fan_out)
-            spots.append({
-                "name": display,
-                "fan_out": fan_out,
-                "note": note,
-            })
+            spots.append(
+                {
+                    "name": display,
+                    "fan_out": fan_out,
+                    "note": note,
+                }
+            )
     spots.sort(key=lambda s: s["fan_out"], reverse=True)
     return spots[:10]
 
@@ -60,47 +62,57 @@ def build_refactoring(
             if fi.class_name:
                 display = f"{fi.class_name}.{fi.name}"
             rel = _rel_path(fi.file, result.project_path)
-            priorities.append({
-                "action": f"Split {display} (CC={cc})",
-                "impact": "high" if cc >= 25 else "medium",
-                "effort": "low",
-                "module": Path(rel).name,
-            })
+            priorities.append(
+                {
+                    "action": f"Split {display} (CC={cc})",
+                    "impact": "high" if cc >= 25 else "medium",
+                    "effort": "low",
+                    "module": Path(rel).name,
+                }
+            )
 
     # Cycles → break
     proj_metrics = result.metrics.get("project", {})
     cycles = proj_metrics.get("circular_dependencies", [])
     for cycle in cycles[:3]:
-        priorities.append({
-            "action": f"Break circular dependency: {' → '.join(str(c) for c in cycle) if isinstance(cycle, list) else str(cycle)}",
-            "impact": "medium",
-            "effort": "low",
-        })
+        priorities.append(
+            {
+                "action": f"Break circular dependency: {' → '.join(str(c) for c in cycle) if isinstance(cycle, list) else str(cycle)}",
+                "impact": "medium",
+                "effort": "low",
+            }
+        )
 
     # High fan-out → reduce
     for spot in hotspots[:3]:
         if spot["fan_out"] >= 15:
-            priorities.append({
-                "action": f"Reduce {spot['name']} fan-out (currently {spot['fan_out']})",
-                "impact": "medium",
-                "effort": "medium",
-            })
+            priorities.append(
+                {
+                    "action": f"Reduce {spot['name']} fan-out (currently {spot['fan_out']})",
+                    "impact": "medium",
+                    "effort": "medium",
+                }
+            )
 
     # God modules → split
     for mod in modules:
         if mod["lines"] >= GOD_MODULE_LINES:
-            priorities.append({
-                "action": f"Split god module {mod['path']} ({mod['lines']}L, {mod['classes']} classes)",
-                "impact": "high",
-                "effort": "high",
-            })
+            priorities.append(
+                {
+                    "action": f"Split god module {mod['path']} ({mod['lines']}L, {mod['classes']} classes)",
+                    "impact": "high",
+                    "effort": "high",
+                }
+            )
 
     # Sort: high impact first, then low effort first
     impact_order = {"high": 0, "medium": 1, "low": 2}
     effort_order = {"low": 0, "medium": 1, "high": 2}
-    priorities.sort(key=lambda p: (
-        impact_order.get(p.get("impact", "low"), 9),
-        effort_order.get(p.get("effort", "medium"), 9),
-    ))
+    priorities.sort(
+        key=lambda p: (
+            impact_order.get(p.get("impact", "low"), 9),
+            effort_order.get(p.get("effort", "medium"), 9),
+        )
+    )
 
     return {"priorities": priorities[:15]}

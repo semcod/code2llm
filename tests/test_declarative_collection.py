@@ -17,8 +17,9 @@ import pytest
 
 from code2llm.core.analyzer import ProjectAnalyzer
 from code2llm.core.config import (
-    ALL_EXTENSIONS, ALL_FILENAMES, DECLARATIVE_EXTENSIONS, Config,
-    LANGUAGE_FILENAMES,
+    ALL_EXTENSIONS,
+    ALL_FILENAMES,
+    Config,
 )
 from code2llm.core.file_analyzer import FileAnalyzer
 from code2llm.core.persistent_cache import PersistentCache
@@ -37,7 +38,7 @@ def iac_project(tmp_path):
     (p / "pyproject.toml").write_text('[project]\nname = "x"\n')
     (p / "package.json").write_text('{"name": "x"}\n')
     (p / "README.md").write_text("# Project\n")
-    (p / "schema.proto").write_text("syntax = \"proto3\";\n")
+    (p / "schema.proto").write_text('syntax = "proto3";\n')
     (p / "app.doql").write_text("query foo { bar }\n")
     # A non-declarative ignored file (binary-ish) to confirm we don't over-match
     (p / "logo.png").write_bytes(b"\x89PNG\r\n\x1a\n")
@@ -68,10 +69,16 @@ def test_collect_files_discovers_iac(iac_project):
 
     # Every declarative fixture file must be picked up.
     expected = {
-        "Dockerfile", "Makefile",
-        "main.tf", "infra.bicep", "k8s.yaml",
-        "pyproject.toml", "package.json",
-        "README.md", "schema.proto", "app.doql",
+        "Dockerfile",
+        "Makefile",
+        "main.tf",
+        "infra.bicep",
+        "k8s.yaml",
+        "pyproject.toml",
+        "package.json",
+        "README.md",
+        "schema.proto",
+        "app.doql",
     }
     missing = expected - found
     assert not missing, f"declarative files not collected: {missing}"
@@ -86,6 +93,7 @@ def test_modifying_declarative_file_invalidates_cache(iac_project, tmp_path):
 
     # Hook ProjectAnalyzer to use our isolated cache root.
     from code2llm.core import analyzer as analyzer_mod
+
     orig = analyzer_mod.PersistentCache
 
     class _PC(orig):
@@ -131,6 +139,7 @@ def test_dockerfile_edit_invalidates_cache(iac_project, tmp_path):
     cache_root = tmp_path / "cache_root"
 
     from code2llm.core import analyzer as analyzer_mod
+
     orig = analyzer_mod.PersistentCache
 
     class _PC(orig):
@@ -217,7 +226,9 @@ def test_generated_analysis_artifacts_are_excluded_by_default(tmp_path):
     (out / "index.html").write_text("<title>code2llm Analysis Results</title>\n")
     batch = out / "batch_1"
     batch.mkdir()
-    (batch / "context.md").write_text("# System Architecture Analysis\n<!-- generated in 0.01s -->\n")
+    (batch / "context.md").write_text(
+        "# System Architecture Analysis\n<!-- generated in 0.01s -->\n"
+    )
     (p / ".code2llm_incremental.json").write_text("{}\n")
     (p / "SUMD.md").write_text("# generated summary\n")
     (p / "defscan-classes-py.md").write_text("class Noise:\n    pass\n")

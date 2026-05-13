@@ -90,7 +90,9 @@ def _pick_relevant_functions(
     return picked
 
 
-def _summarize_functions(nodes: Dict[int, Dict[str, Any]], limit_decisions: int, limit_calls: int) -> Dict[str, FuncSummary]:
+def _summarize_functions(
+    nodes: Dict[int, Dict[str, Any]], limit_decisions: int, limit_calls: int
+) -> Dict[str, FuncSummary]:
     """Summarize functions with their decisions, calls, and location info."""
     decisions_by_func: Dict[str, List[str]] = defaultdict(list)
     calls_by_func: Dict[str, List[str]] = defaultdict(list)
@@ -118,7 +120,11 @@ def _summarize_functions(nodes: Dict[int, Dict[str, Any]], limit_decisions: int,
                 calls_by_func[fn].append(callee)
 
     summaries: Dict[str, FuncSummary] = {}
-    for fn in set(list(decisions_by_func.keys()) + list(calls_by_func.keys()) + list(loc_by_func.keys())):
+    for fn in set(
+        list(decisions_by_func.keys())
+        + list(calls_by_func.keys())
+        + list(loc_by_func.keys())
+    ):
         file, line = loc_by_func.get(fn, (None, None))
 
         decision_counts = Counter(decisions_by_func.get(fn, []))
@@ -138,7 +144,9 @@ def _summarize_functions(nodes: Dict[int, Dict[str, Any]], limit_decisions: int,
     return summaries
 
 
-def _build_call_graph(func_summaries: Dict[str, FuncSummary], known_functions: Set[str]) -> Dict[str, Set[str]]:
+def _build_call_graph(
+    func_summaries: Dict[str, FuncSummary], known_functions: Set[str]
+) -> Dict[str, Set[str]]:
     g: Dict[str, Set[str]] = defaultdict(set)
     for fn, s in func_summaries.items():
         for callee in s.calls:
@@ -147,7 +155,9 @@ def _build_call_graph(func_summaries: Dict[str, FuncSummary], known_functions: S
     return g
 
 
-def _reachable(g: Dict[str, Set[str]], roots: Iterable[str], max_nodes: int) -> List[str]:
+def _reachable(
+    g: Dict[str, Set[str]], roots: Iterable[str], max_nodes: int
+) -> List[str]:
     seen: Set[str] = set()
     q: deque[str] = deque([r for r in roots if r])
 
@@ -164,10 +174,10 @@ def _reachable(g: Dict[str, Set[str]], roots: Iterable[str], max_nodes: int) -> 
 
 
 __all__ = [
-    'FuncSummary',
-    '_node_counts_by_function',
-    '_pick_relevant_functions',
-    '_summarize_functions',
-    '_build_call_graph',
-    '_reachable',
+    "FuncSummary",
+    "_node_counts_by_function",
+    "_pick_relevant_functions",
+    "_summarize_functions",
+    "_build_call_graph",
+    "_reachable",
 ]

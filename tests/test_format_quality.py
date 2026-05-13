@@ -9,10 +9,7 @@ Run with: pytest tests/test_format_quality.py -v
 """
 
 import textwrap
-import tempfile
-import shutil
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -21,12 +18,14 @@ import pytest
 # Fixtures
 # ─────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="module")
 def ground_truth_project(tmp_path_factory) -> Path:
     """Create a project with known problems."""
     project = tmp_path_factory.mktemp("sample")
 
-    (project / "core.py").write_text(textwrap.dedent("""\
+    (project / "core.py").write_text(
+        textwrap.dedent("""\
         from typing import List, Dict, Optional
         from dataclasses import dataclass
 
@@ -101,9 +100,11 @@ def ground_truth_project(tmp_path_factory) -> Path:
                 if not data:
                     return Result(errors=["empty"])
                 return Result(data=data)
-    """))
+    """)
+    )
 
-    (project / "etl.py").write_text(textwrap.dedent("""\
+    (project / "etl.py").write_text(
+        textwrap.dedent("""\
         from typing import List
         from core import Config, Result
 
@@ -120,9 +121,11 @@ def ground_truth_project(tmp_path_factory) -> Path:
             with open("output.json", "w") as f:
                 json.dump(data, f)
             return Result(data=data)
-    """))
+    """)
+    )
 
-    (project / "utils.py").write_text(textwrap.dedent("""\
+    (project / "utils.py").write_text(
+        textwrap.dedent("""\
         from core import Result, Config
 
         class Validator:
@@ -140,7 +143,8 @@ def ground_truth_project(tmp_path_factory) -> Path:
         def process_data(data, config):
             v = Validator(config)
             return v.validate(data)
-    """))
+    """)
+    )
 
     return project
 
@@ -149,10 +153,15 @@ def ground_truth_project(tmp_path_factory) -> Path:
 def analysis_result(ground_truth_project):
     """Run code2llm analysis on ground truth project."""
     from code2llm import ProjectAnalyzer, Config
+
     cfg = Config()
     cfg.filters.exclude_patterns = [
-        '*__pycache__*', '*.pyc', '*venv*', '*.venv*',
-        '*node_modules*', '*.git*',
+        "*__pycache__*",
+        "*.pyc",
+        "*venv*",
+        "*.venv*",
+        "*node_modules*",
+        "*.git*",
     ]
     cfg.filters.skip_private = False
     cfg.filters.min_function_lines = 1
@@ -164,12 +173,14 @@ def analysis_result(ground_truth_project):
 # analysis.toon tests
 # ─────────────────────────────────────────────────────────────────
 
+
 class TestAnalysisToon:
     """Test that analysis.toon detects known problems."""
 
     @pytest.fixture
     def toon_content(self, analysis_result, tmp_path):
         from code2llm.exporters.toon import ToonExporter
+
         out = tmp_path / "analysis.toon"
         ToonExporter().export(analysis_result, str(out))
         return out.read_text()
@@ -194,8 +205,12 @@ class TestAnalysisToon:
         assert "COUPLING" in toon_content
 
     def test_has_severity_markers(self, toon_content):
-        assert ("!" in toon_content or "🔴" in toon_content
-                or "🟡" in toon_content or "critical" in toon_content)
+        assert (
+            "!" in toon_content
+            or "🔴" in toon_content
+            or "🟡" in toon_content
+            or "critical" in toon_content
+        )
 
     def test_has_layers(self, toon_content):
         assert "LAYERS" in toon_content
@@ -205,12 +220,14 @@ class TestAnalysisToon:
 # flow.toon tests
 # ─────────────────────────────────────────────────────────────────
 
+
 class TestFlowToon:
     """Test that flow.toon detects data-flow information."""
 
     @pytest.fixture
     def flow_content(self, analysis_result, tmp_path):
         from code2llm.exporters.flow_exporter import FlowExporter
+
         out = tmp_path / "flow.toon"
         FlowExporter().export(analysis_result, str(out))
         return out.read_text()
@@ -230,8 +247,9 @@ class TestFlowToon:
         has_extract = "extract_data" in flow_content
         has_transform = "transform_data" in flow_content
         has_load = "load_data" in flow_content
-        assert sum([has_extract, has_transform, has_load]) >= 2, \
+        assert sum([has_extract, has_transform, has_load]) >= 2, (
             "Should detect at least 2 of 3 ETL pipeline stages"
+        )
 
     def test_has_side_effects_section(self, flow_content):
         assert "SIDE" in flow_content.upper() or "pure" in flow_content.lower()
@@ -245,12 +263,14 @@ class TestFlowToon:
 # project.map tests
 # ─────────────────────────────────────────────────────────────────
 
+
 class TestProjectMap:
     """Test that project.map provides structural information."""
 
     @pytest.fixture
     def map_content(self, analysis_result, tmp_path):
         from code2llm.exporters.map_exporter import MapExporter
+
         out = tmp_path / "map.toon"
         MapExporter().export(analysis_result, str(out))
         return out.read_text()
@@ -278,12 +298,14 @@ class TestProjectMap:
 # context.md tests
 # ─────────────────────────────────────────────────────────────────
 
+
 class TestContextMd:
     """Test that context.md provides LLM-readable narrative."""
 
     @pytest.fixture
     def context_content(self, analysis_result, tmp_path):
         from code2llm.exporters.llm_exporter import LLMPromptExporter
+
         out = tmp_path / "context.md"
         LLMPromptExporter().export(analysis_result, str(out))
         return out.read_text()
@@ -302,6 +324,7 @@ class TestContextMd:
 # Cross-format comparison
 # ─────────────────────────────────────────────────────────────────
 
+
 class TestCrossFormat:
     """Test that formats are complementary, not redundant."""
 
@@ -310,9 +333,9 @@ class TestCrossFormat:
         formats = {}
         exporters = {
             "analysis.toon": ("code2llm.exporters.toon", "ToonExporter"),
-            "flow.toon":     ("code2llm.exporters.flow_exporter", "FlowExporter"),
-            "map.toon":      ("code2llm.exporters.map_exporter", "MapExporter"),
-            "context.md":    ("code2llm.exporters.llm_exporter", "LLMPromptExporter"),
+            "flow.toon": ("code2llm.exporters.flow_exporter", "FlowExporter"),
+            "map.toon": ("code2llm.exporters.map_exporter", "MapExporter"),
+            "context.md": ("code2llm.exporters.llm_exporter", "LLMPromptExporter"),
         }
         for name, (mod_path, cls_name) in exporters.items():
             try:
@@ -330,9 +353,17 @@ class TestCrossFormat:
         """flow.toon should have pipeline info that analysis.toon doesn't."""
         flow = all_formats.get("flow.toon", "")
         # flow.toon should be the one with pipeline/transform/contract focus
-        pipeline_keywords = ["PIPELINE", "TRANSFORM", "CONTRACT", "SIDE_EFFECT", "PURITY"]
+        pipeline_keywords = [
+            "PIPELINE",
+            "TRANSFORM",
+            "CONTRACT",
+            "SIDE_EFFECT",
+            "PURITY",
+        ]
         flow_has = sum(1 for kw in pipeline_keywords if kw in flow.upper())
-        assert flow_has >= 2, f"flow.toon should have ≥2 pipeline keywords, found {flow_has}"
+        assert flow_has >= 2, (
+            f"flow.toon should have ≥2 pipeline keywords, found {flow_has}"
+        )
 
     def test_analysis_toon_has_unique_health_info(self, all_formats):
         """analysis.toon should keep the compact health/layers/coupling focus."""

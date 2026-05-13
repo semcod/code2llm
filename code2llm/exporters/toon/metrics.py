@@ -51,7 +51,9 @@ class MetricsComputer:
         ctx["packages"] = self._core.compute_package_metrics(ctx["files"], result)
         ctx["func_metrics"] = self._core.compute_function_metrics(result)
         ctx["class_metrics"] = self._core.compute_class_metrics(result)
-        ctx["coupling_matrix"], ctx["pkg_fan"] = self._core.compute_coupling_matrix(result)
+        ctx["coupling_matrix"], ctx["pkg_fan"] = self._core.compute_coupling_matrix(
+            result
+        )
 
         # Health and duplicates
         ctx["duplicates"] = self._duplicates.detect_duplicates(result)
@@ -74,12 +76,14 @@ class MetricsComputer:
                 display = fi.name
                 if fi.class_name:
                     display = f"{fi.class_name}.{fi.name}"
-                spots.append({
-                    "name": display,
-                    "qualified": qname,
-                    "fan_out": fan_out,
-                    "description": _hotspot_description(fi, fan_out),
-                })
+                spots.append(
+                    {
+                        "name": display,
+                        "qualified": qname,
+                        "fan_out": fan_out,
+                        "description": _hotspot_description(fi, fan_out),
+                    }
+                )
         spots.sort(key=lambda x: x["fan_out"], reverse=True)
         return spots[:10]
 
@@ -91,8 +95,8 @@ class MetricsComputer:
 
 # Backward compatibility re-exports
 __all__ = [
-    'MetricsComputer',
-    'CoreMetricsComputer',
-    'HealthMetricsComputer',
-    'DuplicatesMetricsComputer',
+    "MetricsComputer",
+    "CoreMetricsComputer",
+    "HealthMetricsComputer",
+    "DuplicatesMetricsComputer",
 ]

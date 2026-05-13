@@ -33,17 +33,30 @@ class DashboardRenderer:
         """Render complete dashboard HTML."""
         evo_section = self._render_evolution_section(evo_chart)
         evo_script = self._render_evolution_script(evo_chart)
-        lang_summary = ', '.join(f'{n}: {c}' for n, c in zip(lang_data['names'], lang_data['files']))
+        lang_summary = ", ".join(
+            f"{n}: {c}" for n, c in zip(lang_data["names"], lang_data["files"])
+        )
 
         return self._assemble_html(
-            proj=proj, stats=stats, health=health,
-            cc_avg=cc_avg, health_color=health_color, health_label=health_label,
-            evo_section=evo_section, evo_script=evo_script, lang_data=lang_data,
-            lang_summary=lang_summary, mod_lines_chart=mod_lines_chart,
-            mod_funcs_chart=mod_funcs_chart, alerts_html=alerts_html,
-            hotspots_html=hotspots_html, refactor_html=refactor_html,
-            top_modules_html=top_modules_html, modules=modules,
-            hotspots=hotspots, refactoring=refactoring,
+            proj=proj,
+            stats=stats,
+            health=health,
+            cc_avg=cc_avg,
+            health_color=health_color,
+            health_label=health_label,
+            evo_section=evo_section,
+            evo_script=evo_script,
+            lang_data=lang_data,
+            lang_summary=lang_summary,
+            mod_lines_chart=mod_lines_chart,
+            mod_funcs_chart=mod_funcs_chart,
+            alerts_html=alerts_html,
+            hotspots_html=hotspots_html,
+            refactor_html=refactor_html,
+            top_modules_html=top_modules_html,
+            modules=modules,
+            hotspots=hotspots,
+            refactoring=refactoring,
         )
 
     def _assemble_html(self, **ctx) -> str:
@@ -73,7 +86,7 @@ class DashboardRenderer:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{proj.get('name', 'Project')} — Health Dashboard</title>
+<title>{proj.get("name", "Project")} — Health Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
   :root {{
@@ -125,24 +138,24 @@ class DashboardRenderer:
 <body>
 <h1>
   <span class="health-indicator" style="background:{health_color}"></span>
-  {proj.get('name', 'Project')} — {health_label}
+  {proj.get("name", "Project")} — {health_label}
 </h1>
 <p style="color:var(--muted);font-size:.85rem;">
-  Analyzed {proj.get('analyzed_at', '?')[:10]} by code2llm
-  &nbsp;·&nbsp; Primary language: <strong>{proj.get('language', 'unknown')}</strong>
+  Analyzed {proj.get("analyzed_at", "?")[:10]} by code2llm
+  &nbsp;·&nbsp; Primary language: <strong>{proj.get("language", "unknown")}</strong>
   &nbsp;·&nbsp; {lang_summary}
 </p>
 
 <div class="grid">
-  <div class="card"><div class="value">{stats.get('functions', 0):,}</div><div class="label">Functions</div></div>
-  <div class="card"><div class="value">{stats.get('classes', 0):,}</div><div class="label">Classes</div></div>
-  <div class="card"><div class="value">{stats.get('files', 0):,}</div><div class="label">Files</div></div>
-  <div class="card"><div class="value">{stats.get('lines', 0):,}</div><div class="label">Lines</div></div>
-  <div class="card"><div class="value">{len(lang['names'])}</div><div class="label">Languages</div></div>
+  <div class="card"><div class="value">{stats.get("functions", 0):,}</div><div class="label">Functions</div></div>
+  <div class="card"><div class="value">{stats.get("classes", 0):,}</div><div class="label">Classes</div></div>
+  <div class="card"><div class="value">{stats.get("files", 0):,}</div><div class="label">Files</div></div>
+  <div class="card"><div class="value">{stats.get("lines", 0):,}</div><div class="label">Lines</div></div>
+  <div class="card"><div class="value">{len(lang["names"])}</div><div class="label">Languages</div></div>
   <div class="card"><div class="value">{cc_avg}</div><div class="label">Avg CC</div></div>
-  <div class="card"><div class="value">{health.get('critical_count', 0)}</div><div class="label">Critical (CC≥{health.get('critical_limit', 10)})</div></div>
-  <div class="card"><div class="value">{health.get('duplicates', 0)}</div><div class="label">Duplicates</div></div>
-  <div class="card"><div class="value">{health.get('cycles', 0)}</div><div class="label">Cycles</div></div>
+  <div class="card"><div class="value">{health.get("critical_count", 0)}</div><div class="label">Critical (CC≥{health.get("critical_limit", 10)})</div></div>
+  <div class="card"><div class="value">{health.get("duplicates", 0)}</div><div class="label">Duplicates</div></div>
+  <div class="card"><div class="value">{health.get("cycles", 0)}</div><div class="label">Cycles</div></div>
 </div>
 
 <div class="three-col">
@@ -173,7 +186,7 @@ class DashboardRenderer:
   </div>
 </div>
 
-<h2>Alerts ({len(health.get('alerts', []))})</h2>
+<h2>Alerts ({len(health.get("alerts", []))})</h2>
 <div class="card"><div class="table-wrap">
 <table>
   <thead><tr><th>Severity</th><th>Target</th><th>Type</th><th>Value</th><th>Limit</th></tr></thead>
@@ -193,7 +206,7 @@ class DashboardRenderer:
 </div>
 
 <div>
-<h2>Refactoring Priorities ({len(refactoring.get('priorities', []))})</h2>
+<h2>Refactoring Priorities ({len(refactoring.get("priorities", []))})</h2>
 <div class="card"><div class="table-wrap">
 <table>
   <thead><tr><th>#</th><th>Action</th><th>Impact</th><th>Effort</th></tr></thead>
@@ -203,7 +216,7 @@ class DashboardRenderer:
 </div>
 </div>
 
-<footer>Generated by code2llm on {datetime.now().strftime('%Y-%m-%d %H:%M')}</footer>
+<footer>Generated by code2llm on {datetime.now().strftime("%Y-%m-%d %H:%M")}</footer>
 
 <script>
 {evo_script}
@@ -213,10 +226,10 @@ const langCtx = document.getElementById('langChart').getContext('2d');
 new Chart(langCtx, {{
   type: 'doughnut',
   data: {{
-    labels: {lang['names']},
+    labels: {lang["names"]},
     datasets: [{{
-      data: {lang['files']},
-      backgroundColor: {lang['colors']},
+      data: {lang["files"]},
+      backgroundColor: {lang["colors"]},
       borderColor: 'var(--border)', borderWidth: 1
     }}]
   }},
@@ -233,8 +246,8 @@ const modLinesCtx = document.getElementById('modLinesChart').getContext('2d');
 new Chart(modLinesCtx, {{
   type: 'bar',
   data: {{
-    labels: {mod_lines['names']},
-    datasets: [{{ label: 'Lines', data: {mod_lines['lines']},
+    labels: {mod_lines["names"]},
+    datasets: [{{ label: 'Lines', data: {mod_lines["lines"]},
       backgroundColor: '#3b82f6'
     }}]
   }},
@@ -253,8 +266,8 @@ const modFuncsCtx = document.getElementById('modFuncsChart').getContext('2d');
 new Chart(modFuncsCtx, {{
   type: 'bar',
   data: {{
-    labels: {mod_funcs['names']},
-    datasets: [{{ label: 'Functions', data: {mod_funcs['funcs']},
+    labels: {mod_funcs["names"]},
+    datasets: [{{ label: 'Functions', data: {mod_funcs["funcs"]},
       backgroundColor: '#22c55e'
     }}]
   }},
@@ -306,7 +319,7 @@ new Chart(modFuncsCtx, {{
         crit_trend = trend(crit, prev.get("critical") if prev else None)
 
         return f"""<div class="chart-container">
-    <h2 style="border:none;margin:0 0 .5rem;">Evolution ({last.get('date', '?')})</h2>
+    <h2 style="border:none;margin:0 0 .5rem;">Evolution ({last.get("date", "?")})</h2>
     <div class="evo-cards">
       <div class="card"><div class="value">{cc}</div><div class="label">CC̄ {cc_trend}</div></div>
       <div class="card"><div class="value">{crit}</div><div class="label">Critical {crit_trend}</div></div>

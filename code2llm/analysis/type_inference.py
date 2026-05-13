@@ -165,33 +165,41 @@ class TypeInferenceEngine:
         defaults_offset = len(node.args.args) - len(node.args.defaults)
 
         for i, arg in enumerate(node.args.args):
-            type_str = self._annotation_to_str(arg.annotation) if arg.annotation else None
+            type_str = (
+                self._annotation_to_str(arg.annotation) if arg.annotation else None
+            )
             has_default = i >= defaults_offset
-            result.append({
-                "name": arg.arg,
-                "type": type_str,
-                "has_default": has_default,
-            })
+            result.append(
+                {
+                    "name": arg.arg,
+                    "type": type_str,
+                    "has_default": has_default,
+                }
+            )
 
         # *args
         if node.args.vararg:
             va = node.args.vararg
             type_str = self._annotation_to_str(va.annotation) if va.annotation else None
-            result.append({
-                "name": f"*{va.arg}",
-                "type": type_str,
-                "has_default": False,
-            })
+            result.append(
+                {
+                    "name": f"*{va.arg}",
+                    "type": type_str,
+                    "has_default": False,
+                }
+            )
 
         # **kwargs
         if node.args.kwarg:
             kw = node.args.kwarg
             type_str = self._annotation_to_str(kw.annotation) if kw.annotation else None
-            result.append({
-                "name": f"**{kw.arg}",
-                "type": type_str,
-                "has_default": False,
-            })
+            result.append(
+                {
+                    "name": f"**{kw.arg}",
+                    "type": type_str,
+                    "has_default": False,
+                }
+            )
 
         return result
 

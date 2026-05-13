@@ -1,4 +1,5 @@
 """Python - valid code."""
+
 from dataclasses import dataclass
 from typing import List, Optional
 

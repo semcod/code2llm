@@ -148,6 +148,6 @@ class ExportPipeline:
                     # Fallback: pass raw AnalysisResult
                     exporter.export(self._ctx.result, output_dir)
                 results[name] = True
-            except Exception as e:
+            except Exception:
                 results[name] = False
         return results

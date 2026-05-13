@@ -7,8 +7,9 @@ from typing import Optional
 from code2llm.core.ast_registry import ASTRegistry
 
 
-def get_ast(filepath: str,
-            registry: Optional[ASTRegistry] = None) -> Optional[ast.Module]:
+def get_ast(
+    filepath: str, registry: Optional[ASTRegistry] = None
+) -> Optional[ast.Module]:
     """Return parsed AST for *filepath* using the shared registry.
 
     Falls back to process-wide singleton when no registry is supplied.
@@ -67,7 +68,7 @@ def qualified_name(module_name: str, class_stack: list, name: str) -> str:
     if class_stack:
         parts.append(class_stack[-1])
     parts.append(name)
-    return '.'.join(parts)
+    return ".".join(parts)
 
 
 def expr_to_str(node: ast.expr) -> Optional[str]:

@@ -6,16 +6,14 @@ Success metrics from action_plan_v3:
 - Side-effect detection accuracy ≥70%
 - Pipeline purity scoring matches manual analysis
 """
+
 import textwrap
 import pytest
-from pathlib import Path
 
-from code2llm.core.models import AnalysisResult, FunctionInfo, ModuleInfo
+from code2llm.core.models import AnalysisResult, FunctionInfo
 from code2llm.analysis.pipeline_detector import (
-    PipelineDetector, Pipeline, PipelineStage,
+    PipelineDetector,
 )
-from code2llm.analysis.side_effects import SideEffectDetector
-from code2llm.analysis.type_inference import TypeInferenceEngine
 from code2llm.exporters.flow_exporter import FlowExporter
 
 
@@ -23,8 +21,17 @@ from code2llm.exporters.flow_exporter import FlowExporter
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _fi(name, module="mod", args=None, calls=None, cc=3, class_name=None,
-        file="/test/src.py", line=1):
+
+def _fi(
+    name,
+    module="mod",
+    args=None,
+    calls=None,
+    cc=3,
+    class_name=None,
+    file="/test/src.py",
+    line=1,
+):
     """Shorthand FunctionInfo builder."""
     return FunctionInfo(
         name=name,
@@ -49,7 +56,7 @@ def _build_chain_funcs(chain_spec, module="mod", file="/test/src.py"):
     funcs = {}
     names = [name for name, _ in chain_spec]
     for i, (name, cc) in enumerate(chain_spec):
-        calls = [f"{module}.{names[i+1]}"] if i < len(chain_spec) - 1 else []
+        calls = [f"{module}.{names[i + 1]}"] if i < len(chain_spec) - 1 else []
         fi = _fi(name, module=module, calls=calls, cc=cc, file=file)
         funcs[fi.qualified_name] = fi
     return funcs
@@ -59,13 +66,18 @@ def _build_chain_funcs(chain_spec, module="mod", file="/test/src.py"):
 # PipelineDetector unit tests
 # ---------------------------------------------------------------------------
 
-class TestPipelineDetector:
 
+class TestPipelineDetector:
     def test_detects_simple_chain(self):
         """A linear chain A->B->C->D should produce 1 pipeline with 4 stages."""
-        funcs = _build_chain_funcs([
-            ("entry", 2), ("process", 5), ("transform", 3), ("output", 1),
-        ])
+        funcs = _build_chain_funcs(
+            [
+                ("entry", 2),
+                ("process", 5),
+                ("transform", 3),
+                ("output", 1),
+            ]
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -75,9 +87,13 @@ class TestPipelineDetector:
 
     def test_entry_exit_labeling(self):
         """First stage should be marked entry, last stage marked exit."""
-        funcs = _build_chain_funcs([
-            ("start", 1), ("middle", 2), ("end", 1),
-        ])
+        funcs = _build_chain_funcs(
+            [
+                ("start", 1),
+                ("middle", 2),
+                ("end", 1),
+            ]
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -93,7 +109,8 @@ class TestPipelineDetector:
     def test_purity_aggregation(self, tmp_path):
         """Pipeline purity should count pure stages correctly."""
         src = tmp_path / "purity_test.py"
-        src.write_text(textwrap.dedent("""\
+        src.write_text(
+            textwrap.dedent("""\
             def pure_func(x: str) -> str:
                 return x.upper()
 
@@ -103,14 +120,18 @@ class TestPipelineDetector:
 
             def another_pure(x: int) -> int:
                 return x + 1
-        """))
+        """)
+        )
         funcs = {
-            "m.pure_func": _fi("pure_func", module="m",
-                                calls=["m.io_func"], file=str(src), line=1),
-            "m.io_func": _fi("io_func", module="m",
-                              calls=["m.another_pure"], file=str(src), line=4),
-            "m.another_pure": _fi("another_pure", module="m",
-                                   calls=[], file=str(src), line=8),
+            "m.pure_func": _fi(
+                "pure_func", module="m", calls=["m.io_func"], file=str(src), line=1
+            ),
+            "m.io_func": _fi(
+                "io_func", module="m", calls=["m.another_pure"], file=str(src), line=4
+            ),
+            "m.another_pure": _fi(
+                "another_pure", module="m", calls=[], file=str(src), line=8
+            ),
         }
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
@@ -123,9 +144,13 @@ class TestPipelineDetector:
 
     def test_bottleneck_detection(self):
         """Bottleneck should be the stage with highest CC."""
-        funcs = _build_chain_funcs([
-            ("a", 2), ("b", 18), ("c", 5),
-        ])
+        funcs = _build_chain_funcs(
+            [
+                ("a", 2),
+                ("b", 18),
+                ("c", 5),
+            ]
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -137,9 +162,13 @@ class TestPipelineDetector:
 
     def test_pipeline_to_dict(self):
         """Pipeline.to_dict() should produce a valid dict."""
-        funcs = _build_chain_funcs([
-            ("x", 1), ("y", 2), ("z", 3),
-        ])
+        funcs = _build_chain_funcs(
+            [
+                ("x", 1),
+                ("y", 2),
+                ("z", 3),
+            ]
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -173,12 +202,17 @@ class TestPipelineDetector:
 # Domain classification tests
 # ---------------------------------------------------------------------------
 
-class TestDomainClassification:
 
+class TestDomainClassification:
     def test_nlp_domain(self):
-        funcs = _build_chain_funcs([
-            ("normalize_query", 2), ("match_intent", 5), ("resolve_entity", 3),
-        ], module="code2llm.nlp")
+        funcs = _build_chain_funcs(
+            [
+                ("normalize_query", 2),
+                ("match_intent", 5),
+                ("resolve_entity", 3),
+            ],
+            module="code2llm.nlp",
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -186,9 +220,14 @@ class TestDomainClassification:
         assert pipelines[0].domain == "NLP"
 
     def test_analysis_domain(self):
-        funcs = _build_chain_funcs([
-            ("analyze_file", 4), ("compute_metrics", 6), ("build_call_graph", 3),
-        ], module="code2llm.analysis")
+        funcs = _build_chain_funcs(
+            [
+                ("analyze_file", 4),
+                ("compute_metrics", 6),
+                ("build_call_graph", 3),
+            ],
+            module="code2llm.analysis",
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -196,9 +235,14 @@ class TestDomainClassification:
         assert pipelines[0].domain == "Analysis"
 
     def test_export_domain(self):
-        funcs = _build_chain_funcs([
-            ("export_toon", 3), ("render_header", 2), ("format_output", 2),
-        ], module="code2llm.exporters")
+        funcs = _build_chain_funcs(
+            [
+                ("export_toon", 3),
+                ("render_header", 2),
+                ("format_output", 2),
+            ],
+            module="code2llm.exporters",
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -206,9 +250,14 @@ class TestDomainClassification:
         assert pipelines[0].domain == "Export"
 
     def test_unknown_domain(self):
-        funcs = _build_chain_funcs([
-            ("foo", 1), ("bar", 1), ("baz", 1),
-        ], module="mylib.stuff")
+        funcs = _build_chain_funcs(
+            [
+                ("foo", 1),
+                ("bar", 1),
+                ("baz", 1),
+            ],
+            module="mylib.stuff",
+        )
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
 
@@ -220,23 +269,44 @@ class TestDomainClassification:
 # Multiple pipelines (success metric: ≥3 pipelines with ≥3 stages)
 # ---------------------------------------------------------------------------
 
-class TestMultiplePipelines:
 
+class TestMultiplePipelines:
     def test_three_independent_pipelines(self):
         """Three independent chains should produce ≥3 pipelines."""
         funcs = {}
         # NLP pipeline
-        funcs.update(_build_chain_funcs([
-            ("normalize", 2), ("tokenize", 3), ("match_intent", 5),
-        ], module="nlp"))
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("normalize", 2),
+                    ("tokenize", 3),
+                    ("match_intent", 5),
+                ],
+                module="nlp",
+            )
+        )
         # Analysis pipeline
-        funcs.update(_build_chain_funcs([
-            ("analyze_file", 4), ("compute_metrics", 6), ("build_graph", 3),
-        ], module="analysis"))
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("analyze_file", 4),
+                    ("compute_metrics", 6),
+                    ("build_graph", 3),
+                ],
+                module="analysis",
+            )
+        )
         # Export pipeline
-        funcs.update(_build_chain_funcs([
-            ("export_data", 3), ("render_toon", 2), ("format_output", 2),
-        ], module="exporters"))
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("export_data", 3),
+                    ("render_toon", 2),
+                    ("format_output", 2),
+                ],
+                module="exporters",
+            )
+        )
 
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
@@ -248,18 +318,46 @@ class TestMultiplePipelines:
     def test_four_pipelines_with_domains(self):
         """Four domain pipelines including Refactor."""
         funcs = {}
-        funcs.update(_build_chain_funcs([
-            ("normalize", 2), ("tokenize", 3), ("match_intent", 5),
-        ], module="nlp"))
-        funcs.update(_build_chain_funcs([
-            ("analyze_file", 4), ("compute_metrics", 6), ("build_graph", 3),
-        ], module="analysis"))
-        funcs.update(_build_chain_funcs([
-            ("export_data", 3), ("render_toon", 2), ("format_output", 2),
-        ], module="exporters"))
-        funcs.update(_build_chain_funcs([
-            ("detect_smell", 5), ("suggest_fix", 4), ("apply_patch", 3),
-        ], module="refactor"))
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("normalize", 2),
+                    ("tokenize", 3),
+                    ("match_intent", 5),
+                ],
+                module="nlp",
+            )
+        )
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("analyze_file", 4),
+                    ("compute_metrics", 6),
+                    ("build_graph", 3),
+                ],
+                module="analysis",
+            )
+        )
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("export_data", 3),
+                    ("render_toon", 2),
+                    ("format_output", 2),
+                ],
+                module="exporters",
+            )
+        )
+        funcs.update(
+            _build_chain_funcs(
+                [
+                    ("detect_smell", 5),
+                    ("suggest_fix", 4),
+                    ("apply_patch", 3),
+                ],
+                module="refactor",
+            )
+        )
 
         detector = PipelineDetector()
         pipelines = detector.detect(funcs)
@@ -276,8 +374,8 @@ class TestMultiplePipelines:
 # FlowExporter integration (Sprint 3)
 # ---------------------------------------------------------------------------
 
-class TestFlowExporterSprint3:
 
+class TestFlowExporterSprint3:
     @pytest.fixture
     def multi_pipeline_result(self):
         """AnalysisResult with multiple pipelines across domains."""
@@ -367,8 +465,8 @@ class TestFlowExporterSprint3:
 # Edge cases
 # ---------------------------------------------------------------------------
 
-class TestPipelineEdgeCases:
 
+class TestPipelineEdgeCases:
     def test_cyclic_calls(self):
         """Cycles should not crash the detector."""
         funcs = {

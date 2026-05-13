@@ -10,8 +10,8 @@ def is_excluded(path: str) -> bool:
     """Check if path should be excluded (venv, site-packages, etc.)."""
     if not path:
         return False
-    parts = set(path.lower().replace('\\', '/').split('/'))
+    parts = set(path.lower().replace("\\", "/").split("/"))
     return bool(parts & EXCLUDE_PATTERNS)
 
 
-__all__ = ['is_excluded']
+__all__ = ["is_excluded"]

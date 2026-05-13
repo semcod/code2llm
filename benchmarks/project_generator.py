@@ -206,7 +206,8 @@ def create_utils_py(project: Path) -> None:
 def add_validator_to_core(project: Path) -> None:
     """Dodaj klasę Validator do core.py (tworzy duplikat)."""
     with open(project / "core.py", "a") as f:
-        f.write(textwrap.dedent("""
+        f.write(
+            textwrap.dedent("""
         class Validator:
             '''Validator - also exists in utils.py.'''
             def __init__(self, config: Config):
@@ -216,7 +217,8 @@ def add_validator_to_core(project: Path) -> None:
                 if not data:
                     return Result(errors=["empty"])
                 return Result(data=data)
-        """))
+        """)
+        )
 
 
 def create_ground_truth_project(base_dir: Path) -> Path:

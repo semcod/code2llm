@@ -8,7 +8,9 @@ from pathlib import Path
 from typing import List
 
 
-def _export_code2logic(args, source_path: Path, output_dir: Path, formats: list[str]) -> None:
+def _export_code2logic(
+    args, source_path: Path, output_dir: Path, formats: list[str]
+) -> None:
     """Generate project.toon using external code2logic tool."""
     if not _should_run_code2logic(formats):
         return
@@ -21,7 +23,7 @@ def _export_code2logic(args, source_path: Path, output_dir: Path, formats: list[
         _handle_code2logic_error(res, cmd)
 
     found = _find_code2logic_output(output_dir, res)
-    target = output_dir / 'project.toon'
+    target = output_dir / "project.toon"
     final_files = _normalize_code2logic_output(found, target, args)
 
     if args.verbose:
@@ -36,13 +38,16 @@ def _export_code2logic(args, source_path: Path, output_dir: Path, formats: list[
 
 def _should_run_code2logic(formats: list[str]) -> bool:
     """Check if code2logic format is requested."""
-    return 'code2logic' in formats or 'all' in formats
+    return "code2logic" in formats or "all" in formats
 
 
 def _check_code2logic_installed() -> None:
     """Verify code2logic is available in PATH."""
-    if shutil.which('code2logic') is None:
-        print("Error: requested format 'code2logic' but 'code2logic' executable was not found in PATH.", file=sys.stderr)
+    if shutil.which("code2logic") is None:
+        print(
+            "Error: requested format 'code2logic' but 'code2logic' executable was not found in PATH.",
+            file=sys.stderr,
+        )
         print("Install it with: pip install code2logic --upgrade", file=sys.stderr)
         sys.exit(1)
 
@@ -50,14 +55,18 @@ def _check_code2logic_installed() -> None:
 def _build_code2logic_cmd(args, source_path: Path, output_dir: Path) -> list[str]:
     """Build command for code2logic execution."""
     cmd = [
-        'code2logic', str(source_path),
-        '-f', 'toon',
-        '--compact',
-        '--name', 'project',
-        '-o', str(output_dir),
+        "code2logic",
+        str(source_path),
+        "-f",
+        "toon",
+        "--compact",
+        "--name",
+        "project",
+        "-o",
+        str(output_dir),
     ]
     if not args.verbose:
-        cmd.append('-q')
+        cmd.append("-q")
     return cmd
 
 
@@ -67,7 +76,9 @@ def _run_code2logic(cmd: list[str], verbose: bool):
         if verbose:
             return subprocess.run(cmd, capture_output=True, text=True)
         else:
-            return subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, text=True)
+            return subprocess.run(
+                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, text=True
+            )
     except Exception as e:
         print(f"Error running code2logic: {e}", file=sys.stderr)
         sys.exit(1)
@@ -93,9 +104,9 @@ def _handle_code2logic_error(res, cmd: list[str]) -> None:
 def _find_code2logic_output(output_dir: Path, res) -> Path:
     """Find code2logic output file in possible locations."""
     candidate_paths = [
-        output_dir / 'project.toon',
-        output_dir / 'project' / 'project.toon',
-        output_dir / 'project.toon.txt',
+        output_dir / "project.toon",
+        output_dir / "project" / "project.toon",
+        output_dir / "project.toon.txt",
     ]
     found = next((p for p in candidate_paths if p.exists()), None)
 
@@ -104,7 +115,10 @@ def _find_code2logic_output(output_dir: Path, res) -> Path:
             print(res.stdout, file=sys.stderr)
         if res.stderr:
             print(res.stderr, file=sys.stderr)
-        print("Error: code2logic completed but project.toon was not found in the output directory.", file=sys.stderr)
+        print(
+            "Error: code2logic completed but project.toon was not found in the output directory.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     return found
@@ -118,10 +132,11 @@ def _normalize_code2logic_output(found: Path, target: Path, args) -> List[Path]:
         found = target
 
     from ..core.toon_size_manager import manage_toon_size
+
     return manage_toon_size(
         found,
         target.parent,
         max_kb=256,
         prefix="project",
-        verbose=getattr(args, 'verbose', False)
+        verbose=getattr(args, "verbose", False),
     )

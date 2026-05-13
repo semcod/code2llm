@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple
 # Optional tqdm for progress bars
 try:
     from tqdm import tqdm
+
     _HAS_TQDM = True
 except ImportError:
     _HAS_TQDM = False
@@ -17,7 +18,10 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 from .config import (
-    Config, FAST_CONFIG, ALL_EXTENSIONS, ALL_FILENAMES,
+    Config,
+    FAST_CONFIG,
+    ALL_EXTENSIONS,
+    ALL_FILENAMES,
     LANGUAGE_FILENAME_PREFIXES,
     DEFAULT_PROGRESS_BAR_THRESHOLD,
 )
@@ -32,17 +36,23 @@ from .refactoring import RefactoringAnalyzer
 
 class ProjectAnalyzer:
     """Main analyzer with parallel processing."""
-    
-    def __init__(self, config: Optional[Config] = None, project_path: Optional[Path] = None):
+
+    def __init__(
+        self, config: Optional[Config] = None, project_path: Optional[Path] = None
+    ):
         self.config = config or FAST_CONFIG
         self.project_path = project_path
-        self.cache = FileCache(
-            self.config.performance.cache_dir,
-            self.config.performance.cache_ttl_hours
-        ) if self.config.performance.enable_cache else None
+        self.cache = (
+            FileCache(
+                self.config.performance.cache_dir,
+                self.config.performance.cache_ttl_hours,
+            )
+            if self.config.performance.enable_cache
+            else None
+        )
         self.file_filter = FastFileFilter(self.config.filters, project_path)
         self.refactoring_analyzer = RefactoringAnalyzer(self.config, self.file_filter)
-    
+
     def analyze_project(self, project_path: str) -> AnalysisResult:
         """Analyze entire project."""
         start_time = time.time()
@@ -52,13 +62,19 @@ class ProjectAnalyzer:
         if self.config.verbose:
             print(f"Found {len(files)} files to analyze")
             workers = self.config.performance.get_workers()
-            print(f"  - Parallel: {self.config.performance.parallel_enabled}, Workers: {workers}")
+            print(
+                f"  - Parallel: {self.config.performance.parallel_enabled}, Workers: {workers}"
+            )
 
-        pcache, cached_results, files_to_analyze = self._load_from_persistent_cache(files, project_path)
+        pcache, cached_results, files_to_analyze = self._load_from_persistent_cache(
+            files, project_path
+        )
 
         # Watch mode: show what changed
-        if getattr(self.config, 'watch', False) and files_to_analyze:
-            print(f"\n👁️  Watch mode: {len(files_to_analyze)} files changed since last run:")
+        if getattr(self.config, "watch", False) and files_to_analyze:
+            print(
+                f"\n👁️  Watch mode: {len(files_to_analyze)} files changed since last run:"
+            )
             for fp, _ in files_to_analyze[:10]:
                 print(f"   • {Path(fp).name}")
             if len(files_to_analyze) > 10:
@@ -86,7 +102,7 @@ class ProjectAnalyzer:
         self, files: List[Tuple[str, str]], project_path: Path
     ) -> Tuple[Optional["PersistentCache"], List[Dict], List[Tuple[str, str]]]:
         """Split files into cached/changed; return (pcache, cached_results, files_to_analyze)."""
-        if getattr(self.config, 'no_cache', False):
+        if getattr(self.config, "no_cache", False):
             return None, [], files
         try:
             pcache = PersistentCache(str(project_path))
@@ -107,9 +123,13 @@ class ProjectAnalyzer:
                     changed_paths.append(fp)
             files_to_analyze = [(fp, path_to_module[fp]) for fp in changed_paths]
             if self.config.verbose:
-                print(f"  - Persistent cache: {len(cached_results)} hits, {len(files_to_analyze)} to analyze")
+                print(
+                    f"  - Persistent cache: {len(cached_results)} hits, {len(files_to_analyze)} to analyze"
+                )
                 if removed:
-                    print(f"  - Persistent cache: {len(removed)} stale entries pruned (deleted files)")
+                    print(
+                        f"  - Persistent cache: {len(removed)} stale entries pruned (deleted files)"
+                    )
                     for rel in removed[:10]:
                         print(f"     • {rel}")
                     if len(removed) > 10:
@@ -128,8 +148,10 @@ class ProjectAnalyzer:
         if not files_to_analyze:
             return []
         _PARALLEL_THRESHOLD = 30
-        if (self.config.performance.parallel_enabled
-                and len(files_to_analyze) > _PARALLEL_THRESHOLD):
+        if (
+            self.config.performance.parallel_enabled
+            and len(files_to_analyze) > _PARALLEL_THRESHOLD
+        ):
             return self._analyze_parallel(files_to_analyze)
         return self._analyze_sequential(files_to_analyze)
 
@@ -149,7 +171,7 @@ class ProjectAnalyzer:
         if pcache is None:
             return
         if fresh_results:
-            path_to_result = {r.get('file', ''): r for r in fresh_results if r}
+            path_to_result = {r.get("file", ""): r for r in fresh_results if r}
             for fp, _ in files_to_analyze:
                 if fp in path_to_result:
                     try:
@@ -161,22 +183,30 @@ class ProjectAnalyzer:
         except Exception as exc:
             logger.debug("PersistentCache save failed: %s", exc)
 
-    def _build_stats(self, files: List, results: List[Dict], merged: AnalysisResult, start_time: float) -> Dict:
+    def _build_stats(
+        self,
+        files: List,
+        results: List[Dict],
+        merged: AnalysisResult,
+        start_time: float,
+    ) -> Dict:
         """Build analysis stats dict."""
         return {
-            'files_processed': len(files),
-            'functions_found': len(merged.functions),
-            'classes_found': len(merged.classes),
-            'nodes_created': len(merged.nodes),
-            'edges_created': len(merged.edges),
-            'patterns_detected': len(merged.patterns),
-            'analysis_time_seconds': round(time.time() - start_time, 2),
-            'cache_hits': sum(r.get('cache_hits', 0) for r in results),
+            "files_processed": len(files),
+            "functions_found": len(merged.functions),
+            "classes_found": len(merged.classes),
+            "nodes_created": len(merged.nodes),
+            "edges_created": len(merged.edges),
+            "patterns_detected": len(merged.patterns),
+            "analysis_time_seconds": round(time.time() - start_time, 2),
+            "cache_hits": sum(r.get("cache_hits", 0) for r in results),
         }
 
     def _print_summary(self, merged: AnalysisResult) -> None:
         """Print verbose analysis summary."""
-        print(f"Analysis complete in {merged.stats.get('analysis_time_seconds', 0):.2f}s")
+        print(
+            f"Analysis complete in {merged.stats.get('analysis_time_seconds', 0):.2f}s"
+        )
         print(f"  Functions: {len(merged.functions)}")
         print(f"  Classes: {len(merged.classes)}")
         print(f"  CFG Nodes: {len(merged.nodes)}")
@@ -201,7 +231,7 @@ class ProjectAnalyzer:
         merged.stats = self._build_stats(files, results, merged, start_time)
         if self.config.verbose:
             self._print_summary(merged)
-    
+
     @staticmethod
     def _should_collect_file(
         filename: str,
@@ -222,17 +252,17 @@ class ProjectAnalyzer:
         )
 
     @staticmethod
-    def _compute_module_name(
-        rel: str, filename: str, project_name: str
-    ) -> str:
+    def _compute_module_name(rel: str, filename: str, project_name: str) -> str:
         """Derive a Pythonic module name from a relative file path."""
-        parts = rel.replace('\\', '/').split('/')
+        parts = rel.replace("\\", "/").split("/")
         dir_parts = parts[:-1]
-        init_names = frozenset({'__init__.py', 'index.js', 'index.ts', 'mod.rs', 'lib.rs'})
+        init_names = frozenset(
+            {"__init__.py", "index.js", "index.ts", "mod.rs", "lib.rs"}
+        )
         if filename in init_names:
-            return '.'.join(dir_parts) if dir_parts else project_name
+            return ".".join(dir_parts) if dir_parts else project_name
         stem = os.path.splitext(filename)[0]
-        return '.'.join(dir_parts + [stem]) if dir_parts else stem
+        return ".".join(dir_parts + [stem]) if dir_parts else stem
 
     def _collect_files(self, project_path: Path) -> List[Tuple[str, str]]:
         """Collect all source files with their module names for all supported languages.
@@ -250,8 +280,7 @@ class ProjectAnalyzer:
 
         for dirpath, dirnames, filenames in os.walk(project_str, topdown=True):
             dirnames[:] = [
-                d for d in dirnames
-                if not self.file_filter.should_skip_dir(d)
+                d for d in dirnames if not self.file_filter.should_skip_dir(d)
             ]
 
             for filename in filenames:
@@ -273,34 +302,40 @@ class ProjectAnalyzer:
                 files.append((file_str, module_name))
 
         return files
-    
+
     def _analyze_parallel(self, files: List[Tuple[str, str]]) -> List[Dict]:
         """Analyze files in parallel."""
         results = []
         workers = min(self.config.performance.get_workers(), len(files))
-        
+
         # Convert config to dict for pickle compatibility
         config_dict = {
-            'mode': self.config.mode,
-            'max_depth_enumeration': self.config.max_depth_enumeration,
-            'detect_state_machines': self.config.detect_state_machines,
-            'detect_recursion': self.config.detect_recursion,
-            'output_dir': self.config.output_dir,
+            "mode": self.config.mode,
+            "max_depth_enumeration": self.config.max_depth_enumeration,
+            "detect_state_machines": self.config.detect_state_machines,
+            "detect_recursion": self.config.detect_recursion,
+            "output_dir": self.config.output_dir,
         }
-        
+
         with ProcessPoolExecutor(max_workers=workers) as executor:
             # Submit all jobs
             future_to_file = {
-                executor.submit(_analyze_single_file, (file_path, module_name, config_dict)): (file_path, module_name)
+                executor.submit(
+                    _analyze_single_file, (file_path, module_name, config_dict)
+                ): (file_path, module_name)
                 for file_path, module_name in files
             }
-            
+
             # Collect results as they complete (with optional progress bar)
             completed = 0
             iterator = as_completed(future_to_file)
-            if not self.config.verbose and len(files) > DEFAULT_PROGRESS_BAR_THRESHOLD and _HAS_TQDM:
+            if (
+                not self.config.verbose
+                and len(files) > DEFAULT_PROGRESS_BAR_THRESHOLD
+                and _HAS_TQDM
+            ):
                 iterator = tqdm(iterator, total=len(files), desc="Analyzing")
-            
+
             for future in iterator:
                 file_path, module_name = future_to_file[future]
                 try:
@@ -312,21 +347,28 @@ class ProjectAnalyzer:
                         print(f"Error analyzing {file_path}: {e}")
                 completed += 1
                 if self.config.verbose and completed % 10 == 0:
-                    print(f"  - Progress: {completed}/{len(files)} files analyzed ({completed*100//len(files)}%)", flush=True)
-        
+                    print(
+                        f"  - Progress: {completed}/{len(files)} files analyzed ({completed * 100 // len(files)}%)",
+                        flush=True,
+                    )
+
         return results
-    
+
     def _analyze_sequential(self, files: List[Tuple[str, str]]) -> List[Dict]:
         """Analyze files sequentially."""
         results = []
         analyzer = FileAnalyzer(self.config, self.cache)
         total = len(files)
-        
+
         # Use tqdm for large projects in non-verbose mode
         file_iterator = enumerate(files, 1)
-        if not self.config.verbose and total > DEFAULT_PROGRESS_BAR_THRESHOLD and _HAS_TQDM:
+        if (
+            not self.config.verbose
+            and total > DEFAULT_PROGRESS_BAR_THRESHOLD
+            and _HAS_TQDM
+        ):
             file_iterator = tqdm(list(file_iterator), desc="Analyzing", total=total)
-        
+
         for i, (file_path, module_name) in file_iterator:
             try:
                 result = analyzer.analyze_file(file_path, module_name)
@@ -336,56 +378,63 @@ class ProjectAnalyzer:
                 if self.config.verbose:
                     print(f"Error analyzing {file_path}: {e}")
             if self.config.verbose and (i % 10 == 0 or i == total):
-                print(f"  - Progress: {i}/{total} files analyzed ({i*100//total}%)", flush=True)
-        
+                print(
+                    f"  - Progress: {i}/{total} files analyzed ({i * 100 // total}%)",
+                    flush=True,
+                )
+
         return results
-    
+
     def _merge_results(self, results: List[Dict], project_path: str) -> AnalysisResult:
         """Merge results from multiple files."""
         merged = AnalysisResult(project_path=project_path)
-        
+
         for result in results:
             # Merge module info
-            if 'module' in result:
-                module_name = result['module'].name
-                merged.modules[module_name] = result['module']
-            
+            if "module" in result:
+                module_name = result["module"].name
+                merged.modules[module_name] = result["module"]
+
             # Merge functions
-            for func_name, func_info in result.get('functions', {}).items():
+            for func_name, func_info in result.get("functions", {}).items():
                 merged.functions[func_name] = func_info
-            
+
             # Merge classes
-            for class_name, class_info in result.get('classes', {}).items():
+            for class_name, class_info in result.get("classes", {}).items():
                 merged.classes[class_name] = class_info
-            
+
             # Merge nodes
-            for node_id, node_info in result.get('nodes', {}).items():
+            for node_id, node_info in result.get("nodes", {}).items():
                 merged.nodes[node_id] = node_info
-            
+
             # Merge edges
-            merged.edges.extend(result.get('edges', []))
-            
+            merged.edges.extend(result.get("edges", []))
+
             # Merge mutations and data flows
-            if 'mutations' in result:
-                merged.mutations.extend(result['mutations'])
-            if 'data_flows' in result:
-                merged.data_flows.update(result['data_flows'])
-        
+            if "mutations" in result:
+                merged.mutations.extend(result["mutations"])
+            if "data_flows" in result:
+                merged.data_flows.update(result["data_flows"])
+
         return merged
-    
+
     def _build_simple_name_map(self, result: AnalysisResult) -> Dict[str, List[str]]:
         """Build lookup map: simple name -> list of full qualified names."""
         simple_to_full: Dict[str, List[str]] = {}
         for known_name in result.functions:
-            simple_name = known_name.split('.')[-1]
+            simple_name = known_name.split(".")[-1]
             if simple_name not in simple_to_full:
                 simple_to_full[simple_name] = []
             simple_to_full[simple_name].append(known_name)
         return simple_to_full
 
-    def _resolve_call(self, called: str, func_name: str,
-                     result: AnalysisResult,
-                     simple_to_full: Dict[str, List[str]]) -> str | None:
+    def _resolve_call(
+        self,
+        called: str,
+        func_name: str,
+        result: AnalysisResult,
+        simple_to_full: Dict[str, List[str]],
+    ) -> str | None:
         """Resolve a function call to its fully qualified name."""
         # Try exact match first
         if called in result.functions:
@@ -398,17 +447,18 @@ class ProjectAnalyzer:
         candidates = simple_to_full[called]
 
         # Prefer exact module match if available
-        func_module = func_name.rsplit('.', 1)[0]
+        func_module = func_name.rsplit(".", 1)[0]
         for cand in candidates:
-            cand_module = cand.rsplit('.', 1)[0]
+            cand_module = cand.rsplit(".", 1)[0]
             if func_module == cand_module:
                 return cand
 
         # Fall back to first candidate
         return candidates[0]
 
-    def _collect_call_edges(self, result: AnalysisResult,
-                           simple_to_full: Dict[str, List[str]]) -> None:
+    def _collect_call_edges(
+        self, result: AnalysisResult, simple_to_full: Dict[str, List[str]]
+    ) -> None:
         """Collect and resolve all call graph edges."""
         for func_name, func in result.functions.items():
             for idx, called in enumerate(func.calls):
@@ -428,7 +478,10 @@ class ProjectAnalyzer:
     def _build_call_graph(self, result: AnalysisResult) -> None:
         """Build call graph and find entry points."""
         if self.config.verbose:
-            print(f"  - Building call graph for {len(result.functions)} functions...", flush=True)
+            print(
+                f"  - Building call graph for {len(result.functions)} functions...",
+                flush=True,
+            )
 
         # Build lookup maps for O(1) resolution
         simple_to_full = self._build_simple_name_map(result)
@@ -440,9 +493,14 @@ class ProjectAnalyzer:
         self._find_entry_points(result)
 
         if self.config.verbose:
-            print(f"  - Call graph complete: {len(result.entry_points)} entry points found", flush=True)
-    
-    def analyze_files(self, files: List[Tuple[str, str]], project_path: str) -> AnalysisResult:
+            print(
+                f"  - Call graph complete: {len(result.entry_points)} entry points found",
+                flush=True,
+            )
+
+    def analyze_files(
+        self, files: List[Tuple[str, str]], project_path: str
+    ) -> AnalysisResult:
         """Analyze specific list of files (for chunked analysis).
 
         Args:
@@ -458,37 +516,50 @@ class ProjectAnalyzer:
         merged = self._merge_results(results, project_path)
         self._post_process(merged, files, results, start_time)
         return merged
-    
+
     def _detect_patterns(self, result: AnalysisResult) -> None:
         """Detect behavioral patterns."""
         # Detect recursion
         for func_name, func in result.functions.items():
             if func_name in func.calls:
-                result.patterns.append(Pattern(
-                    name=f"recursion_{func.name}",
-                    type="recursion",
-                    confidence=0.9,
-                    functions=[func_name],
-                    entry_points=[func_name],
-                ))
-        
+                result.patterns.append(
+                    Pattern(
+                        name=f"recursion_{func.name}",
+                        type="recursion",
+                        confidence=0.9,
+                        functions=[func_name],
+                        entry_points=[func_name],
+                    )
+                )
+
         # Detect state machines (simple heuristic)
         for class_name, cls in result.classes.items():
-            state_methods = [m for m in cls.methods if any(
-                s in m.lower() for s in ['state', 'transition', 'enter', 'exit', 'connect', 'disconnect']
-            )]
+            state_methods = [
+                m
+                for m in cls.methods
+                if any(
+                    s in m.lower()
+                    for s in [
+                        "state",
+                        "transition",
+                        "enter",
+                        "exit",
+                        "connect",
+                        "disconnect",
+                    ]
+                )
+            ]
             if len(state_methods) >= 2:
                 cls.is_state_machine = True
-                result.patterns.append(Pattern(
-                    name=f"state_machine_{cls.name}",
-                    type="state_machine",
-                    confidence=0.7,
-                    functions=cls.methods,
-                    entry_points=cls.methods[:1],
-                ))
+                result.patterns.append(
+                    Pattern(
+                        name=f"state_machine_{cls.name}",
+                        type="state_machine",
+                        confidence=0.7,
+                        functions=cls.methods,
+                        entry_points=cls.methods[:1],
+                    )
+                )
 
 
 # Re-export for backward compatibility
-from .file_cache import FileCache
-from .file_filter import FastFileFilter
-from .file_analyzer import FileAnalyzer

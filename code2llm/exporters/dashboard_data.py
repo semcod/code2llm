@@ -9,25 +9,65 @@ from typing import Any, Dict, List
 
 # Language detection from file extensions
 _LANG_EXT_MAP = {
-    '.py': 'Python', '.ts': 'TypeScript', '.tsx': 'TypeScript',
-    '.js': 'JavaScript', '.jsx': 'JavaScript', '.mjs': 'JavaScript', '.cjs': 'JavaScript',
-    '.go': 'Go', '.rs': 'Rust', '.java': 'Java',
-    '.cpp': 'C++', '.cc': 'C++', '.cxx': 'C++', '.hpp': 'C++', '.h': 'C/C++',
-    '.c': 'C', '.cs': 'C#', '.rb': 'Ruby', '.php': 'PHP',
-    '.swift': 'Swift', '.kt': 'Kotlin', '.kts': 'Kotlin',
-    '.scala': 'Scala', '.sh': 'Shell', '.bash': 'Shell', '.zsh': 'Shell',
-    '.dart': 'Dart', '.ex': 'Elixir', '.exs': 'Elixir',
-    '.hs': 'Haskell', '.lua': 'Lua', '.pl': 'Perl', '.r': 'R', '.R': 'R',
+    ".py": "Python",
+    ".ts": "TypeScript",
+    ".tsx": "TypeScript",
+    ".js": "JavaScript",
+    ".jsx": "JavaScript",
+    ".mjs": "JavaScript",
+    ".cjs": "JavaScript",
+    ".go": "Go",
+    ".rs": "Rust",
+    ".java": "Java",
+    ".cpp": "C++",
+    ".cc": "C++",
+    ".cxx": "C++",
+    ".hpp": "C++",
+    ".h": "C/C++",
+    ".c": "C",
+    ".cs": "C#",
+    ".rb": "Ruby",
+    ".php": "PHP",
+    ".swift": "Swift",
+    ".kt": "Kotlin",
+    ".kts": "Kotlin",
+    ".scala": "Scala",
+    ".sh": "Shell",
+    ".bash": "Shell",
+    ".zsh": "Shell",
+    ".dart": "Dart",
+    ".ex": "Elixir",
+    ".exs": "Elixir",
+    ".hs": "Haskell",
+    ".lua": "Lua",
+    ".pl": "Perl",
+    ".r": "R",
+    ".R": "R",
 }
 
 _LANG_COLORS = {
-    'TypeScript': '#3178c6', 'JavaScript': '#f7df1e', 'Python': '#3572A5',
-    'Go': '#00ADD8', 'Rust': '#dea584', 'Java': '#b07219',
-    'C++': '#f34b7d', 'C': '#555555', 'C/C++': '#555555', 'C#': '#178600',
-    'Ruby': '#701516', 'PHP': '#4F5D95', 'Swift': '#F05138',
-    'Kotlin': '#A97BFF', 'Scala': '#c22d40', 'Shell': '#89e051',
-    'Dart': '#00B4AB', 'Elixir': '#6e4a7e', 'Haskell': '#5e5086',
-    'Lua': '#000080', 'Perl': '#0298c3', 'R': '#198CE7',
+    "TypeScript": "#3178c6",
+    "JavaScript": "#f7df1e",
+    "Python": "#3572A5",
+    "Go": "#00ADD8",
+    "Rust": "#dea584",
+    "Java": "#b07219",
+    "C++": "#f34b7d",
+    "C": "#555555",
+    "C/C++": "#555555",
+    "C#": "#178600",
+    "Ruby": "#701516",
+    "PHP": "#4F5D95",
+    "Swift": "#F05138",
+    "Kotlin": "#A97BFF",
+    "Scala": "#c22d40",
+    "Shell": "#89e051",
+    "Dart": "#00B4AB",
+    "Elixir": "#6e4a7e",
+    "Haskell": "#5e5086",
+    "Lua": "#000080",
+    "Perl": "#0298c3",
+    "R": "#198CE7",
 }
 
 
@@ -52,8 +92,11 @@ class DashboardDataBuilder:
         evo_crit = [e.get("critical", 0) for e in evolution]
         use_chart = len(evolution) >= 3
         return {
-            "dates": evo_dates, "cc": evo_cc, "crit": evo_crit,
-            "use_chart": use_chart, "entries": evolution,
+            "dates": evo_dates,
+            "cc": evo_cc,
+            "crit": evo_crit,
+            "use_chart": use_chart,
+            "entries": evolution,
         }
 
     @staticmethod
@@ -63,7 +106,9 @@ class DashboardDataBuilder:
         lang_lines: Dict[str, int] = defaultdict(int)
         for m in modules:
             ext = Path(m.get("path", "")).suffix.lower()
-            lang = _LANG_EXT_MAP.get(ext, ext.lstrip('.').capitalize() if ext else "Other")
+            lang = _LANG_EXT_MAP.get(
+                ext, ext.lstrip(".").capitalize() if ext else "Other"
+            )
             lang_files[lang] += 1
             lang_lines[lang] += m.get("lines", 0)
 
@@ -71,7 +116,7 @@ class DashboardDataBuilder:
         names = [l[0] for l in sorted_langs]
         files = [l[1] for l in sorted_langs]
         lines = [lang_lines[l[0]] for l in sorted_langs]
-        colors = [_LANG_COLORS.get(n, '#6b7280') for n in names]
+        colors = [_LANG_COLORS.get(n, "#6b7280") for n in names]
         return {"names": names, "files": files, "lines": lines, "colors": colors}
 
     @staticmethod
@@ -104,12 +149,12 @@ class DashboardDataBuilder:
             classes = m.get("classes", 0)
             cc_max = m.get("cc_max", 0)
             ext = Path(path).suffix.lower()
-            lang = _LANG_EXT_MAP.get(ext, ext.lstrip('.'))
-            color = _LANG_COLORS.get(lang, '#6b7280')
+            lang = _LANG_EXT_MAP.get(ext, ext.lstrip("."))
+            color = _LANG_COLORS.get(lang, "#6b7280")
             html += f"""
             <tr>
                 <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{color};margin-right:6px"></span>{Path(path).name}</td>
-                <td style="color:var(--muted);font-size:.75rem">{'/'.join(Path(path).parts[:-1]) or '.'}</td>
+                <td style="color:var(--muted);font-size:.75rem">{"/".join(Path(path).parts[:-1]) or "."}</td>
                 <td style="text-align:right">{lines:,}</td>
                 <td style="text-align:right">{methods}</td>
                 <td style="text-align:right">{classes}</td>
@@ -127,10 +172,10 @@ class DashboardDataBuilder:
             html += f"""
             <tr class="{sev_class}">
                 <td><span class="badge {sev_class}">{sev}</span></td>
-                <td>{a.get('target', '?')}</td>
-                <td>{a.get('type', '?')}</td>
-                <td>{a.get('value', '?')}</td>
-                <td>{a.get('limit', '?')}</td>
+                <td>{a.get("target", "?")}</td>
+                <td>{a.get("type", "?")}</td>
+                <td>{a.get("value", "?")}</td>
+                <td>{a.get("limit", "?")}</td>
             </tr>"""
         return html
 
@@ -141,9 +186,9 @@ class DashboardDataBuilder:
         for h in hotspots[:10]:
             html += f"""
             <tr>
-                <td><strong>{h.get('name', '?')}</strong></td>
-                <td>{h.get('fan_out', 0)}</td>
-                <td>{h.get('note', '')}</td>
+                <td><strong>{h.get("name", "?")}</strong></td>
+                <td>{h.get("fan_out", 0)}</td>
+                <td>{h.get("note", "")}</td>
             </tr>"""
         return html
 
@@ -156,8 +201,8 @@ class DashboardDataBuilder:
             html += f"""
             <tr>
                 <td>{i}</td>
-                <td>{p.get('action', '?')}</td>
-                <td><span class="badge {impact_class}">{p.get('impact', '?')}</span></td>
-                <td>{p.get('effort', '?')}</td>
+                <td>{p.get("action", "?")}</td>
+                <td><span class="badge {impact_class}">{p.get("impact", "?")}</span></td>
+                <td>{p.get("effort", "?")}</td>
             </tr>"""
         return html

@@ -19,17 +19,25 @@ def compute_func_data(result: AnalysisResult) -> List[Dict]:
         cc = fi.complexity.get("cyclomatic_complexity", 0)
         fan_out = len(set(fi.calls))
         fan_in = len(set(fi.called_by))
-        func_data.append({
-            "qname": qname, "name": fi.name,
-            "class_name": fi.class_name, "cc": cc,
-            "fan_out": fan_out, "fan_in": fan_in,
-            "impact": cc * max(fan_out, 1),
-            "file": fi.file, "module": fi.module,
-        })
+        func_data.append(
+            {
+                "qname": qname,
+                "name": fi.name,
+                "class_name": fi.class_name,
+                "cc": cc,
+                "fan_out": fan_out,
+                "fan_in": fan_in,
+                "impact": cc * max(fan_out, 1),
+                "file": fi.file,
+                "module": fi.module,
+            }
+        )
     return sorted(func_data, key=lambda x: x["impact"], reverse=True)
 
 
-def scan_file_sizes(project_path: Optional[Path], result: Optional[AnalysisResult] = None) -> Dict[str, int]:
+def scan_file_sizes(
+    project_path: Optional[Path], result: Optional[AnalysisResult] = None
+) -> Dict[str, int]:
     """Return per-file line counts, preferring already-analyzed module data."""
     file_lines: Dict[str, int] = {}
 
@@ -37,7 +45,7 @@ def scan_file_sizes(project_path: Optional[Path], result: Optional[AnalysisResul
     if result and result.modules:
         for mi in result.modules.values():
             if mi.file and not is_excluded(mi.file):
-                lc = mi.line_count if hasattr(mi, 'line_count') and mi.line_count else 0
+                lc = mi.line_count if hasattr(mi, "line_count") and mi.line_count else 0
                 if lc == 0:
                     lc = len(mi.functions) + len(mi.classes)
                 if lc > 0:
@@ -50,16 +58,28 @@ def scan_file_sizes(project_path: Optional[Path], result: Optional[AnalysisResul
         return file_lines
 
     import os
-    exclude = {'.git', '__pycache__', 'node_modules', 'venv', '.venv',
-               'env', '.env', 'site-packages', 'dist', 'build', '.tox'}
+
+    exclude = {
+        ".git",
+        "__pycache__",
+        "node_modules",
+        "venv",
+        ".venv",
+        "env",
+        ".env",
+        "site-packages",
+        "dist",
+        "build",
+        ".tox",
+    }
     for dirpath, dirnames, filenames in os.walk(str(project_path)):
         dirnames[:] = [d for d in dirnames if d not in exclude]
         for fn in filenames:
-            if not fn.endswith('.py'):
+            if not fn.endswith(".py"):
                 continue
             fpath = os.path.join(dirpath, fn)
             try:
-                with open(fpath, encoding='utf-8', errors='ignore') as f:
+                with open(fpath, encoding="utf-8", errors="ignore") as f:
                     file_lines[fpath] = sum(1 for _ in f)
             except Exception:
                 pass
@@ -67,18 +87,17 @@ def scan_file_sizes(project_path: Optional[Path], result: Optional[AnalysisResul
 
 
 def aggregate_file_stats(
-    result: AnalysisResult, 
-    file_lines: Dict[str, int]
+    result: AnalysisResult, file_lines: Dict[str, int]
 ) -> Dict[str, Dict]:
     """Aggregate function and class data per file."""
     file_stats: Dict[str, Dict] = defaultdict(
         lambda: {"lines": 0, "funcs": 0, "classes": set(), "max_cc": 0}
     )
-    
+
     # Initialize with line counts
     for fpath, lc in file_lines.items():
         file_stats[fpath]["lines"] = lc
-    
+
     # Aggregate function data
     for qname, fi in result.functions.items():
         if is_excluded(fi.file):
@@ -88,12 +107,12 @@ def aggregate_file_stats(
         fs["max_cc"] = max(fs["max_cc"], fi.complexity.get("cyclomatic_complexity", 0))
         if fi.class_name:
             fs["classes"].add(fi.class_name)
-    
+
     # Aggregate class data
     for qname, ci in result.classes.items():
         if not is_excluded(ci.file):
             file_stats[ci.file]["classes"].add(ci.name)
-    
+
     return file_stats
 
 
@@ -107,19 +126,23 @@ def make_relative_path(fpath: str, project_path: Optional[Path]) -> str:
         return fpath
 
 
-def filter_god_modules(file_stats: Dict[str, Dict], project_path: Optional[Path]) -> List[Dict]:
+def filter_god_modules(
+    file_stats: Dict[str, Dict], project_path: Optional[Path]
+) -> List[Dict]:
     """Filter files to god modules (≥500 lines)."""
     god_modules = []
     for fpath, stats in file_stats.items():
         if stats["lines"] >= GOD_MODULE_LINES:
             rel = make_relative_path(fpath, project_path)
-            god_modules.append({
-                "file": rel, 
-                "lines": stats["lines"],
-                "funcs": stats["funcs"], 
-                "classes": len(stats["classes"]),
-                "max_cc": stats["max_cc"],
-            })
+            god_modules.append(
+                {
+                    "file": rel,
+                    "lines": stats["lines"],
+                    "funcs": stats["funcs"],
+                    "classes": len(stats["classes"]),
+                    "max_cc": stats["max_cc"],
+                }
+            )
     god_modules.sort(key=lambda x: x["lines"], reverse=True)
     return god_modules
 
@@ -127,7 +150,7 @@ def filter_god_modules(file_stats: Dict[str, Dict], project_path: Optional[Path]
 def compute_god_modules(result: AnalysisResult) -> List[Dict]:
     """Identify god modules (≥500 lines) from project files."""
     pp = Path(result.project_path) if result.project_path else None
-    
+
     file_lines = scan_file_sizes(pp, result)
     file_stats = aggregate_file_stats(result, file_lines)
     return filter_god_modules(file_stats, pp)
@@ -175,12 +198,12 @@ def build_context(result: AnalysisResult) -> Dict[str, Any]:
 
 
 __all__ = [
-    'compute_func_data',
-    'scan_file_sizes',
-    'aggregate_file_stats',
-    'make_relative_path',
-    'filter_god_modules',
-    'compute_god_modules',
-    'compute_hub_types',
-    'build_context',
+    "compute_func_data",
+    "scan_file_sizes",
+    "aggregate_file_stats",
+    "make_relative_path",
+    "filter_god_modules",
+    "compute_god_modules",
+    "compute_hub_types",
+    "build_context",
 ]

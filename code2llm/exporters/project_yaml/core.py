@@ -18,7 +18,9 @@ from .hotspots import build_hotspots, build_refactoring
 from .evolution import build_evolution, load_previous_evolution
 
 
-@export_format("project-yaml", description="Unified project.yaml format", extension=".yaml")
+@export_format(
+    "project-yaml", description="Unified project.yaml format", extension=".yaml"
+)
 class ProjectYAMLExporter(BaseExporter):
     """Export unified project.yaml — single source of truth for diagnostics.
 
@@ -26,7 +28,9 @@ class ProjectYAMLExporter(BaseExporter):
     into one machine-parseable YAML file.
     """
 
-    def export(self, result: AnalysisResult, output_path: str, **kwargs) -> Optional[Path]:
+    def export(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Generate project.yaml from AnalysisResult.
 
         If the file already exists, the evolution section is appended (not replaced).
@@ -40,7 +44,9 @@ class ProjectYAMLExporter(BaseExporter):
         data = self._build_project_yaml(result, prev_evolution)
 
         with open(output, "w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            yaml.dump(
+                data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+            )
         return output
 
     def _build_project_yaml(
@@ -49,10 +55,7 @@ class ProjectYAMLExporter(BaseExporter):
         """Build complete project.yaml structure."""
         line_counts = _scan_line_counts(result.project_path, result=result)
         # Filter out venv/site-packages/etc — only count lines of non-excluded files
-        filtered_lines = {
-            k: v for k, v in line_counts.items()
-            if not _is_excluded(k)
-        }
+        filtered_lines = {k: v for k, v in line_counts.items() if not _is_excluded(k)}
         total_lines = sum(filtered_lines.values()) // 2  # keys stored twice (abs + rel)
 
         modules = build_modules(result, line_counts)
@@ -64,25 +67,33 @@ class ProjectYAMLExporter(BaseExporter):
         return {
             "version": "1",
             "project": {
-                "name": Path(result.project_path).name if result.project_path else "unknown",
+                "name": Path(result.project_path).name
+                if result.project_path
+                else "unknown",
                 "repo": result.project_path or "",
                 "language": self._detect_primary_language(result),
                 "analyzed_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "tool": "code2llm",
                 "stats": {
-                    "files": len(set(
-                        fi.file for fi in result.functions.values()
-                        if not _is_excluded(fi.file)
-                    )) or len(result.modules),
+                    "files": len(
+                        set(
+                            fi.file
+                            for fi in result.functions.values()
+                            if not _is_excluded(fi.file)
+                        )
+                    )
+                    or len(result.modules),
                     "lines": total_lines,
-                    "functions": len([
-                        f for f in result.functions.values()
-                        if not _is_excluded(f.file)
-                    ]),
-                    "classes": len([
-                        c for c in result.classes.values()
-                        if not _is_excluded(c.file)
-                    ]),
+                    "functions": len(
+                        [
+                            f
+                            for f in result.functions.values()
+                            if not _is_excluded(f.file)
+                        ]
+                    ),
+                    "classes": len(
+                        [c for c in result.classes.values() if not _is_excluded(c.file)]
+                    ),
                 },
             },
             "health": health,
@@ -108,7 +119,7 @@ class ProjectYAMLExporter(BaseExporter):
                     break
             if not detected:
                 # Fallback to extension
-                ext = Path(mi.file).suffix.lstrip('.').lower()
+                ext = Path(mi.file).suffix.lstrip(".").lower()
                 if ext:
                     lang_counts[ext] += 1
 

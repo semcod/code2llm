@@ -74,8 +74,15 @@ def run_benchmark(project_path: str):
     # Run evolution analysis
     with tempfile.TemporaryDirectory() as tmpdir:
         cmd = [
-            sys.executable, "-m", "code2llm",
-            project_path, "-f", "evolution", "-o", tmpdir, "--no-png"
+            sys.executable,
+            "-m",
+            "code2llm",
+            project_path,
+            "-f",
+            "evolution",
+            "-o",
+            tmpdir,
+            "--no-png",
         ]
         print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -125,7 +132,7 @@ def run_benchmark(project_path: str):
     # Save current for next run
     save_current(history_file, after)
     print(f"  Metrics saved → {history_file}")
-    print(f"  Run again after refactoring to see delta!\n")
+    print("  Run again after refactoring to see delta!\n")
 
     # Show evolution.toon content
     print("-" * 60)

@@ -8,21 +8,21 @@ from .core.config import ANALYSIS_MODES
 
 def get_version() -> str:
     """Read version from VERSION file."""
-    version_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION')
+    version_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "VERSION")
     try:
-        with open(version_file, 'r') as f:
+        with open(version_file, "r") as f:
             return f.read().strip()
     except Exception:
-        return 'unknown'
+        return "unknown"
 
 
 def create_parser() -> argparse.ArgumentParser:
     """Create CLI argument parser."""
     parser = argparse.ArgumentParser(
-        prog='code2llm',
-        description='Analyze Python code control flow, data flow, and call graphs',
+        prog="code2llm",
+        description="Analyze Python code control flow, data flow, and call graphs",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
+        epilog="""
 Examples:
   code2llm ./                                       # Default: TOON diagnostics + README
   code2llm ./ -f all -o ./docs --no-chunk           # All core formats + project.toon.yaml + prompt.txt to ./docs/
@@ -62,272 +62,259 @@ Strategy Options (--strategy):
   quick     — Fast overview, fewer files analyzed
   standard  — Balanced analysis [default]
   deep      — Complete analysis, all files
-        '''
+        """,
     )
-    
+
     # Add version argument
     parser.add_argument(
-        '--version', '-V',
-        action='version',
-        version=f'%(prog)s {get_version()}'
+        "--version", "-V", action="version", version=f"%(prog)s {get_version()}"
     )
 
     # Add backward compatibility source argument first
     parser.add_argument(
-        'source',
-        nargs='?',
-        help='Path to Python source file or directory'
+        "source", nargs="?", help="Path to Python source file or directory"
     )
-    
+
     parser.add_argument(
-        '-m', '--mode',
+        "-m",
+        "--mode",
         choices=list(ANALYSIS_MODES.keys()),
-        default='hybrid',
-        help=f'Analysis mode (default: hybrid)'
-    )
-    
-    parser.add_argument(
-        '-o', '--output',
-        default='./code2llm_output',
-        help='Output directory (default: ./code2llm_output)'
-    )
-    
-    parser.add_argument(
-        '-f', '--format',
-        default='toon',
-        help='Output formats: toon,map,flow,context,code2logic,yaml,json,mermaid,evolution,calls,png,project-yaml,all (default: toon)'
-    )
-    
-    parser.add_argument(
-        '--full',
-        action='store_true',
-        help='Include all fields in output (including empty/null values)'
-    )
-    
-    parser.add_argument(
-        '--no-patterns',
-        action='store_true',
-        help='Disable pattern detection'
-    )
-    
-    parser.add_argument(
-        '--max-depth',
-        type=int,
-        default=10,
-        help='Maximum analysis depth (default: 10)'
-    )
-    
-    parser.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='Verbose output'
-    )
-    
-    parser.add_argument(
-        '--no-png',
-        action='store_true',
-        help='Skip automatic PNG generation from Mermaid files'
+        default="hybrid",
+        help="Analysis mode (default: hybrid)",
     )
 
     parser.add_argument(
-        '--png',
-        action='store_true',
-        help='Generate PNG diagrams from Mermaid files (opt-in; also enabled by -f mermaid)'
-    )
-    
-    parser.add_argument(
-        '--no-cache',
-        action='store_true',
-        help='Disable persistent cache (~/.code2llm/); always analyze all files'
+        "-o",
+        "--output",
+        default="./code2llm_output",
+        help="Output directory (default: ./code2llm_output)",
     )
 
     parser.add_argument(
-        '--force',
-        action='store_true',
-        help='Force re-analysis and re-export even when cache is valid (alias for --no-cache)'
+        "-f",
+        "--format",
+        default="toon",
+        help="Output formats: toon,map,flow,context,code2logic,yaml,json,mermaid,evolution,calls,png,project-yaml,all (default: toon)",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be exported without writing files'
+        "--full",
+        action="store_true",
+        help="Include all fields in output (including empty/null values)",
     )
 
     parser.add_argument(
-        '--watch',
-        action='store_true',
-        help='Auto-detect changed files and only re-analyze those (faster subsequent runs)'
+        "--no-patterns", action="store_true", help="Disable pattern detection"
     )
 
     parser.add_argument(
-        '--fast',
-        action='store_true',
-        help='Skip expensive analyses (vulture, centrality, DFG, communities) for faster runs'
+        "--max-depth", type=int, default=10, help="Maximum analysis depth (default: 10)"
+    )
+
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+
+    parser.add_argument(
+        "--no-png",
+        action="store_true",
+        help="Skip automatic PNG generation from Mermaid files",
     )
 
     parser.add_argument(
-        '--strategy',
-        choices=['quick', 'standard', 'deep'],
-        default='standard',
-        help='Analysis strategy: quick (fast overview), standard (balanced), deep (complete)'
+        "--png",
+        action="store_true",
+        help="Generate PNG diagrams from Mermaid files (opt-in; also enabled by -f mermaid)",
     )
-    
+
     parser.add_argument(
-        '--streaming',
-        action='store_true',
-        help='Use streaming analysis with progress reporting'
+        "--no-cache",
+        action="store_true",
+        help="Disable persistent cache (~/.code2llm/); always analyze all files",
     )
-    
+
     parser.add_argument(
-        '--incremental',
-        action='store_true',
-        help='Only analyze changed files (requires previous run)'
+        "--force",
+        action="store_true",
+        help="Force re-analysis and re-export even when cache is valid (alias for --no-cache)",
     )
-    
+
     parser.add_argument(
-        '--max-memory',
-        type=int,
-        default=1000,
-        help='Max memory in MB (default: 1000)'
+        "--dry-run",
+        action="store_true",
+        help="Show what would be exported without writing files",
     )
-    
+
     parser.add_argument(
-        '--split-output',
-        action='store_true',
-        help='Split YAML output into multiple files (summary, functions, classes, modules, entry_points)'
+        "--watch",
+        action="store_true",
+        help="Auto-detect changed files and only re-analyze those (faster subsequent runs)",
     )
-    
+
     parser.add_argument(
-        '--separate-orphans',
-        action='store_true',
-        help='Separate consolidated project from orphaned/isolated functions into different folders'
+        "--fast",
+        action="store_true",
+        help="Skip expensive analyses (vulture, centrality, DFG, communities) for faster runs",
     )
-    
+
     parser.add_argument(
-        '--data-flow',
-        action='store_true',
-        help='Export data flow analysis (pipelines, state patterns, dependencies, events)'
+        "--strategy",
+        choices=["quick", "standard", "deep"],
+        default="standard",
+        help="Analysis strategy: quick (fast overview), standard (balanced), deep (complete)",
     )
-    
+
     parser.add_argument(
-        '--data-structures',
-        action='store_true',
-        help='Export data structure analysis (types, flows, optimization opportunities)'
+        "--streaming",
+        action="store_true",
+        help="Use streaming analysis with progress reporting",
     )
-    
+
     parser.add_argument(
-        '--refactor',
-        action='store_true',
-        help='Enable AI-driven refactoring analysis and prompt generation'
+        "--incremental",
+        action="store_true",
+        help="Only analyze changed files (requires previous run)",
     )
-    
+
     parser.add_argument(
-        '--smell',
-        help='Filter refactoring by specific code smell (e.g., god_function, feature_envy)'
+        "--max-memory", type=int, default=1000, help="Max memory in MB (default: 1000)"
     )
-    
+
     parser.add_argument(
-        '--llm-format',
-        choices=['claude', 'gpt', 'markdown'],
-        default='markdown',
-        help='Format for refactoring prompts (default: markdown)'
+        "--split-output",
+        action="store_true",
+        help="Split YAML output into multiple files (summary, functions, classes, modules, entry_points)",
     )
-    
+
     parser.add_argument(
-        '--readme',
-        action='store_true',
+        "--separate-orphans",
+        action="store_true",
+        help="Separate consolidated project from orphaned/isolated functions into different folders",
+    )
+
+    parser.add_argument(
+        "--data-flow",
+        action="store_true",
+        help="Export data flow analysis (pipelines, state patterns, dependencies, events)",
+    )
+
+    parser.add_argument(
+        "--data-structures",
+        action="store_true",
+        help="Export data structure analysis (types, flows, optimization opportunities)",
+    )
+
+    parser.add_argument(
+        "--refactor",
+        action="store_true",
+        help="Enable AI-driven refactoring analysis and prompt generation",
+    )
+
+    parser.add_argument(
+        "--smell",
+        help="Filter refactoring by specific code smell (e.g., god_function, feature_envy)",
+    )
+
+    parser.add_argument(
+        "--llm-format",
+        choices=["claude", "gpt", "markdown"],
+        default="markdown",
+        help="Format for refactoring prompts (default: markdown)",
+    )
+
+    parser.add_argument(
+        "--readme",
+        action="store_true",
         default=True,
-        help='Generate README.md with documentation of all output files (default: enabled)'
-    )
-    
-    parser.add_argument(
-        '--chunk',
-        action='store_true',
-        help='Automatically split large repositories into smaller subprojects'
+        help="Generate README.md with documentation of all output files (default: enabled)",
     )
 
     parser.add_argument(
-        '--no-chunk',
-        action='store_true',
-        help='Disable chunked analysis even for large repositories'
+        "--chunk",
+        action="store_true",
+        help="Automatically split large repositories into smaller subprojects",
     )
-    
+
     parser.add_argument(
-        '--chunk-size',
+        "--no-chunk",
+        action="store_true",
+        help="Disable chunked analysis even for large repositories",
+    )
+
+    parser.add_argument(
+        "--chunk-size",
         type=int,
         default=256,
-        help='Maximum output size per chunk in KB (default: 256)'
+        help="Maximum output size per chunk in KB (default: 256)",
     )
-    
+
     parser.add_argument(
-        '--max-files-per-chunk',
+        "--max-files-per-chunk",
         type=int,
         default=50,
-        help='Maximum files per chunk for large repos (default: 50)'
+        help="Maximum files per chunk for large repos (default: 50)",
     )
-    
+
     parser.add_argument(
-        '--auto-chunk-threshold',
+        "--auto-chunk-threshold",
         type=int,
         default=100,
-        help='File count threshold to auto-enable chunking (default: 100)'
+        help="File count threshold to auto-enable chunking (default: 100)",
     )
-    
+
     parser.add_argument(
-        '--skip-subprojects',
-        nargs='+',
+        "--skip-subprojects",
+        nargs="+",
         default=[],
-        help='Skip specific subprojects (e.g., --skip-subprojects tests examples)'
+        help="Skip specific subprojects (e.g., --skip-subprojects tests examples)",
     )
-    
+
     parser.add_argument(
-        '--only-subproject',
-        help='Analyze only specific subproject (e.g., --only-subproject src)'
+        "--only-subproject",
+        help="Analyze only specific subproject (e.g., --only-subproject src)",
     )
-    
+
     parser.add_argument(
-        '--exclude',
-        nargs='+',
+        "--exclude",
+        nargs="+",
         default=[],
-        help='Exclude specific directories or patterns (e.g., --exclude vendor build test)'
+        help="Exclude specific directories or patterns (e.g., --exclude vendor build test)",
     )
-    
+
     parser.add_argument(
-        '--no-gitignore',
-        action='store_true',
-        help='Disable .gitignore support (include all files)'
+        "--no-gitignore",
+        action="store_true",
+        help="Disable .gitignore support (include all files)",
     )
-    
+
     parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='Validate generated chunked output - check all chunks have required files'
+        "--validate",
+        action="store_true",
+        help="Validate generated chunked output - check all chunks have required files",
     )
 
     # Flow diagram options (Plan R1)
     parser.add_argument(
-        '--flow-detail',
-        action='store_true',
-        help='Export detailed flow diagram (flow_detailed.mmd) with per-module view (~150 nodes)'
+        "--flow-detail",
+        action="store_true",
+        help="Export detailed flow diagram (flow_detailed.mmd) with per-module view (~150 nodes)",
     )
 
     parser.add_argument(
-        '--flow-full',
-        action='store_true',
-        help='Export full flow diagram (flow_full.mmd) with all nodes (debug view)'
+        "--flow-full",
+        action="store_true",
+        help="Export full flow diagram (flow_full.mmd) with all nodes (debug view)",
     )
 
     parser.add_argument(
-        '--flow-include-examples',
-        action='store_true',
-        help='Include examples/, benchmarks/, demo_langs/, tests/ in flow diagrams'
+        "--flow-include-examples",
+        action="store_true",
+        help="Include examples/, benchmarks/, demo_langs/, tests/ in flow diagrams",
     )
 
     # Toon YAML export option
     parser.add_argument(
-        '--toon-yaml',
-        action='store_true',
-        help='Export TOON format as YAML (analysis.toon.yaml) instead of plain text'
+        "--toon-yaml",
+        action="store_true",
+        help="Export TOON format as YAML (analysis.toon.yaml) instead of plain text",
     )
 
     return parser

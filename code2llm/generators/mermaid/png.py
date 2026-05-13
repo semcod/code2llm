@@ -29,11 +29,11 @@ def _is_png_fresh(mmd_file: Path, output_dir: Path) -> bool:
 def _prepare_and_render(mmd_file: Path, output_dir: Path, timeout: int) -> bool:
     """Validate, optionally fix, then render a single .mmd file to PNG."""
     output_file = output_dir / f"{mmd_file.stem}.png"
-    
+
     # Skip if PNG is already fresh
     if _is_png_fresh(mmd_file, output_dir):
         return True
-    
+
     errors = validate_mermaid_file(mmd_file)
     if errors:
         print(f"  Fixing {mmd_file.name}: {len(errors)} issues")
@@ -46,14 +46,17 @@ def _prepare_and_render(mmd_file: Path, output_dir: Path, timeout: int) -> bool:
 
 
 def generate_pngs(
-    input_dir: Path, output_dir: Path, timeout: int = DEFAULT_PNG_TIMEOUT, max_workers: int = 0
+    input_dir: Path,
+    output_dir: Path,
+    timeout: int = DEFAULT_PNG_TIMEOUT,
+    max_workers: int = 0,
 ) -> int:
     """Generate PNG files from all .mmd files in input_dir (parallel).
 
     Args:
         max_workers: Number of parallel workers (0 = auto-detect from CPU count)
     """
-    mmd_files = list(input_dir.glob('*.mmd'))
+    mmd_files = list(input_dir.glob("*.mmd"))
     if not mmd_files:
         return 0
 
@@ -63,7 +66,10 @@ def generate_pngs(
 
     success_count = 0
     with ThreadPoolExecutor(max_workers=min(max_workers, len(mmd_files))) as pool:
-        futures = {pool.submit(_prepare_and_render, f, output_dir, timeout): f for f in mmd_files}
+        futures = {
+            pool.submit(_prepare_and_render, f, output_dir, timeout): f
+            for f in mmd_files
+        }
         for future in as_completed(futures):
             if future.result():
                 success_count += 1
@@ -73,12 +79,18 @@ def generate_pngs(
 def _setup_puppeteer_config() -> tuple[int, int, Optional[str], Optional[str]]:
     """Setup puppeteer config file and return (max_text_size, max_edges, cfg_path, puppeteer_cfg_path)."""
     try:
-        max_text_size = int(os.getenv('CODE2FLOW_MERMAID_MAX_TEXT_SIZE', str(DEFAULT_MERMAID_MAX_TEXT_SIZE)))
+        max_text_size = int(
+            os.getenv(
+                "CODE2FLOW_MERMAID_MAX_TEXT_SIZE", str(DEFAULT_MERMAID_MAX_TEXT_SIZE)
+            )
+        )
     except Exception:
         max_text_size = DEFAULT_MERMAID_MAX_TEXT_SIZE
 
     try:
-        max_edges = int(os.getenv('CODE2FLOW_MERMAID_MAX_EDGES', str(DEFAULT_MERMAID_MAX_EDGES)))
+        max_edges = int(
+            os.getenv("CODE2FLOW_MERMAID_MAX_EDGES", str(DEFAULT_MERMAID_MAX_EDGES))
+        )
     except Exception:
         max_edges = DEFAULT_MERMAID_MAX_EDGES
 
@@ -90,7 +102,9 @@ def _setup_puppeteer_config() -> tuple[int, int, Optional[str], Optional[str]]:
             "maxEdges": max_edges,
             "theme": "default",
         }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_cfg:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as tmp_cfg:
             tmp_cfg.write(json.dumps(cfg))
             cfg_path = tmp_cfg.name
     except Exception:
@@ -101,7 +115,9 @@ def _setup_puppeteer_config() -> tuple[int, int, Optional[str], Optional[str]]:
         puppeteer_cfg = {
             "args": ["--no-sandbox", "--disable-setuid-sandbox"],
         }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_pcfg:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as tmp_pcfg:
             tmp_pcfg.write(json.dumps(puppeteer_cfg))
             puppeteer_cfg_path = tmp_pcfg.name
     except Exception:
@@ -117,21 +133,51 @@ def _build_renderers(
     puppeteer_cfg_path: Optional[str] = None,
 ) -> List[tuple]:
     """Build renderer command list based on config availability."""
-    base_mmdc = ['mmdc', '-i', str(mmd_file), '-o', str(output_file), '-t', 'default', '-b', 'white', '-w', '2400', '-H', '1800']
-    base_npx = ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', str(mmd_file), '-o', str(output_file), '-t', 'default', '-b', 'white', '-w', '2400', '-H', '1800']
+    base_mmdc = [
+        "mmdc",
+        "-i",
+        str(mmd_file),
+        "-o",
+        str(output_file),
+        "-t",
+        "default",
+        "-b",
+        "white",
+        "-w",
+        "2400",
+        "-H",
+        "1800",
+    ]
+    base_npx = [
+        "npx",
+        "-y",
+        "@mermaid-js/mermaid-cli",
+        "-i",
+        str(mmd_file),
+        "-o",
+        str(output_file),
+        "-t",
+        "default",
+        "-b",
+        "white",
+        "-w",
+        "2400",
+        "-H",
+        "1800",
+    ]
 
     if cfg_path:
-        base_mmdc.extend(['-c', cfg_path])
-        base_npx.extend(['-c', cfg_path])
+        base_mmdc.extend(["-c", cfg_path])
+        base_npx.extend(["-c", cfg_path])
 
     if puppeteer_cfg_path:
-        base_mmdc.extend(['-p', puppeteer_cfg_path])
-        base_npx.extend(['-p', puppeteer_cfg_path])
+        base_mmdc.extend(["-p", puppeteer_cfg_path])
+        base_npx.extend(["-p", puppeteer_cfg_path])
 
     return [
-        ('mmdc', base_mmdc),
-        ('npx', base_npx),
-        ('puppeteer', None),
+        ("mmdc", base_mmdc),
+        ("npx", base_npx),
+        ("puppeteer", None),
     ]
 
 
@@ -146,15 +192,20 @@ def _run_mmdc_subprocess(
     """Run mmdc/npx/puppeteer renderers and return success status."""
     for renderer_name, cmd in renderers:
         try:
-            if renderer_name == 'puppeteer':
+            if renderer_name == "puppeteer":
                 if generate_with_puppeteer(
-                    mmd_file, output_file, timeout,
-                    max_text_size=max_text_size, max_edges=max_edges,
+                    mmd_file,
+                    output_file,
+                    timeout,
+                    max_text_size=max_text_size,
+                    max_edges=max_edges,
                 ):
                     return True
                 continue
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=timeout
+            )
             if result.returncode == 0:
                 return True
             else:
@@ -170,7 +221,9 @@ def _run_mmdc_subprocess(
     return False
 
 
-def generate_single_png(mmd_file: Path, output_file: Path, timeout: int = DEFAULT_PNG_TIMEOUT) -> bool:
+def generate_single_png(
+    mmd_file: Path, output_file: Path, timeout: int = DEFAULT_PNG_TIMEOUT
+) -> bool:
     """Generate PNG from single Mermaid file using available renderers."""
     # Create output directory
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -202,8 +255,8 @@ def generate_with_puppeteer(
 ) -> bool:
     """Generate PNG using Puppeteer with HTML template."""
     try:
-        mmd_content = mmd_file.read_text(encoding='utf-8')
-        
+        mmd_content = mmd_file.read_text(encoding="utf-8")
+
         html_template = f"""
 <!DOCTYPE html>
 <html>
@@ -225,43 +278,52 @@ def generate_with_puppeteer(
 </body>
 </html>
 """
-        
+
         # Create temporary HTML
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as tmp_html:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".html", delete=False
+        ) as tmp_html:
             tmp_html.write(html_template)
             tmp_html_path = tmp_html.name
-        
+
         try:
             # Use puppeteer screenshot
             cmd = [
-                'npx', '-y', 'puppeteer',
-                'screenshot',
-                '--url', f'file://{tmp_html_path}',
-                '--output', str(output_file),
-                '--wait-for', '.mermaid',
-                '--full-page',
-                '--no-sandbox',
+                "npx",
+                "-y",
+                "puppeteer",
+                "screenshot",
+                "--url",
+                f"file://{tmp_html_path}",
+                "--output",
+                str(output_file),
+                "--wait-for",
+                ".mermaid",
+                "--full-page",
+                "--no-sandbox",
             ]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-            
+
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=timeout
+            )
+
             return result.returncode == 0
-            
+
         finally:
             os.unlink(tmp_html_path)
-            
+
     except Exception as e:
         print(f"    Puppeteer error: {e}")
         return False
 
 
 __all__ = [
-    'generate_pngs',
-    'generate_single_png',
-    'generate_with_puppeteer',
-    '_is_png_fresh',
-    '_prepare_and_render',
-    '_setup_puppeteer_config',
-    '_build_renderers',
-    '_run_mmdc_subprocess',
+    "generate_pngs",
+    "generate_single_png",
+    "generate_with_puppeteer",
+    "_is_png_fresh",
+    "_prepare_and_render",
+    "_setup_puppeteer_config",
+    "_build_renderers",
+    "_run_mmdc_subprocess",
 ]

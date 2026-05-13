@@ -10,20 +10,22 @@ from code2llm.analysis.utils import ast_unparse, qualified_name
 
 class CallGraphExtractor(ast.NodeVisitor):
     """Extract call graph from AST."""
-    
+
     def __init__(self, config: Config):
         self.config = config
         self.result = AnalysisResult()
         self.module_name = ""
         self.file_path = ""
-        
+
         # Context
         self.function_stack = []
         self.class_stack = []
         self.imports = {}
         self.astroid_tree = None
-        
-    def extract(self, tree: ast.AST, module_name: str, file_path: str) -> AnalysisResult:
+
+    def extract(
+        self, tree: ast.AST, module_name: str, file_path: str
+    ) -> AnalysisResult:
         """Extract call graph from AST."""
         self.result = AnalysisResult()
         self.module_name = module_name
@@ -31,14 +33,15 @@ class CallGraphExtractor(ast.NodeVisitor):
         self.function_stack = []
         self.class_stack = []
         self.imports = {}
-        
+
         # Try to get astroid tree for better resolution (lazy import - heavy module)
         try:
             import astroid as _astroid
+
             self.astroid_tree = _astroid.MANAGER.ast_from_file(file_path)
         except Exception:
             self.astroid_tree = None
-            
+
         self.visit(tree)
         self._calculate_metrics()
         return self.result
@@ -55,20 +58,22 @@ class CallGraphExtractor(ast.NodeVisitor):
         for func_name, func_info in self.result.functions.items():
             fan_out = len(set(func_info.calls))
             fan_in = len(set(func_info.called_by))
-            
+
             self.result.metrics[func_name] = {
                 "fan_in": fan_in,
                 "fan_out": fan_out,
-                "complexity": getattr(func_info, 'complexity', 1) # Placeholder for now
+                "complexity": getattr(
+                    func_info, "complexity", 1
+                ),  # Placeholder for now
             }
-        
+
     def visit_Import(self, node: ast.Import):
         """Track imports."""
         for alias in node.names:
             name = alias.asname if alias.asname else alias.name
             self.imports[name] = alias.name
             self.result.imports[name] = alias.name
-            
+
     def visit_ImportFrom(self, node: ast.ImportFrom):
         """Track from imports."""
         module = node.module or ""
@@ -77,68 +82,68 @@ class CallGraphExtractor(ast.NodeVisitor):
             full_name = f"{module}.{alias.name}" if module else alias.name
             self.imports[name] = full_name
             self.result.imports[name] = full_name
-            
+
     def visit_ClassDef(self, node: ast.ClassDef):
         """Visit class definition."""
         self.class_stack.append(node.name)
-        
+
         # Store class info
         self.result.classes[node.name] = {
-            'file': self.file_path,
-            'line': node.lineno,
-            'methods': [m.name for m in node.body if isinstance(m, ast.FunctionDef)],
-            'bases': [self._expr_to_str(b) for b in node.bases]
+            "file": self.file_path,
+            "line": node.lineno,
+            "methods": [m.name for m in node.body if isinstance(m, ast.FunctionDef)],
+            "bases": [self._expr_to_str(b) for b in node.bases],
         }
-        
+
         for stmt in node.body:
             self.visit(stmt)
-            
+
         self.class_stack.pop()
-        
+
     def visit_FunctionDef(self, node: ast.FunctionDef):
         """Visit function definition and track calls within it."""
         func_name = qualified_name(self.module_name, self.class_stack, node.name)
         self.function_stack.append(func_name)
-        
+
         # Visit body to find calls
         for stmt in node.body:
             self.visit(stmt)
-            
+
         self.function_stack.pop()
-        
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
         """Visit async function."""
         self.visit_FunctionDef(node)
-        
+
     def visit_Call(self, node: ast.Call):
         """Track function calls."""
         if not self.function_stack:
             self.generic_visit(node)
             return
-            
+
         caller = self.function_stack[-1]
         callee = self._resolve_call(node.func)
-        
+
         # If ast-based resolution failed or returned None.sth, try astroid
-        if (not callee or 'None.' in callee) and self.astroid_tree:
+        if (not callee or "None." in callee) and self.astroid_tree:
             astroid_callee = self._resolve_with_astroid(node)
             if astroid_callee:
                 callee = astroid_callee
-        
+
         if callee and caller in self.result.functions:
             self.result.functions[caller].calls.append(callee)
-            
+
             # Create call edge
             edge = FlowEdge(
                 source=-1,  # Will be resolved
                 target=-1,
                 edge_type="call",
-                metadata={'caller': caller, 'callee': callee}
+                metadata={"caller": caller, "callee": callee},
             )
             self.result.call_edges.append(edge)
-            
+
         self.generic_visit(node)
-        
+
     def _resolve_call(self, node: ast.AST) -> Optional[str]:
         """Resolve a call to its full name."""
         if isinstance(node, ast.Name):
@@ -146,53 +151,57 @@ class CallGraphExtractor(ast.NodeVisitor):
             if node.id in self.imports:
                 return self.imports[node.id]
             return f"{self.module_name}.{node.id}"
-            
+
         elif isinstance(node, ast.Attribute):
             # Method or module.function call
             parts = []
             current = node
-            
+
             while isinstance(current, ast.Attribute):
                 parts.append(current.attr)
                 current = current.value
-                
+
             if isinstance(current, ast.Name):
                 parts.append(current.id)
                 parts.reverse()
-                
+
                 # Check if root is an import
                 root = parts[0]
                 if root in self.imports:
                     return f"{self.imports[root]}.{'.'.join(parts[1:])}"
-                    
+
                 # Check for self/cls
-                if root in ('self', 'cls') and self.class_stack:
+                if root in ("self", "cls") and self.class_stack:
                     return f"{self.module_name}.{self.class_stack[-1]}.{'.'.join(parts[1:])}"
-                    
+
                 return f"{self.module_name}.{'.'.join(parts)}"
-                
+
         return None
 
     def _resolve_with_astroid(self, node: ast.Call) -> Optional[str]:
         """Use astroid to infer the call target."""
         if not self.astroid_tree:
             return None
-            
+
         try:
             # Find the corresponding astroid node by line/col
             # This is a bit slow but robust
             import astroid as _astroid
+
             for astroid_node in self.astroid_tree.nodes_of_class(_astroid.Call):
-                if astroid_node.lineno == node.lineno and astroid_node.col_offset == node.col_offset:
+                if (
+                    astroid_node.lineno == node.lineno
+                    and astroid_node.col_offset == node.col_offset
+                ):
                     # Infer the targets
                     inferred = astroid_node.func.infer()
                     for target in inferred:
-                        if hasattr(target, 'qname'):
+                        if hasattr(target, "qname"):
                             return target.qname()
                     break
         except Exception:
             pass
         return None
-        
+
     def _expr_to_str(self, node: ast.AST) -> str:
         return ast_unparse(node, default_none="")

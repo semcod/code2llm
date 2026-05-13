@@ -78,7 +78,7 @@ def _read_previous_cc_avg(evolution_path: Path) -> Optional[float]:
 
 
 __all__ = [
-    'build_alerts',
-    'build_hotspots',
-    'load_evolution_trend',
+    "build_alerts",
+    "build_hotspots",
+    "load_evolution_trend",
 ]

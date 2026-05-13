@@ -13,7 +13,7 @@ CC_WARNING = 15
 
 class ModuleDetailRenderer:
     """Renders detailed module information."""
-    
+
     def render_details(self, ctx: Dict[str, Any]) -> List[str]:
         """Render D: section — per-module details sorted by max CC desc."""
         result: AnalysisResult = ctx["result"]
@@ -25,7 +25,9 @@ class ModuleDetailRenderer:
             self._render_module_detail(result, mi, dup_classes, lines)
         return lines
 
-    def _rank_modules_by_cc(self, result: AnalysisResult) -> List[Tuple[str, ModuleInfo, float]]:
+    def _rank_modules_by_cc(
+        self, result: AnalysisResult
+    ) -> List[Tuple[str, ModuleInfo, float]]:
         """Sort modules by max cyclomatic complexity (desc)."""
         mod_items = []
         for mname, mi in result.modules.items():
@@ -39,7 +41,9 @@ class ModuleDetailRenderer:
         mod_items.sort(key=lambda x: x[2], reverse=True)
         return mod_items
 
-    def _render_module_detail(self, result: AnalysisResult, mi: ModuleInfo, dup_classes: set, lines: List[str]) -> None:
+    def _render_module_detail(
+        self, result: AnalysisResult, mi: ModuleInfo, dup_classes: set, lines: List[str]
+    ) -> None:
         """Render detail for a single module: imports, exports, classes, funcs."""
         rel = _rel_path(mi.file, result.project_path)
         lines.append(f"  {rel}:")
@@ -73,7 +77,9 @@ class ModuleDetailRenderer:
                 exports.append(fi.name)
         return exports
 
-    def _render_module_classes(self, result: AnalysisResult, mi: ModuleInfo, dup_classes: set, lines: List[str]) -> None:
+    def _render_module_classes(
+        self, result: AnalysisResult, mi: ModuleInfo, dup_classes: set, lines: List[str]
+    ) -> None:
         """Render classes with call chains within a module."""
         for cq in mi.classes:
             ci = result.classes.get(cq)
@@ -93,9 +99,13 @@ class ModuleDetailRenderer:
             root_method = self._find_root_method(method_items)
 
             if root_method:
-                self._render_call_chain(root_method, method_items, result, lines, "      ")
+                self._render_call_chain(
+                    root_method, method_items, result, lines, "      "
+                )
 
-    def _get_method_items(self, result: AnalysisResult, ci: ClassInfo) -> List[Tuple[FunctionInfo, float, int]]:
+    def _get_method_items(
+        self, result: AnalysisResult, ci: ClassInfo
+    ) -> List[Tuple[FunctionInfo, float, int]]:
         """Get method items for call chain rendering."""
         method_items = []
         for mq in ci.methods:
@@ -106,7 +116,9 @@ class ModuleDetailRenderer:
                 method_items.append((fi, cc, arity))
         return method_items
 
-    def _find_root_method(self, method_items: List[Tuple[FunctionInfo, float, int]]) -> FunctionInfo:
+    def _find_root_method(
+        self, method_items: List[Tuple[FunctionInfo, float, int]]
+    ) -> FunctionInfo:
         """Find root method for call chain rendering."""
         # find root method
         root_method = None
@@ -118,14 +130,14 @@ class ModuleDetailRenderer:
             root_method = method_items[0][0]
         return root_method
 
-    def _render_standalone_funcs(self, result: AnalysisResult, mi: ModuleInfo, lines: List[str]) -> None:
+    def _render_standalone_funcs(
+        self, result: AnalysisResult, mi: ModuleInfo, lines: List[str]
+    ) -> None:
         """Render standalone (non-class) functions within a module."""
         for fq in mi.functions:
             fi = result.functions.get(fq)
             if fi and not fi.class_name:
-                args_str = ",".join(
-                    a for a in fi.args if a != "self"
-                )
+                args_str = ",".join(a for a in fi.args if a != "self")
                 ret = ""
                 if fi.returns:
                     ret = f"->{fi.returns}"
@@ -147,9 +159,7 @@ class ModuleDetailRenderer:
             cc = fi.complexity.get("cyclomatic_complexity", 0)
             arity = len(fi.args) - (1 if fi.is_method else 0)
             cc_marker = "  !" if cc >= CC_WARNING else ""
-            lines.append(
-                f"{indent}{prefix}{fi.name}({arity})  CC={cc:.1f}{cc_marker}"
-            )
+            lines.append(f"{indent}{prefix}{fi.name}({arity})  CC={cc:.1f}{cc_marker}")
             if depth > 3:
                 return
             for call in fi.calls:

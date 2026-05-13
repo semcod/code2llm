@@ -7,76 +7,99 @@ from code2llm.core.models import ClassInfo, FunctionInfo, ModuleInfo
 from code2llm.core.lang.base import calculate_complexity_regex, extract_calls_regex
 
 
-def _analyze_go_regex(content: str, file_path: str, module_name: str, stats: Dict) -> Dict:
+def _analyze_go_regex(
+    content: str, file_path: str, module_name: str, stats: Dict
+) -> Dict:
     """Regex fallback for Go analysis."""
     result = {
-        'module': ModuleInfo(name=module_name, file=file_path, is_package=False),
-        'functions': {},
-        'classes': {},
-        'nodes': {},
-        'edges': [],
+        "module": ModuleInfo(name=module_name, file=file_path, is_package=False),
+        "functions": {},
+        "classes": {},
+        "nodes": {},
+        "edges": [],
     }
 
-    lines = content.split('\n')
-    import_pattern = re.compile(r'^\s*import\s+(?:\(\s*["\']([^"\']+)["\']|["\']([^"\']+)["\'])')
-    func_pattern = re.compile(r'^\s*func\s+(?:\([^)]+\)\s+)?(\w+)\s*\(')
-    struct_pattern = re.compile(r'^\s*type\s+(\w+)\s+struct')
-    interface_pattern = re.compile(r'^\s*type\s+(\w+)\s+interface')
+    lines = content.split("\n")
+    import_pattern = re.compile(
+        r'^\s*import\s+(?:\(\s*["\']([^"\']+)["\']|["\']([^"\']+)["\'])'
+    )
+    func_pattern = re.compile(r"^\s*func\s+(?:\([^)]+\)\s+)?(\w+)\s*\(")
+    struct_pattern = re.compile(r"^\s*type\s+(\w+)\s+struct")
+    interface_pattern = re.compile(r"^\s*type\s+(\w+)\s+interface")
 
     for line_no, line in enumerate(lines, 1):
         line = line.strip()
-        if not line or line.startswith('//'):
+        if not line or line.startswith("//"):
             continue
 
         import_match = import_pattern.match(line)
         if import_match:
             imp = import_match.group(1) or import_match.group(2)
             if imp:
-                result['module'].imports.append(imp)
+                result["module"].imports.append(imp)
 
         func_match = func_pattern.match(line)
         if func_match:
             func_name = func_match.group(1)
             qualified_name = f"{module_name}.{func_name}"
-            result['functions'][qualified_name] = FunctionInfo(
-                name=func_name, qualified_name=qualified_name,
-                file=file_path, line=line_no, column=0,
-                module=module_name, class_name=None,
-                is_method=False, is_private=func_name.startswith('_'),
-                is_property=False, docstring="", args=[], decorators=[],
+            result["functions"][qualified_name] = FunctionInfo(
+                name=func_name,
+                qualified_name=qualified_name,
+                file=file_path,
+                line=line_no,
+                column=0,
+                module=module_name,
+                class_name=None,
+                is_method=False,
+                is_private=func_name.startswith("_"),
+                is_property=False,
+                docstring="",
+                args=[],
+                decorators=[],
             )
-            result['module'].functions.append(qualified_name)
-            stats['functions_found'] += 1
+            result["module"].functions.append(qualified_name)
+            stats["functions_found"] += 1
 
         struct_match = struct_pattern.match(line)
         if struct_match:
             class_name = struct_match.group(1)
             qualified_name = f"{module_name}.{class_name}"
-            result['classes'][qualified_name] = ClassInfo(
-                name=class_name, qualified_name=qualified_name,
-                file=file_path, line=line_no, module=module_name,
-                bases=[], methods=[], docstring="",
+            result["classes"][qualified_name] = ClassInfo(
+                name=class_name,
+                qualified_name=qualified_name,
+                file=file_path,
+                line=line_no,
+                module=module_name,
+                bases=[],
+                methods=[],
+                docstring="",
             )
-            result['module'].classes.append(qualified_name)
-            stats['classes_found'] += 1
+            result["module"].classes.append(qualified_name)
+            stats["classes_found"] += 1
 
         interface_match = interface_pattern.match(line)
         if interface_match:
             class_name = interface_match.group(1)
             qualified_name = f"{module_name}.{class_name}"
-            result['classes'][qualified_name] = ClassInfo(
-                name=class_name, qualified_name=qualified_name,
-                file=file_path, line=line_no, module=module_name,
-                bases=[], methods=[], docstring="",
+            result["classes"][qualified_name] = ClassInfo(
+                name=class_name,
+                qualified_name=qualified_name,
+                file=file_path,
+                line=line_no,
+                module=module_name,
+                bases=[],
+                methods=[],
+                docstring="",
             )
-            result['module'].classes.append(qualified_name)
-            stats['classes_found'] += 1
+            result["module"].classes.append(qualified_name)
+            stats["classes_found"] += 1
 
     return result
 
 
-def analyze_go(content: str, file_path: str, module_name: str,
-               ext: str, stats: Dict) -> Dict:
+def analyze_go(
+    content: str, file_path: str, module_name: str, ext: str, stats: Dict
+) -> Dict:
     """Analyze Go files. Uses tree-sitter when available, regex fallback."""
     result = None
 
@@ -84,10 +107,11 @@ def analyze_go(content: str, file_path: str, module_name: str,
     try:
         from .ts_parser import parse_source
         from .ts_extractors import extract_declarations_ts
+
         tree = parse_source(content, ext)
         if tree:
             result = extract_declarations_ts(
-                tree, content.encode('utf-8'), ext, file_path, module_name
+                tree, content.encode("utf-8"), ext, file_path, module_name
             )
     except ImportError:
         pass
@@ -96,7 +120,7 @@ def analyze_go(content: str, file_path: str, module_name: str,
     if result is None:
         result = _analyze_go_regex(content, file_path, module_name, stats)
 
-    calculate_complexity_regex(content, result, lang='go')
+    calculate_complexity_regex(content, result, lang="go")
     extract_calls_regex(content, module_name, result)
-    stats['files_processed'] += 1
+    stats["files_processed"] += 1
     return result

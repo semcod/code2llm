@@ -17,11 +17,11 @@ class JSONExporter(BaseExporter):
         output_path: str,
         compact: bool = True,
         include_defaults: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Optional[Path]:
         """Export to JSON file."""
         data = result.to_dict(compact=compact and not include_defaults)
         path = self._ensure_dir(output_path)
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2 if not compact else None, ensure_ascii=False)
         return path

@@ -3,12 +3,16 @@
 import json
 import os
 import time
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from code2llm.core.persistent_cache import PersistentCache, get_all_projects, clear_all, VERSION
+from code2llm.core.persistent_cache import (
+    PersistentCache,
+    get_all_projects,
+    clear_all,
+    VERSION,
+)
 
 
 @pytest.fixture()
@@ -66,7 +70,11 @@ class TestFileResultRoundtrip:
         fp = str(tmp_project / "a.py")
         payload = {
             "module": ModuleInfo(name="a", file=fp, is_package=False),
-            "functions": {"a.foo": FunctionInfo(name="foo", qualified_name="a.foo", file=fp, line=1)},
+            "functions": {
+                "a.foo": FunctionInfo(
+                    name="foo", qualified_name="a.foo", file=fp, line=1
+                )
+            },
             "classes": {},
             "nodes": {},
             "edges": [],
@@ -263,7 +271,9 @@ class TestExportCache:
 
     def test_complete_export_returned(self, tmp_project, cache):
         # Populate manifest so export cache is allowed (see empty-manifest guard)
-        cache.put_file_result(str(tmp_project / "a.py"), {"file": str(tmp_project / "a.py")})
+        cache.put_file_result(
+            str(tmp_project / "a.py"), {"file": str(tmp_project / "a.py")}
+        )
         cfg = {"fmt": "toon", "verbose": False}
         d = cache.create_export_cache_dir(cfg)
         assert cache.get_export_cache_dir(cfg) is None  # not complete yet
@@ -292,7 +302,9 @@ class TestExportCache:
         cfg = {"fmt": "toon"}
         d = cache.create_export_cache_dir(cfg)
         cache.mark_export_complete(d)
-        cache.put_file_result(str(tmp_project / "a.py"), {"file": str(tmp_project / "a.py")})
+        cache.put_file_result(
+            str(tmp_project / "a.py"), {"file": str(tmp_project / "a.py")}
+        )
         # After populating the manifest the run-hash changes, so the old
         # _complete export dir is no longer valid either.
         assert cache.get_export_cache_dir(cfg) is None
@@ -322,9 +334,11 @@ class TestSaveAndReload:
 
     def test_version_mismatch_resets_manifest(self, tmp_project, tmp_path):
         cache_root = tmp_path / "cache_root"
-        proj_hash = __import__('hashlib').md5(
-            os.path.realpath(str(tmp_project)).encode()
-        ).hexdigest()[:12]
+        proj_hash = (
+            __import__("hashlib")
+            .md5(os.path.realpath(str(tmp_project)).encode())
+            .hexdigest()[:12]
+        )
         manifest_path = cache_root / "projects" / proj_hash / "manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps({"version": 0, "files": {"stale": {}}}))

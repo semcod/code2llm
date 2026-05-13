@@ -8,7 +8,9 @@ from code2llm.exporters.toon.helpers import _is_excluded, _rel_path
 from .constants import CC_CRITICAL, CC_WARNING, FAN_OUT_THRESHOLD
 
 
-def build_modules(result: AnalysisResult, line_counts: Dict[str, int]) -> List[Dict[str, Any]]:
+def build_modules(
+    result: AnalysisResult, line_counts: Dict[str, int]
+) -> List[Dict[str, Any]]:
     """Build module list with per-file metrics."""
     file_funcs, file_classes = group_by_file(result)
 
@@ -26,9 +28,9 @@ def build_modules(result: AnalysisResult, line_counts: Dict[str, int]) -> List[D
     return modules
 
 
-def group_by_file(result: AnalysisResult) -> Tuple[
-    Dict[str, List[FunctionInfo]], Dict[str, List[ClassInfo]]
-]:
+def group_by_file(
+    result: AnalysisResult,
+) -> Tuple[Dict[str, List[FunctionInfo]], Dict[str, List[ClassInfo]]]:
     """Group functions and classes by file path."""
     file_funcs: Dict[str, List[FunctionInfo]] = defaultdict(list)
     file_classes: Dict[str, List[ClassInfo]] = defaultdict(list)
@@ -42,7 +44,8 @@ def group_by_file(result: AnalysisResult) -> Tuple[
 
 
 def compute_module_entry(
-    fpath: str, result: AnalysisResult,
+    fpath: str,
+    result: AnalysisResult,
     line_counts: Dict[str, int],
     file_funcs: Dict[str, List[FunctionInfo]],
     file_classes: Dict[str, List[ClassInfo]],
@@ -60,8 +63,11 @@ def compute_module_entry(
     exports = build_exports(funcs, classes, result)
 
     mod: Dict[str, Any] = {
-        "path": rel, "lines": lc, "classes": len(classes),
-        "methods": len(funcs), "cc_max": cc_max,
+        "path": rel,
+        "lines": lc,
+        "classes": len(classes),
+        "methods": len(funcs),
+        "cc_max": cc_max,
         "inbound_deps": len(inbound),
     }
     if exports:
@@ -96,16 +102,15 @@ def build_exports(
 def build_class_export(ci: ClassInfo, result: AnalysisResult) -> Dict[str, Any]:
     """Build export entry for a single class."""
     class_funcs = [
-        result.functions.get(m) for m in ci.methods
-        if result.functions.get(m)
+        result.functions.get(m) for m in ci.methods if result.functions.get(m)
     ]
-    method_ccs = [
-        f.complexity.get("cyclomatic_complexity", 0) for f in class_funcs
-    ]
+    method_ccs = [f.complexity.get("cyclomatic_complexity", 0) for f in class_funcs]
     avg_cc = round(sum(method_ccs) / len(method_ccs), 1) if method_ccs else 0.0
 
     cls_export: Dict[str, Any] = {
-        "name": ci.name, "type": "class", "cc_avg": avg_cc,
+        "name": ci.name,
+        "type": "class",
+        "cc_avg": avg_cc,
     }
 
     notable = []
@@ -139,7 +144,9 @@ def build_function_exports(
             continue
         cc = fi.complexity.get("cyclomatic_complexity", 0)
         func_export: Dict[str, Any] = {
-            "name": fi.name, "type": "function", "cc": cc,
+            "name": fi.name,
+            "type": "function",
+            "cc": cc,
         }
         if cc >= CC_WARNING:
             func_export["flag"] = "split"

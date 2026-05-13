@@ -13,6 +13,7 @@ def export_compact(result: AnalysisResult, output_path: str) -> None:
     lines = ["flowchart TD"]
 
     from .utils import module_of
+
     # Build name index for O(1) callee resolution
     name_index = build_name_index(result.functions)
 
@@ -22,7 +23,9 @@ def export_compact(result: AnalysisResult, output_path: str) -> None:
     for func_name, fi in result.functions.items():
         module = module_of(func_name)
         mod_funcs[module] += 1
-        mod_lines[module] += fi.end_line - fi.line if hasattr(fi, 'end_line') and fi.end_line else 0
+        mod_lines[module] += (
+            fi.end_line - fi.line if hasattr(fi, "end_line") and fi.end_line else 0
+        )
 
     # Cross-module edges with weights
     cross_edges: Dict[Tuple[str, str], int] = defaultdict(int)
@@ -37,7 +40,7 @@ def export_compact(result: AnalysisResult, output_path: str) -> None:
 
     # Only modules with cross-edges
     active_mods: Set[str] = set()
-    for (s, d) in cross_edges:
+    for s, d in cross_edges:
         active_mods.add(s)
         active_mods.add(d)
 
@@ -63,4 +66,4 @@ def export_compact(result: AnalysisResult, output_path: str) -> None:
     write_file(output_path, lines)
 
 
-__all__ = ['export_compact']
+__all__ = ["export_compact"]

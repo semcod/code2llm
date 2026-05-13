@@ -5,6 +5,5 @@ coupling matrix, duplicate detection, filtered functions.
 """
 
 # Re-export the modular ToonExporter for backward compatibility
-from .toon import ToonExporter
 
 # Keep this file for backward compatibility - the actual implementation is now in .toon/

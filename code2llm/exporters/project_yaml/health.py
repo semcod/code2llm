@@ -5,7 +5,15 @@ from typing import Any, Dict, List
 
 from code2llm.core.models import AnalysisResult
 from code2llm.exporters.toon.helpers import _is_excluded
-from .constants import CC_CRITICAL, CC_WARNING, CC_ERROR, CC_SEVERE, FAN_OUT_THRESHOLD, FAN_OUT_ERROR, FAN_OUT_SEVERE
+from .constants import (
+    CC_CRITICAL,
+    CC_WARNING,
+    CC_ERROR,
+    CC_SEVERE,
+    FAN_OUT_THRESHOLD,
+    FAN_OUT_ERROR,
+    FAN_OUT_SEVERE,
+)
 
 
 def build_health(result: AnalysisResult, modules: List[Dict]) -> Dict[str, Any]:
@@ -56,13 +64,15 @@ def build_alerts(result: AnalysisResult) -> List[Dict[str, Any]]:
                 severity = "error"
             else:
                 severity = "warning"
-            alerts.append({
-                "type": "cc_exceeded",
-                "target": display,
-                "value": cc,
-                "limit": CC_WARNING,
-                "severity": severity,
-            })
+            alerts.append(
+                {
+                    "type": "cc_exceeded",
+                    "target": display,
+                    "value": cc,
+                    "limit": CC_WARNING,
+                    "severity": severity,
+                }
+            )
 
     fan_alerts = []
     for qname, fi in result.functions.items():
@@ -79,13 +89,15 @@ def build_alerts(result: AnalysisResult) -> List[Dict[str, Any]]:
                 severity = "error"
             else:
                 severity = "warning"
-            fan_alerts.append({
-                "type": "high_fan_out",
-                "target": display,
-                "value": fan_out,
-                "limit": FAN_OUT_THRESHOLD,
-                "severity": severity,
-            })
+            fan_alerts.append(
+                {
+                    "type": "high_fan_out",
+                    "target": display,
+                    "value": fan_out,
+                    "limit": FAN_OUT_THRESHOLD,
+                    "severity": severity,
+                }
+            )
 
     # Sort alerts by severity (critical first), then by value desc
     sev_order = {"critical": 0, "error": 1, "warning": 2, "info": 3}

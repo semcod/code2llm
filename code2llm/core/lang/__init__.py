@@ -38,11 +38,7 @@ class LanguageParser(ABC):
 
     @abstractmethod
     def analyze(
-        self,
-        content: str,
-        file_path: str,
-        module_name: str,
-        stats: Dict[str, Any]
+        self, content: str, file_path: str, module_name: str, stats: Dict[str, Any]
     ) -> ParserResult:
         """Analyze file content and return parsed structure.
 
@@ -87,11 +83,12 @@ def register_language(*extensions: str, name: str = ""):
         def analyze_ruby(content, file_path, module_name, ext, stats):
             ...
     """
+
     def decorator(cls_or_func):
         if isinstance(cls_or_func, type) and issubclass(cls_or_func, LanguageParser):
             # It's a class
             parser = cls_or_func()
-            parser.language_name = name or cls_or_func.__name__.replace('Parser', '')
+            parser.language_name = name or cls_or_func.__name__.replace("Parser", "")
             for ext in extensions:
                 LANGUAGE_REGISTRY[ext.lower()] = parser
         else:
@@ -99,6 +96,7 @@ def register_language(*extensions: str, name: str = ""):
             for ext in extensions:
                 LANGUAGE_REGISTRY[ext.lower()] = cls_or_func
         return cls_or_func
+
     return decorator
 
 
@@ -132,40 +130,41 @@ from .generic import analyze_generic
 
 
 # Register legacy parsers
-register_language('.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs')(analyze_typescript_js)
-register_language('.go')(analyze_go)
-register_language('.rs')(analyze_rust)
-register_language('.java')(analyze_java)
-register_language('.cpp', '.cc', '.cxx', '.hpp', '.h', '.c')(analyze_cpp)
-register_language('.cs')(analyze_csharp)
-register_language('.php')(analyze_php)
+register_language(".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs")(analyze_typescript_js)
+register_language(".go")(analyze_go)
+register_language(".rs")(analyze_rust)
+register_language(".java")(analyze_java)
+register_language(".cpp", ".cc", ".cxx", ".hpp", ".h", ".c")(analyze_cpp)
+register_language(".cs")(analyze_csharp)
+register_language(".php")(analyze_php)
 
 # Import and register RubyParser class (demonstrating new ABC pattern)
 from .ruby import RubyParser
-LANGUAGE_REGISTRY['.rb'] = RubyParser()
-LANGUAGE_REGISTRY['.rbw'] = RubyParser()
+
+LANGUAGE_REGISTRY[".rb"] = RubyParser()
+LANGUAGE_REGISTRY[".rbw"] = RubyParser()
 
 # Generic parser as fallback for unknown extensions
-LANGUAGE_REGISTRY['*'] = analyze_generic
+LANGUAGE_REGISTRY["*"] = analyze_generic
 
 
 __all__ = [
-    'LanguageParser',
-    'ParserResult',
-    'register_language',
-    'LANGUAGE_REGISTRY',
-    'get_parser',
-    'list_parsers',
+    "LanguageParser",
+    "ParserResult",
+    "register_language",
+    "LANGUAGE_REGISTRY",
+    "get_parser",
+    "list_parsers",
     # New class-based parsers
-    'RubyParser',
+    "RubyParser",
     # Legacy exports
-    'analyze_typescript_js',
-    'analyze_go',
-    'analyze_rust',
-    'analyze_java',
-    'analyze_cpp',
-    'analyze_csharp',
-    'analyze_php',
-    'analyze_ruby',
-    'analyze_generic',
+    "analyze_typescript_js",
+    "analyze_go",
+    "analyze_rust",
+    "analyze_java",
+    "analyze_cpp",
+    "analyze_csharp",
+    "analyze_php",
+    "analyze_ruby",
+    "analyze_generic",
 ]

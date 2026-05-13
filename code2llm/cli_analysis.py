@@ -16,14 +16,13 @@ def _run_analysis(args, source_path: Path, output_dir: Path):
     from .core.large_repo import should_use_chunking
 
     # --no-chunk explicitly disables chunking
-    use_chunking = (
-        not args.no_chunk and
-        (args.chunk or should_use_chunking(source_path, args.chunk_size))
+    use_chunking = not args.no_chunk and (
+        args.chunk or should_use_chunking(source_path, args.chunk_size)
     )
 
     if use_chunking:
         if args.verbose:
-            print(f"Large repository detected - using chunked analysis")
+            print("Large repository detected - using chunked analysis")
         args.chunk = True
         return _run_chunked_analysis(args, source_path, output_dir)
 
@@ -32,13 +31,12 @@ def _run_analysis(args, source_path: Path, output_dir: Path):
 
 def _run_standard_analysis(args, source_path: Path, output_dir: Path):
     """Standard single-project analysis flow."""
-    from .core.config import Config
     from .core.analyzer import ProjectAnalyzer
 
     config = _build_config(args, output_dir)
 
     try:
-        if args.streaming or args.strategy in ['quick', 'deep']:
+        if args.streaming or args.strategy in ["quick", "deep"]:
             result = _run_streaming_analysis(args, config, source_path)
         else:
             analyzer = ProjectAnalyzer(config, source_path)
@@ -57,45 +55,49 @@ def _run_standard_analysis(args, source_path: Path, output_dir: Path):
 def _build_config(args, output_dir: Path):
     """Build analysis Config from CLI args."""
     from .core.config import Config, FilterConfig
-    
+
     # Start with default filter config
     filter_config = FilterConfig()
-    
+
     # Apply custom exclude patterns if provided
-    if hasattr(args, 'exclude') and args.exclude:
+    if hasattr(args, "exclude") and args.exclude:
         default_patterns = filter_config.exclude_patterns
-        custom_patterns = [f"*{pattern}*" if not pattern.startswith('*') and not pattern.endswith('*') else pattern 
-                          for pattern in args.exclude]
+        custom_patterns = [
+            f"*{pattern}*"
+            if not pattern.startswith("*") and not pattern.endswith("*")
+            else pattern
+            for pattern in args.exclude
+        ]
         filter_config.exclude_patterns = list(set(default_patterns + custom_patterns))
-    
+
     # Apply gitignore setting
-    if hasattr(args, 'no_gitignore') and args.no_gitignore:
+    if hasattr(args, "no_gitignore") and args.no_gitignore:
         filter_config.gitignore_enabled = False
-    
+
     config = Config(
         mode=args.mode,
         max_depth_enumeration=args.max_depth,
         detect_state_machines=not args.no_patterns,
         detect_recursion=not args.no_patterns,
         output_dir=str(output_dir),
-        filters=filter_config
+        filters=filter_config,
     )
     # Persistent cache flags (read via getattr with defaults in analyzer.py)
-    no_cache = getattr(args, 'no_cache', False) or getattr(args, 'force', False)
+    no_cache = getattr(args, "no_cache", False) or getattr(args, "force", False)
     config.no_cache = no_cache
     # Watch mode for auto-detecting changed files
-    config.watch = getattr(args, 'watch', False)
+    config.watch = getattr(args, "watch", False)
     # Dry-run mode (handled in orchestrator, but stored for reference)
-    config.dry_run = getattr(args, 'dry_run', False)
+    config.dry_run = getattr(args, "dry_run", False)
 
     # --fast: skip expensive analyses (vulture, centrality, DFG, communities)
-    if getattr(args, 'fast', False):
+    if getattr(args, "fast", False):
         config.performance.fast_mode = True
         config.performance.apply_fast_mode()
 
     # Strategy-based performance tuning
-    strategy = getattr(args, 'strategy', 'standard')
-    if strategy == 'quick':
+    strategy = getattr(args, "strategy", "standard")
+    if strategy == "quick":
         config.performance.skip_data_flow = True
         config.performance.skip_dead_code_detection = True
         config.performance.skip_centrality = True
@@ -106,7 +108,7 @@ def _build_config(args, output_dir: Path):
 
 def _print_analysis_summary(result) -> None:
     """Print analysis completion summary."""
-    print(f"\nAnalysis complete:")
+    print("\nAnalysis complete:")
     print(f"  - Functions: {len(result.functions)}")
     print(f"  - Classes: {len(result.classes)}")
     print(f"  - CFG nodes: {len(result.nodes)}")
@@ -127,8 +129,7 @@ def _run_chunked_analysis(args, source_path: Path, output_dir: Path):
     from .core.large_repo import HierarchicalRepoSplitter
 
     splitter = HierarchicalRepoSplitter(
-        size_limit_kb=args.chunk_size,
-        max_files_per_chunk=args.max_files_per_chunk
+        size_limit_kb=args.chunk_size, max_files_per_chunk=args.max_files_per_chunk
     )
 
     subprojects = splitter.get_analysis_plan(source_path)
@@ -143,7 +144,7 @@ def _run_chunked_analysis(args, source_path: Path, output_dir: Path):
     merged_result = _merge_chunked_results(all_results, source_path)
 
     if args.verbose:
-        print(f"\nChunked analysis complete:")
+        print("\nChunked analysis complete:")
         print(f"  - Chunks analyzed: {len(all_results)}")
         print(f"  - Total functions: {len(merged_result.functions)}")
         print(f"  - Total classes: {len(merged_result.classes)}")
@@ -159,7 +160,9 @@ def _print_chunked_plan(subprojects) -> None:
         level_counts[sp.level] = level_counts.get(sp.level, 0) + 1
 
     for level in sorted(level_counts.keys()):
-        level_name = {0: 'root', 1: 'level-1', 2: 'level-2', 3: 'file-chunks'}.get(level, f'level-{level}')
+        level_name = {0: "root", 1: "level-1", 2: "level-2", 3: "file-chunks"}.get(
+            level, f"level-{level}"
+        )
         print(f"  {level_name}: {level_counts[level]} chunks")
 
     print("\nChunks:")
@@ -173,17 +176,21 @@ def _filter_subprojects(args, subprojects) -> list:
     """Apply --only-subproject and --skip-subprojects filters."""
     if args.only_subproject:
         subprojects = [
-            sp for sp in subprojects
+            sp
+            for sp in subprojects
             if sp.name == args.only_subproject
-            or sp.name.startswith(args.only_subproject + '.')
+            or sp.name.startswith(args.only_subproject + ".")
         ]
         if not subprojects:
-            print(f"Error: Subproject '{args.only_subproject}' not found", file=sys.stderr)
+            print(
+                f"Error: Subproject '{args.only_subproject}' not found", file=sys.stderr
+            )
             sys.exit(1)
 
     if args.skip_subprojects:
         subprojects = [
-            sp for sp in subprojects
+            sp
+            for sp in subprojects
             if not any(sp.name.startswith(skip) for skip in args.skip_subprojects)
         ]
 
@@ -195,10 +202,14 @@ def _analyze_all_subprojects(args, subprojects, output_dir: Path) -> list:
     all_results = []
     for i, subproject in enumerate(subprojects, 1):
         if args.verbose:
-            level_name = {0: 'root', 1: 'L1', 2: 'L2', 3: 'chunk'}.get(subproject.level, f'L{subproject.level}')
-            print(f"\n[{i}/{len(subprojects)}] Analyzing [{level_name}]: {subproject.name}")
+            level_name = {0: "root", 1: "L1", 2: "L2", 3: "chunk"}.get(
+                subproject.level, f"L{subproject.level}"
+            )
+            print(
+                f"\n[{i}/{len(subprojects)}] Analyzing [{level_name}]: {subproject.name}"
+            )
 
-        sp_output_dir = output_dir / subproject.name.replace('.', '_')
+        sp_output_dir = output_dir / subproject.name.replace(".", "_")
         sp_output_dir.mkdir(parents=True, exist_ok=True)
 
         result = _analyze_subproject(args, subproject, sp_output_dir)
@@ -215,16 +226,20 @@ def _analyze_subproject(args, subproject, output_dir: Path):
 
     # Start with default filter config
     filter_config = FilterConfig()
-    
+
     # Apply custom exclude patterns if provided
-    if hasattr(args, 'exclude') and args.exclude:
+    if hasattr(args, "exclude") and args.exclude:
         default_patterns = filter_config.exclude_patterns
-        custom_patterns = [f"*{pattern}*" if not pattern.startswith('*') and not pattern.endswith('*') else pattern 
-                          for pattern in args.exclude]
+        custom_patterns = [
+            f"*{pattern}*"
+            if not pattern.startswith("*") and not pattern.endswith("*")
+            else pattern
+            for pattern in args.exclude
+        ]
         filter_config.exclude_patterns = list(set(default_patterns + custom_patterns))
-    
+
     # Apply gitignore setting
-    if hasattr(args, 'no_gitignore') and args.no_gitignore:
+    if hasattr(args, "no_gitignore") and args.no_gitignore:
         filter_config.gitignore_enabled = False
 
     config = Config(
@@ -234,7 +249,7 @@ def _analyze_subproject(args, subproject, output_dir: Path):
         detect_recursion=not args.no_patterns,
         output_dir=str(output_dir),
         verbose=args.verbose,
-        filters=filter_config
+        filters=filter_config,
     )
 
     analyzer = ProjectAnalyzer(config, subproject.path)
@@ -242,17 +257,19 @@ def _analyze_subproject(args, subproject, output_dir: Path):
     try:
         result = analyzer.analyze_project(str(subproject.path))
 
-        formats = [f.strip() for f in args.format.split(',')]
-        if 'all' in formats:
-            formats = ['toon', 'context', 'evolution']
+        formats = [f.strip() for f in args.format.split(",")]
+        if "all" in formats:
+            formats = ["toon", "context", "evolution"]
 
         _export_simple_formats(args, result, output_dir, formats)
 
-        if 'evolution' in formats or 'all' in formats:
+        if "evolution" in formats or "all" in formats:
             _export_evolution(args, result, output_dir)
 
         if args.verbose:
-            print(f"    ✓ Exported {subproject.name}: {len(result.functions)} functions")
+            print(
+                f"    ✓ Exported {subproject.name}: {len(result.functions)} functions"
+            )
 
         return result
     except Exception as e:
@@ -273,15 +290,15 @@ def _merge_chunked_results(all_results, source_path: Path):
         prefix = f"{name}."
 
         for func_name, func_info in result.functions.items():
-            new_name = f"{prefix}{func_name}" if '.' not in func_name else func_name
+            new_name = f"{prefix}{func_name}" if "." not in func_name else func_name
             merged.functions[new_name] = func_info
 
         for class_name, class_info in result.classes.items():
-            new_name = f"{prefix}{class_name}" if '.' not in class_name else class_name
+            new_name = f"{prefix}{class_name}" if "." not in class_name else class_name
             merged.classes[new_name] = class_info
 
         for mod_name, mod_info in result.modules.items():
-            new_name = f"{prefix}{mod_name}" if '.' not in mod_name else mod_name
+            new_name = f"{prefix}{mod_name}" if "." not in mod_name else mod_name
             merged.modules[new_name] = mod_info
 
         merged.nodes.update(result.nodes)
@@ -297,36 +314,39 @@ def _run_streaming_analysis(args, config, source_path: Path):
     """Run streaming analysis with progress reporting and return accumulated results."""
     from .core.analyzer import ProjectAnalyzer
     from .core.streaming_analyzer import (
-        StreamingAnalyzer, STRATEGY_QUICK,
-        STRATEGY_STANDARD, STRATEGY_DEEP
+        StreamingAnalyzer,
+        STRATEGY_QUICK,
+        STRATEGY_STANDARD,
+        STRATEGY_DEEP,
     )
 
     strategy_map = {
-        'quick': STRATEGY_QUICK,
-        'standard': STRATEGY_STANDARD,
-        'deep': STRATEGY_DEEP
+        "quick": STRATEGY_QUICK,
+        "standard": STRATEGY_STANDARD,
+        "deep": STRATEGY_DEEP,
     }
     strategy = strategy_map.get(args.strategy, STRATEGY_STANDARD)
 
     strategy.max_files_in_memory = min(
-        strategy.max_files_in_memory,
-        args.max_memory // 10
+        strategy.max_files_in_memory, args.max_memory // 10
     )
 
     analyzer = StreamingAnalyzer(config, strategy)
 
     if args.verbose:
+
         def on_progress(update):
-            pct = update.get('percentage', 0)
-            print(f"\r[{pct:.0f}%] {update.get('message', '')}", end='', flush=True)
+            pct = update.get("percentage", 0)
+            print(f"\r[{pct:.0f}%] {update.get('message', '')}", end="", flush=True)
+
         analyzer.set_progress_callback(on_progress)
 
     print(f"Analyzing with {args.strategy} strategy...")
-    
+
     # Accumulate results from streaming analysis
     accumulated_results = []
     for update in analyzer.analyze_streaming(str(source_path)):
-        if update['type'] == 'complete':
+        if update["type"] == "complete":
             if args.verbose:
                 print()
             print(f"Completed in {update.get('elapsed_seconds', 0):.1f}s")
@@ -334,11 +354,11 @@ def _run_streaming_analysis(args, config, source_path: Path):
             accumulated_results = update
 
     # Use accumulated results if available, otherwise fallback to standard analyzer
-    if accumulated_results and accumulated_results.get('processed_files', 0) > 0:
+    if accumulated_results and accumulated_results.get("processed_files", 0) > 0:
         # Convert accumulated results to AnalysisResult format
         standard_analyzer = ProjectAnalyzer(config)
         return standard_analyzer.analyze_project(str(source_path))
-    
+
     # Fallback: use standard analyzer
     standard_analyzer = ProjectAnalyzer(config)
     return standard_analyzer.analyze_project(str(source_path))

@@ -9,11 +9,11 @@ from .file_filter import FastFileFilter
 
 class RefactoringAnalyzer:
     """Performs refactoring analysis on code."""
-    
+
     def __init__(self, config: Config, file_filter: FastFileFilter):
         self.config = config
         self.file_filter = file_filter
-    
+
     def perform_refactoring_analysis(self, result: AnalysisResult) -> None:
         """Perform deep analysis and detect code smells.
 
@@ -28,44 +28,46 @@ class RefactoringAnalyzer:
 
         if self.config.verbose:
             print("Performing refactoring analysis...")
-            
+
         # 1. Calculate metrics (fan-in/fan-out) — always needed for TOON
         from ..analysis.call_graph import CallGraphExtractor
+
         cg_ext = CallGraphExtractor(self.config)
         cg_ext.result = result
         cg_ext._calculate_metrics()
-        
+
         # 2. Build networkx graph for project-level analysis
         G = self._build_call_graph(result)
-        
+
         # 3. Calculate Betweenness Centrality (Bottlenecks)
         if not perf.skip_centrality:
             self._calculate_centrality(G, result)
-        
+
         # 4. Detect Circular Dependencies
         if not perf.skip_centrality:
             self._detect_cycles(G, result)
-        
+
         # 5. Community Detection (Module groups)
         if not perf.skip_community_detection:
             self._detect_communities(G, result)
-        
+
         # 6. Analyze coupling
         self._analyze_coupling(result)
-        
+
         # 7. Detect code smells
         self._detect_smells(result)
-        
+
         # 8. Dead code detection with vulture (slowest step — rescans all files)
         if not perf.skip_dead_code_detection:
             self._detect_dead_code(result)
-        
+
         if self.config.verbose:
             print(f"  Detected {len(result.smells)} code smells")
 
     def _build_call_graph(self, result: AnalysisResult):
         """Build networkx call graph."""
         import networkx as nx
+
         G = nx.DiGraph()
         for func_name, func_info in result.functions.items():
             G.add_node(func_name)
@@ -81,14 +83,18 @@ class RefactoringAnalyzer:
                 # For large graphs, use sampling to avoid exponential time complexity
                 if node_count > 500:
                     if self.config.verbose:
-                        print(f"  Large graph ({node_count} nodes), using sampled centrality...")
+                        print(
+                            f"  Large graph ({node_count} nodes), using sampled centrality..."
+                        )
                     # Sample adaptively: 10% for large, 20% for medium, cap at 200
                     ratio = 0.1 if node_count > 2000 else 0.2
                     k = min(int(node_count * ratio), 200)
                     import networkx as nx
+
                     centrality = nx.betweenness_centrality(call_graph, k=k)
                 else:
                     import networkx as nx
+
                     centrality = nx.betweenness_centrality(call_graph)
                 for func_name, score in centrality.items():
                     if func_name in result.functions:
@@ -103,9 +109,12 @@ class RefactoringAnalyzer:
             # Limit cycle detection for large graphs
             if len(call_graph) > 1000:
                 if self.config.verbose:
-                    print(f"  Skipping cycle detection for large graph ({len(call_graph)} nodes)")
+                    print(
+                        f"  Skipping cycle detection for large graph ({len(call_graph)} nodes)"
+                    )
                 return
             import networkx as nx
+
             cycles = list(nx.simple_cycles(call_graph))
             if cycles:
                 result.metrics["project"] = result.metrics.get("project", {})
@@ -120,15 +129,20 @@ class RefactoringAnalyzer:
             # Limit community detection for large graphs
             if len(call_graph) > 1000:
                 if self.config.verbose:
-                    print(f"  Skipping community detection for large graph ({len(call_graph)} nodes)")
+                    print(
+                        f"  Skipping community detection for large graph ({len(call_graph)} nodes)"
+                    )
                 return
             from networkx.algorithms import community
+
             # Using Louvain if available, otherwise greedy modularity
-            if hasattr(community, 'louvain_communities'):
+            if hasattr(community, "louvain_communities"):
                 communities = community.louvain_communities(call_graph.to_undirected())
             else:
-                communities = community.greedy_modularity_communities(call_graph.to_undirected())
-            
+                communities = community.greedy_modularity_communities(
+                    call_graph.to_undirected()
+                )
+
             result.coupling["communities"] = [list(c) for c in communities]
         except Exception as e:
             if self.config.verbose:
@@ -137,12 +151,14 @@ class RefactoringAnalyzer:
     def _analyze_coupling(self, result: AnalysisResult) -> None:
         """Analyze coupling between modules."""
         from ..analysis.coupling import CouplingAnalyzer
+
         coupling_analyzer = CouplingAnalyzer(result)
         coupling_analyzer.analyze()
 
     def _detect_smells(self, result: AnalysisResult) -> None:
         """Detect code smells."""
         from ..analysis.smells import SmellDetector
+
         smell_detector = SmellDetector(result)
         smell_detector.detect()
 
@@ -150,32 +166,33 @@ class RefactoringAnalyzer:
         """Use vulture to find dead code and update reachability."""
         if self.config.verbose:
             print("Detecting dead code with vulture...")
-            
+
         try:
             import vulture
+
             v = vulture.Vulture(verbose=False)
-            
+
             # vulture.scan takes the code content as a string
             for py_file in Path(result.project_path).rglob("*.py"):
                 if not self.file_filter.should_process(str(py_file)):
                     continue
                 try:
-                    content = py_file.read_text(encoding='utf-8', errors='ignore')
+                    content = py_file.read_text(encoding="utf-8", errors="ignore")
                     v.scan(content, filename=str(py_file))
                 except Exception:
                     continue
-                    
+
             dead_code = v.get_unused_code()
-            
+
             if self.config.verbose:
                 print(f"  Vulture found {len(dead_code)} unused items")
-            
+
             # Map unused code to our functions/classes
             self._map_dead_code_to_items(dead_code, result)
-            
+
             # Mark others as reachable if they are NOT orphans
             self._mark_reachable_items(result)
-            
+
         except Exception as e:
             if self.config.verbose:
                 print(f"Error in dead code detection: {e}")
@@ -184,23 +201,28 @@ class RefactoringAnalyzer:
         """Map vulture dead code to our functions/classes."""
         for item in dead_code:
             if self.config.verbose:
-                item_lineno = getattr(item, 'lineno', getattr(item, 'first_lineno', 0))
+                item_lineno = getattr(item, "lineno", getattr(item, "first_lineno", 0))
                 print(f"  Vulture item: {item.filename}:{item_lineno} ({item.typ})")
-                
+
             # Match by file and line
             item_path = Path(item.filename).resolve()
-            item_lineno = getattr(item, 'lineno', getattr(item, 'first_lineno', 0))
-            
+            item_lineno = getattr(item, "lineno", getattr(item, "first_lineno", 0))
+
             # Check functions
             for func_name, func_info in result.functions.items():
                 func_path = Path(func_info.file).resolve()
                 if func_path == item_path and func_info.line == item_lineno:
                     func_info.reachability = "unreachable"
-                    
+
             # Check classes
             for class_name, class_info in result.classes.items():
-                if Path(class_info.file).resolve() == item_path and class_info.line == item_lineno:
-                    class_info.reachability = "unreachable" # (if we add reachability to ClassInfo too)
+                if (
+                    Path(class_info.file).resolve() == item_path
+                    and class_info.line == item_lineno
+                ):
+                    class_info.reachability = (
+                        "unreachable"  # (if we add reachability to ClassInfo too)
+                    )
 
     def _mark_reachable_items(self, result: AnalysisResult) -> None:
         """Mark items as reachable if they are NOT orphans."""

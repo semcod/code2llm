@@ -37,12 +37,14 @@ def _safe_read_yaml(path: Path) -> Dict[str, Any]:
         col = e.problem_mark.column if e.problem_mark else "?"
         raise ValueError(
             f"YAML syntax error in {path} at line {line}, column {col}: {e.problem}\n"
-            f"Hint: Check indentation, avoid tabs, watch special characters (:, -, #)")
+            f"Hint: Check indentation, avoid tabs, watch special characters (:, -, #)"
+        )
     except ParserError as e:
         line = e.problem_mark.line + 1 if e.problem_mark else "?"
         raise ValueError(
             f"YAML parse error in {path} at line {line}: {e.problem}\n"
-            f"Hint: Verify structure - are you using list where dict expected?")
+            f"Hint: Verify structure - are you using list where dict expected?"
+        )
     except Exception as e:
         raise ValueError(f"YAML error in {path}: {e}")
 
@@ -51,7 +53,8 @@ def _safe_read_yaml(path: Path) -> Dict[str, Any]:
     if not isinstance(loaded, dict):
         raise ValueError(
             f"Expected YAML mapping (dict), got {type(loaded).__name__} in {path}\n"
-            f"Hint: File must start with 'key: value' pairs, not a list")
+            f"Hint: File must start with 'key: value' pairs, not a list"
+        )
     return loaded
 
 
@@ -74,11 +77,11 @@ def _shorten(s: str, max_len: int) -> str:
 
 
 __all__ = [
-    '_FUNC_LABEL_PREFIX',
-    '_CALL_LABEL_PREFIX',
-    '_strip_bom',
-    '_safe_read_yaml',
-    '_as_dict',
-    '_as_list',
-    '_shorten',
+    "_FUNC_LABEL_PREFIX",
+    "_CALL_LABEL_PREFIX",
+    "_strip_bom",
+    "_safe_read_yaml",
+    "_as_dict",
+    "_as_list",
+    "_shorten",
 ]

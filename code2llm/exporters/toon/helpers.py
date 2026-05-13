@@ -7,7 +7,6 @@ from typing import Any, Dict, Set
 from code2llm.core.models import AnalysisResult, FunctionInfo
 
 # Re-export is_excluded_path from flow_constants to eliminate duplication
-from ..flow_constants import is_excluded_path as _is_excluded
 
 
 @lru_cache(maxsize=4096)
@@ -49,7 +48,7 @@ def _package_of_module(module_name: str) -> str:
 def _traits_from_cfg(fi: FunctionInfo, result: AnalysisResult) -> list:
     traits = []
     node_types = set()
-    for nid in (fi.cfg_nodes or []):
+    for nid in fi.cfg_nodes or []:
         nd = result.nodes.get(nid)
         if nd:
             node_types.add(getattr(nd, "type", ""))
@@ -99,12 +98,16 @@ def _scan_line_counts(project_path, result=None) -> Dict[str, int]:
 
     # Fast path: use already-analyzed file data when available
     if result is not None:
-        for mname, mi in getattr(result, 'modules', {}).items():
+        for mname, mi in getattr(result, "modules", {}).items():
             fpath = mi.file
             if not fpath:
                 continue
             try:
-                lc = len(Path(fpath).read_text(encoding="utf-8", errors="ignore").splitlines())
+                lc = len(
+                    Path(fpath)
+                    .read_text(encoding="utf-8", errors="ignore")
+                    .splitlines()
+                )
                 rel = str(Path(fpath).relative_to(pp))
                 line_counts[str(fpath)] = lc
                 line_counts[rel] = lc
@@ -114,20 +117,38 @@ def _scan_line_counts(project_path, result=None) -> Dict[str, int]:
 
     # Slow fallback: single walk instead of 73 rglob calls
     from ...core.config import ALL_EXTENSIONS
+
     ext_set = set(ALL_EXTENSIONS)
-    for root, dirs, files in Path(project_path).walk() if hasattr(Path, 'walk') else _walk_compat(pp):
+    for root, dirs, files in (
+        Path(project_path).walk() if hasattr(Path, "walk") else _walk_compat(pp)
+    ):
         # Prune excluded directories
-        dirs[:] = [d for d in dirs if d not in {
-            'venv', '.venv', 'node_modules', '__pycache__', '.git',
-            'dist', 'build', '.tox', '.mypy_cache', 'egg-info',
-        }]
+        dirs[:] = [
+            d
+            for d in dirs
+            if d
+            not in {
+                "venv",
+                ".venv",
+                "node_modules",
+                "__pycache__",
+                ".git",
+                "dist",
+                "build",
+                ".tox",
+                ".mypy_cache",
+                "egg-info",
+            }
+        ]
         for fname in files:
             ext = Path(fname).suffix
             if ext not in ext_set:
                 continue
             src_file = root / fname
             try:
-                lc = len(src_file.read_text(encoding="utf-8", errors="ignore").splitlines())
+                lc = len(
+                    src_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+                )
                 rel = str(src_file.relative_to(pp))
                 line_counts[str(src_file)] = lc
                 line_counts[rel] = lc
@@ -139,5 +160,6 @@ def _scan_line_counts(project_path, result=None) -> Dict[str, int]:
 def _walk_compat(path):
     """os.walk compatibility wrapper for Path (Python < 3.12)."""
     import os
+
     for root, dirs, files in os.walk(path):
         yield Path(root), dirs, files

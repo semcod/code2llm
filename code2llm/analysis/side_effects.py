@@ -20,53 +20,128 @@ from code2llm.analysis.utils.ast_helpers import find_function_node
 logger = logging.getLogger(__name__)
 
 # Side-effect classification patterns
-IO_CALLS = frozenset({
-    "open", "read", "write", "print", "input",
-    "mkdir", "makedirs", "rmdir", "remove", "unlink", "rename",
-    "read_text", "write_text", "read_bytes", "write_bytes",
-    "dump", "dumps", "load", "loads",
-    "save", "savefig",
-    "send", "recv", "connect", "listen", "accept",
-    "execute", "commit", "rollback",  # DB
-})
+IO_CALLS = frozenset(
+    {
+        "open",
+        "read",
+        "write",
+        "print",
+        "input",
+        "mkdir",
+        "makedirs",
+        "rmdir",
+        "remove",
+        "unlink",
+        "rename",
+        "read_text",
+        "write_text",
+        "read_bytes",
+        "write_bytes",
+        "dump",
+        "dumps",
+        "load",
+        "loads",
+        "save",
+        "savefig",
+        "send",
+        "recv",
+        "connect",
+        "listen",
+        "accept",
+        "execute",
+        "commit",
+        "rollback",  # DB
+    }
+)
 
 # HTTP verbs — only IO when called on known HTTP objects (requests.get, session.post)
 HTTP_METHODS = frozenset({"get", "post", "put", "delete", "patch"})
-HTTP_CALLERS = frozenset({
-    "requests", "session", "client", "http", "aiohttp",
-    "httpx", "urllib", "conn", "api", "resp", "response",
-})
+HTTP_CALLERS = frozenset(
+    {
+        "requests",
+        "session",
+        "client",
+        "http",
+        "aiohttp",
+        "httpx",
+        "urllib",
+        "conn",
+        "api",
+        "resp",
+        "response",
+    }
+)
 
-IO_ATTRIBUTES = frozenset({
-    "write", "read", "readline", "readlines", "writelines",
-    "flush", "close", "seek", "tell",
-    "send", "recv", "sendall",
-})
+IO_ATTRIBUTES = frozenset(
+    {
+        "write",
+        "read",
+        "readline",
+        "readlines",
+        "writelines",
+        "flush",
+        "close",
+        "seek",
+        "tell",
+        "send",
+        "recv",
+        "sendall",
+    }
+)
 
-CACHE_INDICATORS = frozenset({
-    "cache", "lru_cache", "memoize", "cached_property",
-    "Cache", "FileCache",
-})
+CACHE_INDICATORS = frozenset(
+    {
+        "cache",
+        "lru_cache",
+        "memoize",
+        "cached_property",
+        "Cache",
+        "FileCache",
+    }
+)
 
-CACHE_CALLS = frozenset({
-    "cache_get", "cache_set", "cache_delete", "cache_clear",
-    "get_cached", "set_cached",
-})
+CACHE_CALLS = frozenset(
+    {
+        "cache_get",
+        "cache_set",
+        "cache_delete",
+        "cache_clear",
+        "get_cached",
+        "set_cached",
+    }
+)
 
-MUTATION_CALLS = frozenset({
-    "append", "extend", "insert", "pop", "remove", "clear",
-    "update", "setdefault", "add", "discard",
-    "sort", "reverse",
-})
+MUTATION_CALLS = frozenset(
+    {
+        "append",
+        "extend",
+        "insert",
+        "pop",
+        "remove",
+        "clear",
+        "update",
+        "setdefault",
+        "add",
+        "discard",
+        "sort",
+        "reverse",
+    }
+)
 
 
 class SideEffectInfo:
     """Side-effect analysis result for a single function."""
 
     __slots__ = (
-        "function_name", "qualified_name", "classification",
-        "io_operations", "cache_operations", "mutations",
-        "global_refs", "self_mutations", "has_yield",
+        "function_name",
+        "qualified_name",
+        "classification",
+        "io_operations",
+        "cache_operations",
+        "mutations",
+        "global_refs",
+        "self_mutations",
+        "has_yield",
     )
 
     def __init__(self, function_name: str, qualified_name: str):
@@ -141,9 +216,7 @@ class SideEffectDetector:
         self._heuristic_classify(fi, info)
         return info
 
-    def analyze_all(
-        self, funcs: Dict[str, FunctionInfo]
-    ) -> Dict[str, SideEffectInfo]:
+    def analyze_all(self, funcs: Dict[str, FunctionInfo]) -> Dict[str, SideEffectInfo]:
         """Batch-analyze all functions for side effects."""
         results: Dict[str, SideEffectInfo] = {}
         for qname, fi in funcs.items():
@@ -248,18 +321,36 @@ class SideEffectDetector:
         else:
             info.classification = "pure"
 
-    def _heuristic_classify(
-        self, fi: FunctionInfo, info: SideEffectInfo
-    ) -> None:
+    def _heuristic_classify(self, fi: FunctionInfo, info: SideEffectInfo) -> None:
         """Classify based on function name and calls (fallback)."""
         name_lower = fi.name.lower()
         calls_lower = {c.lower() for c in fi.calls}
 
-        io_words = {"write", "read", "open", "save", "load", "export",
-                     "dump", "print", "mkdir", "rmdir", "remove"}
+        io_words = {
+            "write",
+            "read",
+            "open",
+            "save",
+            "load",
+            "export",
+            "dump",
+            "print",
+            "mkdir",
+            "rmdir",
+            "remove",
+        }
         cache_words = {"cache", "memoize", "lru_cache", "store", "fetch"}
-        mutation_words = {"set_", "update", "modify", "mutate", "append",
-                          "insert", "delete", "fix", "patch"}
+        mutation_words = {
+            "set_",
+            "update",
+            "modify",
+            "mutate",
+            "append",
+            "insert",
+            "delete",
+            "fix",
+            "patch",
+        }
 
         if any(w in name_lower for w in io_words):
             info.classification = "IO"

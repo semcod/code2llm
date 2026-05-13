@@ -10,7 +10,6 @@ import os
 import time
 from pathlib import Path
 
-import pytest
 
 from code2llm.cli_exports.orchestrator import _copy_cached_export
 
@@ -51,4 +50,6 @@ def test_copy_cached_export_preserves_contents(tmp_path: Path) -> None:
     _write(cache_dir / "analysis.toon.yaml", "content: cached\n", time.time() - 10)
     _copy_cached_export(cache_dir, output_dir, verbose=False)
 
-    assert (output_dir / "analysis.toon.yaml").read_text(encoding="utf-8") == "content: cached\n"
+    assert (output_dir / "analysis.toon.yaml").read_text(
+        encoding="utf-8"
+    ) == "content: cached\n"

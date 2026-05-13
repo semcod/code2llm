@@ -18,7 +18,6 @@ from .html_dashboard import HTMLDashboardGenerator
 
 def load_project_yaml(path: str) -> Dict[str, Any]:
     """Load and validate project.yaml with detailed error reporting."""
-    import yaml
     from yaml.scanner import ScannerError
     from yaml.parser import ParserError
 
@@ -42,12 +41,14 @@ def load_project_yaml(path: str) -> Dict[str, Any]:
         col = e.problem_mark.column if e.problem_mark else "?"
         raise ValueError(
             f"YAML syntax error in {path} at line {line}, column {col}: {e.problem}\n"
-            f"Hint: Check indentation and special characters (:, -, #)")
+            f"Hint: Check indentation and special characters (:, -, #)"
+        )
     except ParserError as e:
         line = e.problem_mark.line + 1 if e.problem_mark else "?"
         raise ValueError(
             f"YAML parse error in {path} at line {line}: {e.problem}\n"
-            f"Hint: Verify YAML structure (mapping vs list)")
+            f"Hint: Verify YAML structure (mapping vs list)"
+        )
     except Exception as e:
         raise ValueError(f"YAML error in {path}: {e}")
 
@@ -57,12 +58,14 @@ def load_project_yaml(path: str) -> Dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(
             f"Invalid project.yaml: expected dict/object, got {type(data).__name__} in {path}\n"
-            f"Hint: YAML must start with key-value pairs, not a list")
+            f"Hint: YAML must start with key-value pairs, not a list"
+        )
     if "version" not in data:
         raise ValueError(
             f"Invalid project.yaml: missing required 'version' key in {path}\n"
             f"Required keys: version, project, analysis\n"
-            f"Found keys: {list(data.keys())[:10]}")
+            f"Found keys: {list(data.keys())[:10]}"
+        )
 
     return data
 

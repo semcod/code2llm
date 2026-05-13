@@ -89,10 +89,7 @@ def _render_map_class(result, ci, lines):
         bases_str = f"({','.join(ci.bases)})"
 
     if method_sigs:
-        lines.append(
-            f"    {ci.name}{bases_str}: "
-            f"{','.join(method_sigs)}{doc}"
-        )
+        lines.append(f"    {ci.name}{bases_str}: {','.join(method_sigs)}{doc}")
     else:
         lines.append(f"    {ci.name}{bases_str}:{doc}")
 
@@ -112,4 +109,4 @@ def _function_signature(fi: FunctionInfo) -> str:
     return f"{fi.name}({args_str}){ret}"
 
 
-__all__ = ['render_details']
+__all__ = ["render_details"]

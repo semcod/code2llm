@@ -34,6 +34,7 @@ CC_HIGH = 15
 @dataclass
 class PipelineStage:
     """A single stage in a detected pipeline."""
+
     name: str
     qualified_name: str
     signature: str
@@ -47,6 +48,7 @@ class PipelineStage:
 @dataclass
 class Pipeline:
     """A detected pipeline with stages, purity info, and domain."""
+
     name: str
     domain: str
     stages: List[PipelineStage] = field(default_factory=list)
@@ -88,21 +90,23 @@ class Pipeline:
             "bottleneck": {
                 "name": self.bottleneck.name,
                 "cc": self.bottleneck.cc,
-            } if self.bottleneck else None,
+            }
+            if self.bottleneck
+            else None,
         }
 
 
 # Re-export for backward compatibility
 __all__ = [
-    'PipelineDetector',
-    'Pipeline',
-    'PipelineStage',
-    'PipelineResolver',
-    'PipelineClassifier',
-    'DOMAIN_KEYWORDS',
-    'MIN_PIPELINE_LENGTH',
-    'MAX_PIPELINES',
-    'CC_HIGH',
+    "PipelineDetector",
+    "Pipeline",
+    "PipelineStage",
+    "PipelineResolver",
+    "PipelineClassifier",
+    "DOMAIN_KEYWORDS",
+    "MIN_PIPELINE_LENGTH",
+    "MAX_PIPELINES",
+    "CC_HIGH",
 ]
 
 
@@ -171,8 +175,7 @@ class PipelineDetector:
         G = nx.DiGraph()
 
         for qname, fi in funcs.items():
-            G.add_node(qname, module=fi.module, name=fi.name,
-                       class_name=fi.class_name)
+            G.add_node(qname, module=fi.module, name=fi.name, class_name=fi.class_name)
 
         for qname, fi in funcs.items():
             for callee in fi.calls:
@@ -201,8 +204,7 @@ class PipelineDetector:
 
         # If no natural sources, use nodes with low in-degree
         if not sources:
-            sources = sorted(graph.nodes(),
-                             key=lambda n: graph.in_degree(n))[:5]
+            sources = sorted(graph.nodes(), key=lambda n: graph.in_degree(n))[:5]
 
         # Try to find longest paths from each source
         used_nodes: Set[str] = set()
@@ -239,9 +241,7 @@ class PipelineDetector:
         best: List[str] = [source]
 
         # BFS/DFS with depth limit for performance
-        stack: List[Tuple[str, List[str], Set[str]]] = [
-            (source, [source], {source})
-        ]
+        stack: List[Tuple[str, List[str], Set[str]]] = [(source, [source], {source})]
         max_depth = 10
 
         while stack:
@@ -255,11 +255,7 @@ class PipelineDetector:
             for successor in graph.successors(current):
                 if successor not in visited:
                     # Prefer nodes not yet used in other pipelines
-                    stack.append((
-                        successor,
-                        path + [successor],
-                        visited | {successor}
-                    ))
+                    stack.append((successor, path + [successor], visited | {successor}))
 
         return best
 
@@ -273,8 +269,7 @@ class PipelineDetector:
             return nx.dag_longest_path(subgraph)
         except nx.NetworkXUnfeasible:
             # Has cycles — fall back to finding longest simple path via DFS
-            sources = [n for n in subgraph.nodes()
-                       if subgraph.in_degree(n) == 0]
+            sources = [n for n in subgraph.nodes() if subgraph.in_degree(n) == 0]
             if not sources:
                 sources = list(subgraph.nodes())[:3]
 
@@ -335,7 +330,8 @@ class PipelineDetector:
         return pipelines
 
     def _build_stages(
-        self, path: List[str],
+        self,
+        path: List[str],
         funcs: Dict[str, FunctionInfo],
         se_info: Dict[str, SideEffectInfo],
     ) -> List[PipelineStage]:
@@ -351,12 +347,14 @@ class PipelineDetector:
             se_summary = se.side_effect_summary if se else "pure"
             sig = self._type_engine.get_typed_signature(fi)
 
-            stages.append(PipelineStage(
-                name=fi.name,
-                qualified_name=qname,
-                signature=sig,
-                cc=cc,
-                purity=purity,
-                side_effect_summary=se_summary,
-            ))
+            stages.append(
+                PipelineStage(
+                    name=fi.name,
+                    qualified_name=qname,
+                    signature=sig,
+                    cc=cc,
+                    purity=purity,
+                    side_effect_summary=se_summary,
+                )
+            )
         return stages

@@ -3,6 +3,7 @@ Main Command Generator - orchestrates the generation process.
 
 domain/command_generation/generator.py
 """
+
 from typing import Optional
 
 from .entity_preparers import EntityPreparationPipeline
@@ -25,10 +26,7 @@ class CommandGenerator:
         self._template_loader.load()
 
     def generate(
-        self,
-        intent: str,
-        entities: dict,
-        context: Optional[dict] = None
+        self, intent: str, entities: dict, context: Optional[dict] = None
     ) -> CommandResult:
         """
         Generate command from intent and entities.
@@ -43,19 +41,18 @@ class CommandGenerator:
         """
         context = context or {}
         prepared_entities = self._entity_preparer.prepare(intent, entities, context)
-        template = self._template_loader.find_alternative_template(intent, prepared_entities)
+        template = self._template_loader.find_alternative_template(
+            intent, prepared_entities
+        )
         if not template:
             return CommandResult(
                 command="",
                 confidence=0.0,
-                explanation=f"No template found for intent: {intent}"
+                explanation=f"No template found for intent: {intent}",
             )
         command = self._template_renderer.render_with_conditionals(
-            template.template,
-            prepared_entities
+            template.template, prepared_entities
         )
         return CommandResult(
-            command=command,
-            confidence=0.9,
-            explanation=template.description
+            command=command, confidence=0.9, explanation=template.description
         )

@@ -23,7 +23,9 @@ def _collect_nodes(analysis: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     return parsed
 
 
-def _group_nodes_by_file(nodes: Dict[int, Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+def _group_nodes_by_file(
+    nodes: Dict[int, Dict[str, Any]],
+) -> Dict[str, List[Dict[str, Any]]]:
     """Group nodes by their source file."""
     by_file: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for n in nodes.values():
@@ -38,7 +40,9 @@ def _is_entrypoint_file(filepath: str) -> bool:
     return filepath.endswith("__main__.py") or filepath.endswith("cli.py")
 
 
-def _extract_entrypoint_info(node: Dict[str, Any], filepath: str) -> Optional[Dict[str, Any]]:
+def _extract_entrypoint_info(
+    node: Dict[str, Any], filepath: str
+) -> Optional[Dict[str, Any]]:
     """Extract entrypoint info from a node if it's a function."""
     if node.get("type") != "FUNC" or not isinstance(node.get("function"), str):
         return None
@@ -63,7 +67,7 @@ def _deduplicate_entrypoints(entrypoints: List[Dict[str, Any]]) -> List[Dict[str
 def _collect_entrypoints(nodes: Dict[int, Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Find entrypoint functions (main, CLI handlers)."""
     by_file = _group_nodes_by_file(nodes)
-    
+
     entrypoints: List[Dict[str, Any]] = []
     for f, ns in by_file.items():
         if not _is_entrypoint_file(f):
@@ -72,7 +76,7 @@ def _collect_entrypoints(nodes: Dict[int, Dict[str, Any]]) -> List[Dict[str, Any
             ep_info = _extract_entrypoint_info(n, f)
             if ep_info:
                 entrypoints.append(ep_info)
-    
+
     return _deduplicate_entrypoints(entrypoints)
 
 
@@ -93,11 +97,11 @@ def _collect_functions(nodes: Dict[int, Dict[str, Any]]) -> Set[str]:
 
 
 __all__ = [
-    '_collect_nodes',
-    '_group_nodes_by_file',
-    '_is_entrypoint_file',
-    '_extract_entrypoint_info',
-    '_deduplicate_entrypoints',
-    '_collect_entrypoints',
-    '_collect_functions',
+    "_collect_nodes",
+    "_group_nodes_by_file",
+    "_is_entrypoint_file",
+    "_extract_entrypoint_info",
+    "_deduplicate_entrypoints",
+    "_collect_entrypoints",
+    "_collect_functions",
 ]

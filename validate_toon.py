@@ -4,21 +4,20 @@
 import yaml
 import sys
 from pathlib import Path
-from collections import defaultdict
 
 # Import TOON parser functions
-from code2llm.parsers.toon_parser import (
-    parse_toon_content, is_toon_file, load_toon
-)
+from code2llm.parsers.toon_parser import is_toon_file, load_toon
+
 
 def load_yaml(filepath):
     """Load YAML file safely."""
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             return yaml.safe_load(f)
     except Exception as e:
         print(f"Error loading {filepath}: {e}")
         return None
+
 
 def load_file(filepath):
     """Load file - auto-detect TOON vs YAML format."""
@@ -30,20 +29,21 @@ def load_file(filepath):
 def extract_functions_from_yaml(yaml_data):
     """Extract function list from standard YAML format."""
     functions = set()
-    
+
     # Extract from nodes
-    for node_id, node_data in yaml_data.get('nodes', {}).items():
-        func_name = node_data.get('function', '')
+    for node_id, node_data in yaml_data.get("nodes", {}).items():
+        func_name = node_data.get("function", "")
         if func_name:
             functions.add(func_name)
-    
+
     return functions
+
 
 def _extract_names_from_toon(toon_data, key: str) -> set:
     """Shared helper: extract a set of names from a toon data list by key."""
     names = set()
     for item in toon_data.get(key, []):
-        name = item.get('name', '')
+        name = item.get("name", "")
         if name:
             names.add(name)
     return names
@@ -51,7 +51,7 @@ def _extract_names_from_toon(toon_data, key: str) -> set:
 
 def extract_functions_from_toon(toon_data):
     """Extract function list from parsed TOON data."""
-    return _extract_names_from_toon(toon_data, 'functions')
+    return _extract_names_from_toon(toon_data, "functions")
 
 
 def _extract_keys_from_yaml(yaml_data, key: str) -> set:
@@ -61,227 +61,241 @@ def _extract_keys_from_yaml(yaml_data, key: str) -> set:
 
 def extract_classes_from_yaml(yaml_data):
     """Extract class list from standard YAML format."""
-    return _extract_keys_from_yaml(yaml_data, 'classes')
+    return _extract_keys_from_yaml(yaml_data, "classes")
 
 
 def extract_classes_from_toon(toon_data):
     """Extract class list from parsed TOON data."""
-    return _extract_names_from_toon(toon_data, 'classes')
+    return _extract_names_from_toon(toon_data, "classes")
+
 
 def analyze_class_differences(yaml_data, toon_data):
     """Analyze why classes differ between formats."""
     print("\n🔍 Class Detection Analysis:")
     print("-" * 50)
-    
-    yaml_classes = yaml_data.get('classes', {})
-    toon_classes = toon_data.get('classes', [])
-    
+
+    yaml_classes = yaml_data.get("classes", {})
+    toon_classes = toon_data.get("classes", [])
+
     print(f"YAML: Direct AST class detection ({len(yaml_classes)} classes)")
     print(f"TOON: Inferred from function grouping ({len(toon_classes)} classes)")
-    
+
     # Show examples of different detection methods
-    print(f"\n📋 YAML Detection Examples (AST-based):")
+    print("\n📋 YAML Detection Examples (AST-based):")
     for i, (name, cls_data) in enumerate(list(yaml_classes.items())[:3]):
-        methods = cls_data.get('methods', [])
-        print(f"  {i+1}. {name}")
+        methods = cls_data.get("methods", [])
+        print(f"  {i + 1}. {name}")
         print(f"     Methods: {len(methods)} - {', '.join(methods[:3])}")
-    
-    print(f"\n📋 TOON Detection Examples (Function-based):")
+
+    print("\n📋 TOON Detection Examples (Function-based):")
     for i, cls_data in enumerate(toon_classes[:3]):
-        methods = cls_data.get('methods', [])
-        print(f"  {i+1}. {cls_data.get('module', '')}.{cls_data.get('name', '')}")
+        methods = cls_data.get("methods", [])
+        print(f"  {i + 1}. {cls_data.get('module', '')}.{cls_data.get('name', '')}")
         print(f"     Methods: {len(methods)} - {', '.join(methods[:3])}")
-    
+
     # Check overlap
     yaml_names = set(yaml_classes.keys())
     toon_names = set()
     for cls_data in toon_classes:
-        module = cls_data.get('module', '')
-        name = cls_data.get('name', '')
-        if module and module != 'root':
+        module = cls_data.get("module", "")
+        name = cls_data.get("name", "")
+        if module and module != "root":
             full_name = f"{module}.{name}"
         else:
             full_name = name
         toon_names.add(full_name)
-    
+
     common = yaml_names & toon_names
-    print(f"\n📊 Overlap Analysis:")
+    print("\n📊 Overlap Analysis:")
     print(f"  Common classes: {len(common)}")
     print(f"  YAML-only: {len(yaml_names - toon_names)}")
     print(f"  TOON-only: {len(toon_names - yaml_names)}")
-    
+
     return common
+
 
 def extract_modules_from_yaml(yaml_data):
     """Extract module list from standard YAML format."""
-    return _extract_keys_from_yaml(yaml_data, 'modules')
+    return _extract_keys_from_yaml(yaml_data, "modules")
+
 
 def extract_modules_from_toon(toon_data):
     """Extract module list from parsed TOON data."""
     # TOON v2 doesn't have explicit modules section
     # Modules are inferred from function/class locations
     modules = set()
-    for func in toon_data.get('functions', []):
-        name = func.get('name', '')
-        if '.' in name:
-            modules.add(name.rsplit('.', 1)[0])
+    for func in toon_data.get("functions", []):
+        name = func.get("name", "")
+        if "." in name:
+            modules.add(name.rsplit(".", 1)[0])
     return modules
+
 
 def compare_basic_stats(yaml_data, toon_data):
     """Compare basic statistics."""
     print("📊 Basic Statistics Comparison:")
     print("-" * 50)
-    
-    yaml_stats = yaml_data.get('stats', {})
-    toon_stats = toon_data.get('stats', {})
-    
-    stats_to_check = ['files_processed', 'functions_found', 'classes_found', 'nodes_created', 'edges_created']
-    
+
+    yaml_stats = yaml_data.get("stats", {})
+    toon_stats = toon_data.get("stats", {})
+
+    stats_to_check = [
+        "files_processed",
+        "functions_found",
+        "classes_found",
+        "nodes_created",
+        "edges_created",
+    ]
+
     all_match = True
     for stat in stats_to_check:
-        yaml_val = yaml_stats.get(stat, 'N/A')
-        toon_val = toon_stats.get(stat, 'N/A')
+        yaml_val = yaml_stats.get(stat, "N/A")
+        toon_val = toon_stats.get(stat, "N/A")
         match = "✅" if str(yaml_val) == str(toon_val) else "❌"
         print(f"{match} {stat}: YAML={yaml_val}, TOON={toon_val}")
         if str(yaml_val) != str(toon_val):
             all_match = False
-    
+
     return all_match
+
 
 def compare_functions(yaml_data, toon_data):
     """Compare function lists."""
     print("\n🔧 Functions Comparison:")
     print("-" * 50)
-    
+
     yaml_funcs = extract_functions_from_yaml(yaml_data)
     toon_funcs = extract_functions_from_toon(toon_data)
-    
+
     print(f"YAML functions: {len(yaml_funcs)}")
     print(f"TOON functions: {len(toon_funcs)}")
-    
+
     # Find differences
     yaml_only = yaml_funcs - toon_funcs
     toon_only = toon_funcs - yaml_funcs
     common = yaml_funcs & toon_funcs
-    
+
     print(f"Common functions: {len(common)}")
     print(f"Only in YAML: {len(yaml_only)}")
     print(f"Only in TOON: {len(toon_only)}")
-    
+
     if yaml_only:
-        print(f"\n⚠️  Functions only in YAML (first 10):")
+        print("\n⚠️  Functions only in YAML (first 10):")
         for func in sorted(list(yaml_only))[:10]:
             print(f"  - {func}")
-    
+
     if toon_only:
-        print(f"\n⚠️  Functions only in TOON (first 10):")
+        print("\n⚠️  Functions only in TOON (first 10):")
         for func in sorted(list(toon_only))[:10]:
             print(f"  - {func}")
-    
+
     return len(yaml_only) == 0 and len(toon_only) == 0
+
 
 def compare_classes(yaml_data, toon_data):
     """Compare class lists with detailed analysis."""
     print("\n🏗️  Classes Comparison:")
     print("-" * 50)
-    
+
     yaml_classes = extract_classes_from_yaml(yaml_data)
     toon_classes = extract_classes_from_toon(toon_data)
-    
+
     print(f"YAML classes: {len(yaml_classes)}")
     print(f"TOON classes: {len(toon_classes)}")
-    
+
     # Find differences
     yaml_only = yaml_classes - toon_classes
     toon_only = toon_classes - yaml_classes
     common = yaml_classes & toon_classes
-    
+
     print(f"Common classes: {len(common)}")
     print(f"Only in YAML: {len(yaml_only)}")
     print(f"Only in TOON: {len(toon_only)}")
-    
+
     # Analyze the differences
     analyze_class_differences(yaml_data, toon_data)
-    
+
     # Note about detection methods
-    print(f"\n💡 Note: Different detection methods are expected:")
-    print(f"  - YAML: Direct AST analysis (more accurate for empty classes)")
-    print(f"  - TOON: Inferred from function grouping (only classes with methods)")
-    
+    print("\n💡 Note: Different detection methods are expected:")
+    print("  - YAML: Direct AST analysis (more accurate for empty classes)")
+    print("  - TOON: Inferred from function grouping (only classes with methods)")
+
     return len(common) > 0  # Consider successful if there's overlap
+
 
 def compare_modules(yaml_data, toon_data):
     """Compare module lists with detailed analysis."""
     print("\n📦 Modules Comparison:")
     print("-" * 50)
-    
+
     yaml_modules = extract_modules_from_yaml(yaml_data)
     toon_modules = extract_modules_from_toon(toon_data)
-    
+
     print(f"YAML modules: {len(yaml_modules)}")
     print(f"TOON modules: {len(toon_modules)}")
-    
+
     # Find differences
     yaml_only = yaml_modules - toon_modules
     toon_only = toon_modules - yaml_modules
     common = yaml_modules & toon_modules
-    
+
     print(f"Common modules: {len(common)}")
     print(f"Only in YAML: {len(yaml_only)}")
     print(f"Only in TOON: {len(toon_only)}")
-    
+
     # Explain the difference
-    print(f"\n💡 Note: Different module detection methods:")
-    print(f"  - YAML: Direct module imports and file-level analysis")
-    print(f"  - TOON: Inferred from function locations (more granular)")
-    
+    print("\n💡 Note: Different module detection methods:")
+    print("  - YAML: Direct module imports and file-level analysis")
+    print("  - TOON: Inferred from function locations (more granular)")
+
     # Show some examples of the differences
     if yaml_only:
-        print(f"\n📋 YAML-only modules (file-level):")
+        print("\n📋 YAML-only modules (file-level):")
         for mod in sorted(list(yaml_only))[:5]:
             print(f"  - {mod}")
-    
+
     if toon_only:
-        print(f"\n📋 TOON-only modules (function-level):")
+        print("\n📋 TOON-only modules (function-level):")
         for mod in sorted(list(toon_only))[:5]:
             print(f"  - {mod}")
-    
+
     return len(common) > 0  # Consider successful if there's overlap
+
 
 def validate_toon_completeness(toon_data):
     """Validate toon format structure."""
     print("\n🔍 TOON Format Structure Validation:")
     print("-" * 50)
-    
+
     # Check for TOON v2 format
-    has_functions = bool(toon_data.get('functions'))
-    has_classes = bool(toon_data.get('classes'))
-    has_health = bool(toon_data.get('health'))
-    has_hotspots = bool(toon_data.get('hotspots'))
-    
+    has_functions = bool(toon_data.get("functions"))
+    has_classes = bool(toon_data.get("classes"))
+    has_health = bool(toon_data.get("health"))
+    has_hotspots = bool(toon_data.get("hotspots"))
+
     all_present = True
     sections = [
-        ('functions', has_functions),
-        ('classes', has_classes),
-        ('health', has_health),
-        ('hotspots', has_hotspots),
+        ("functions", has_functions),
+        ("classes", has_classes),
+        ("health", has_health),
+        ("hotspots", has_hotspots),
     ]
-    
+
     for section, present in sections:
         status = "✅" if present else "❌"
         print(f"{status} {section}: {'Present' if present else 'Missing'}")
         if not present:
             all_present = False
-    
-    
+
     # Show function sample
-    functions = toon_data.get('functions', [])
+    functions = toon_data.get("functions", [])
     if functions:
-        print(f"\n📋 Function Details Sample (first 3):")
+        print("\n📋 Function Details Sample (first 3):")
         for i, func in enumerate(functions[:3]):
-            print(f"  {i+1}. {func.get('name', 'N/A')} (CC={func.get('cc', 'N/A')})")
-    
+            print(f"  {i + 1}. {func.get('name', 'N/A')} (CC={func.get('cc', 'N/A')})")
+
     return all_present
+
 
 def _run_single_file_mode(file_path: Path) -> int:
     """Single file mode - validate TOON format structure only."""
@@ -343,7 +357,7 @@ def _compare_all_aspects(yaml_data, toon_data) -> list:
         ("Functions", compare_functions(yaml_data, toon_data)),
         ("Classes", compare_classes(yaml_data, toon_data)),
         ("Modules", compare_modules(yaml_data, toon_data)),
-        ("TOON Structure", validate_toon_completeness(toon_data))
+        ("TOON Structure", validate_toon_completeness(toon_data)),
     ]
 
 
@@ -371,9 +385,14 @@ def main():
         return _run_comparison_mode(Path(sys.argv[1]), Path(sys.argv[2]))
     else:
         print("Usage:")
-        print("  python validate_toon.py <analysis.toon>                      # Validate TOON only")
-        print("  python validate_toon.py <analysis.yaml> <analysis.toon>      # Compare both formats")
+        print(
+            "  python validate_toon.py <analysis.toon>                      # Validate TOON only"
+        )
+        print(
+            "  python validate_toon.py <analysis.yaml> <analysis.toon>      # Compare both formats"
+        )
         return 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

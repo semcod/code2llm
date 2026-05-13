@@ -10,13 +10,17 @@ def validate_mermaid_file(mmd_path: Path) -> List[str]:
         return [f"File not found: {mmd_path}"]
 
     try:
-        content = mmd_path.read_text(encoding='utf-8')
-        lines = content.strip().split('\n')
+        content = mmd_path.read_text(encoding="utf-8")
+        lines = content.strip().split("\n")
         errors = []
 
         # Check for proper graph declaration
-        if not lines or not any(line.strip().startswith(('graph', 'flowchart')) for line in lines):
-            errors.append("Missing graph declaration (should start with 'graph' or 'flowchart')")
+        if not lines or not any(
+            line.strip().startswith(("graph", "flowchart")) for line in lines
+        ):
+            errors.append(
+                "Missing graph declaration (should start with 'graph' or 'flowchart')"
+            )
 
         _check_bracket_balance(lines, errors)
         _check_node_ids(lines, errors)
@@ -30,6 +34,7 @@ def validate_mermaid_file(mmd_path: Path) -> List[str]:
 def _strip_label_segments(s: str) -> str:
     """Remove label segments that frequently contain Mermaid syntax chars."""
     import re
+
     s = re.sub(r"\|[^|]*\|", "||", s)
     s = re.sub(r"\[\"[^\"]*\"\]", "[]", s)
     s = re.sub(r"\(\"[^\"]*\"\)", "()", s)
@@ -41,9 +46,11 @@ def _strip_label_segments(s: str) -> str:
 
 def _is_balanced_node_line(line: str) -> bool:
     """Check if a line has balanced brackets — likely a node definition."""
-    return (('[' in line and ']' in line) or
-            ('(' in line and ')' in line) or
-            ('{' in line and '}' in line))
+    return (
+        ("[" in line and "]" in line)
+        or ("(" in line and ")" in line)
+        or ("{" in line and "}" in line)
+    )
 
 
 def _check_bracket_balance(lines: List[str], errors: List[str]) -> None:
@@ -53,7 +60,7 @@ def _check_bracket_balance(lines: List[str], errors: List[str]) -> None:
 
     for line_num, line in enumerate(lines, 1):
         line = line.strip()
-        if not line or line.startswith('%%'):
+        if not line or line.startswith("%%"):
             continue
         if _is_balanced_node_line(line):
             continue
@@ -66,21 +73,22 @@ def _check_bracket_balance(lines: List[str], errors: List[str]) -> None:
         errors.append(f"Line {line_num}: Unclosed '(' (missing '{expected}')")
 
 
-def _scan_brackets(text: str, line_num: int, bracket_stack: list,
-                   paren_stack: list, errors: List[str]) -> None:
+def _scan_brackets(
+    text: str, line_num: int, bracket_stack: list, paren_stack: list, errors: List[str]
+) -> None:
     """Process bracket/paren chars in a single line."""
     for char in text:
-        if char == '[':
-            bracket_stack.append((']', line_num))
-        elif char == ']':
-            if not bracket_stack or bracket_stack[-1][0] != ']':
+        if char == "[":
+            bracket_stack.append(("]", line_num))
+        elif char == "]":
+            if not bracket_stack or bracket_stack[-1][0] != "]":
                 errors.append(f"Line {line_num}: Unmatched ']'")
             else:
                 bracket_stack.pop()
-        elif char == '(':
-            paren_stack.append((')', line_num))
-        elif char == ')':
-            if not paren_stack or paren_stack[-1][0] != ')':
+        elif char == "(":
+            paren_stack.append((")", line_num))
+        elif char == ")":
+            if not paren_stack or paren_stack[-1][0] != ")":
                 errors.append(f"Line {line_num}: Unmatched ')'")
             else:
                 paren_stack.pop()
@@ -89,31 +97,34 @@ def _scan_brackets(text: str, line_num: int, bracket_stack: list,
 def _check_node_ids(lines: List[str], errors: List[str]) -> None:
     """Check for invalid node IDs."""
     import re
+
     node_pattern = re.compile(r'^\s*([A-Z]\d+|[Ff]\d+_\w+)\s*["\'\[\{]')
 
     for line_num, line in enumerate(lines, 1):
         line = line.strip()
-        if not line or line.startswith('%%'):
+        if not line or line.startswith("%%"):
             continue
-        if line.startswith('subgraph ') or line == 'end':
+        if line.startswith("subgraph ") or line == "end":
             continue
         if _is_balanced_node_line(line):
             continue
 
-        if any(char in line for char in ['[', '(', '{']):
+        if any(char in line for char in ["[", "(", "{"]):
             if not node_pattern.match(line):
-                match = re.match(r'^\s*([A-Za-z0-9_]+)', line)
+                match = re.match(r"^\s*([A-Za-z0-9_]+)", line)
                 if match:
                     node_id = match.group(1)
-                    if not re.match(r'^[A-Z]\d+$|^[Ff]\d+_\w+$', node_id):
-                        errors.append(f"Line {line_num}: Invalid node ID '{node_id}' (should be like 'N1' or 'F123_name')")
+                    if not re.match(r"^[A-Z]\d+$|^[Ff]\d+_\w+$", node_id):
+                        errors.append(
+                            f"Line {line_num}: Invalid node ID '{node_id}' (should be like 'N1' or 'F123_name')"
+                        )
 
 
 __all__ = [
-    'validate_mermaid_file',
-    '_strip_label_segments',
-    '_is_balanced_node_line',
-    '_check_bracket_balance',
-    '_scan_brackets',
-    '_check_node_ids',
+    "validate_mermaid_file",
+    "_strip_label_segments",
+    "_is_balanced_node_line",
+    "_check_bracket_balance",
+    "_scan_brackets",
+    "_check_node_ids",
 ]

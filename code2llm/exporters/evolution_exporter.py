@@ -11,14 +11,13 @@ Implementation has been split into:
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from .base import BaseExporter, export_format
 from code2llm.core.models import AnalysisResult
 
 from .evolution import (
     # Constants
-    CC_SPLIT_THRESHOLD,
     EXCLUDE_PATTERNS,
     # Exclusion
     is_excluded,
@@ -36,7 +35,11 @@ from .evolution import (
 )
 
 
-@export_format("evolution", description="Evolution refactoring queue format", extension=".toon.yaml")
+@export_format(
+    "evolution",
+    description="Evolution refactoring queue format",
+    extension=".toon.yaml",
+)
 class EvolutionExporter(BaseExporter):
     """Export evolution.toon.yaml — prioritized refactoring queue."""
 
@@ -47,7 +50,9 @@ class EvolutionExporter(BaseExporter):
         """Check if path should be excluded (venv, site-packages, etc.)."""
         return is_excluded(path)
 
-    def export(self, result: AnalysisResult, output_path: str, **kwargs) -> Optional[Path]:
+    def export(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> Optional[Path]:
         """Generate evolution.toon."""
         ctx = build_context(result)
 
@@ -69,6 +74,8 @@ class EvolutionExporter(BaseExporter):
             f.write("\n".join(sections) + "\n")
         return path
 
-    def export_to_yaml(self, result: AnalysisResult, output_path: str, **kwargs) -> None:
+    def export_to_yaml(
+        self, result: AnalysisResult, output_path: str, **kwargs
+    ) -> None:
         """Generate evolution.toon.yaml (structured YAML)."""
         _export_to_yaml(result, output_path)

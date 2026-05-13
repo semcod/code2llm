@@ -26,59 +26,59 @@ def split_toon_file(
     source_file: Path,
     output_dir: Path,
     max_kb: int = MAX_TOON_SIZE_KB,
-    prefix: str = "project"
+    prefix: str = "project",
 ) -> List[Path]:
     """Split large TOON file into chunks under size limit.
-    
+
     Strategy:
     1. Split by modules (M: sections)
     2. If module still too big, split by file groups
     3. Keep header in each part for context
-    
+
     Returns list of created chunk files.
     """
     max_bytes = max_kb * 1024
-    content = source_file.read_text(encoding='utf-8')
-    
+    content = source_file.read_text(encoding="utf-8")
+
     # Check if we need to split
-    if len(content.encode('utf-8')) <= max_bytes:
+    if len(content.encode("utf-8")) <= max_bytes:
         return [source_file]
-    
+
     # Parse modules from TOON content
     modules = _parse_modules(content)
-    
+
     if not modules:
         # No clear module structure - split by line count
         return _split_by_lines(source_file, output_dir, max_kb, prefix)
-    
+
     # Split by modules
     return _split_by_modules(source_file, output_dir, modules, max_kb, prefix)
 
 
 def _parse_modules(content: str) -> List[Tuple[str, int, int]]:
     """Parse module sections from TOON content.
-    
+
     Returns list of (module_name, start_line, end_line).
     """
-    lines = content.split('\n')
+    lines = content.split("\n")
     modules = []
     current_module = None
     start_line = 0
-    
+
     for i, line in enumerate(lines):
         # TOON format: M[module_name]:
-        if line.startswith('M[') and line.endswith(':'):
+        if line.startswith("M[") and line.endswith(":"):
             # Save previous module
             if current_module:
                 modules.append((current_module, start_line, i))
             # Start new module
             current_module = line[2:-2]  # Extract from M[...]:
             start_line = i
-    
+
     # Add last module
     if current_module:
         modules.append((current_module, start_line, len(lines)))
-    
+
     return modules
 
 
@@ -87,63 +87,69 @@ def _split_by_modules(
     output_dir: Path,
     modules: List[Tuple[str, int, int]],
     max_kb: int,
-    prefix: str
+    prefix: str,
 ) -> List[Path]:
     """Split TOON file by module sections with balanced chunk sizes."""
-    content = source_file.read_text(encoding='utf-8')
-    lines = content.split('\n')
-    
+    content = source_file.read_text(encoding="utf-8")
+    lines = content.split("\n")
+
     # Extract header (first section before M[)
     header_lines = []
     for i, line in enumerate(lines):
-        if line.startswith('M['):
+        if line.startswith("M["):
             break
         header_lines.append(line)
-    
-    header = '\n'.join(header_lines)
-    header_bytes = len(header.encode('utf-8'))
+
+    header = "\n".join(header_lines)
+    header_bytes = len(header.encode("utf-8"))
     max_bytes = max_kb * 1024
-    
+
     # Calculate target chunk size for more even distribution
     # Aim for chunks between 60-80% of max for better balance
     target_bytes_min = int(max_bytes * 0.6)  # 60% = ~150KB for 256KB limit
     target_bytes_max = int(max_bytes * 0.8)  # 80% = ~200KB for 256KB limit
-    
+
     chunks = []
     current_chunk = [header]
     current_size = header_bytes
     chunk_num = 1
-    
+
     for module_name, start, end in modules:
-        module_content = '\n'.join(lines[start:end])
-        module_bytes = len(module_content.encode('utf-8'))
-        
+        module_content = "\n".join(lines[start:end])
+        module_bytes = len(module_content.encode("utf-8"))
+
         # If single module exceeds limit, it goes in its own chunk
         if module_bytes > max_bytes:
             # Flush current chunk if not empty
             if len(current_chunk) > 1:
-                chunk_file = _write_chunk(output_dir, prefix, chunk_num, '\n'.join(current_chunk))
+                chunk_file = _write_chunk(
+                    output_dir, prefix, chunk_num, "\n".join(current_chunk)
+                )
                 chunks.append(chunk_file)
                 chunk_num += 1
                 current_chunk = [header]
                 current_size = header_bytes
-            
+
             # Write oversized module as separate chunk
-            chunk_file = _write_chunk(output_dir, prefix, chunk_num, 
-                                      header + '\n' + module_content)
+            chunk_file = _write_chunk(
+                output_dir, prefix, chunk_num, header + "\n" + module_content
+            )
             chunks.append(chunk_file)
             chunk_num += 1
             current_chunk = [header]
             current_size = header_bytes
-        
+
         # Check if adding this module would exceed target OR we're well above minimum
-        elif (current_size + module_bytes > target_bytes_max or 
-              (current_size >= target_bytes_min and module_bytes > 0)):
+        elif current_size + module_bytes > target_bytes_max or (
+            current_size >= target_bytes_min and module_bytes > 0
+        ):
             # Flush current chunk - we've reached good size
-            chunk_file = _write_chunk(output_dir, prefix, chunk_num, '\n'.join(current_chunk))
+            chunk_file = _write_chunk(
+                output_dir, prefix, chunk_num, "\n".join(current_chunk)
+            )
             chunks.append(chunk_file)
             chunk_num += 1
-            
+
             # Start new chunk with this module
             current_chunk = [header, module_content]
             current_size = header_bytes + module_bytes
@@ -151,49 +157,50 @@ def _split_by_modules(
             # Add to current chunk
             current_chunk.append(module_content)
             current_size += module_bytes
-    
+
     # Flush remaining chunk
     if len(current_chunk) > 1:
-        chunk_file = _write_chunk(output_dir, prefix, chunk_num, '\n'.join(current_chunk))
+        chunk_file = _write_chunk(
+            output_dir, prefix, chunk_num, "\n".join(current_chunk)
+        )
         chunks.append(chunk_file)
-    
+
     return chunks
 
 
 def _split_by_lines(
-    source_file: Path,
-    output_dir: Path,
-    max_kb: int,
-    prefix: str
+    source_file: Path, output_dir: Path, max_kb: int, prefix: str
 ) -> List[Path]:
     """Fallback: split by line count when no module structure."""
-    content = source_file.read_text(encoding='utf-8')
-    lines = content.split('\n')
-    
+    content = source_file.read_text(encoding="utf-8")
+    lines = content.split("\n")
+
     # Extract header
     header_lines = []
     content_start = 0
     for i, line in enumerate(lines):
-        if line.startswith('M[') or line.startswith('D[') or line.startswith('#'):
+        if line.startswith("M[") or line.startswith("D[") or line.startswith("#"):
             content_start = i
             break
         header_lines.append(line)
-    
-    header = '\n'.join(header_lines)
+
+    header = "\n".join(header_lines)
     max_bytes = max_kb * 1024
-    header_bytes = len(header.encode('utf-8'))
-    
+    header_bytes = len(header.encode("utf-8"))
+
     chunks = []
     current_lines = [header]
     current_size = header_bytes
     chunk_num = 1
-    
+
     for line in lines[content_start:]:
-        line_bytes = len((line + '\n').encode('utf-8'))
-        
+        line_bytes = len((line + "\n").encode("utf-8"))
+
         if current_size + line_bytes > max_bytes:
             # Write current chunk
-            chunk_file = _write_chunk(output_dir, prefix, chunk_num, '\n'.join(current_lines))
+            chunk_file = _write_chunk(
+                output_dir, prefix, chunk_num, "\n".join(current_lines)
+            )
             chunks.append(chunk_file)
             chunk_num += 1
             current_lines = [header, line]
@@ -201,12 +208,14 @@ def _split_by_lines(
         else:
             current_lines.append(line)
             current_size += line_bytes
-    
+
     # Write final chunk
     if len(current_lines) > 1:
-        chunk_file = _write_chunk(output_dir, prefix, chunk_num, '\n'.join(current_lines))
+        chunk_file = _write_chunk(
+            output_dir, prefix, chunk_num, "\n".join(current_lines)
+        )
         chunks.append(chunk_file)
-    
+
     return chunks
 
 
@@ -216,8 +225,8 @@ def _write_chunk(output_dir: Path, prefix: str, chunk_num: int, content: str) ->
         chunk_file = output_dir / f"{prefix}.toon"
     else:
         chunk_file = output_dir / f"{prefix}_part{chunk_num}.toon"
-    
-    chunk_file.write_text(content, encoding='utf-8')
+
+    chunk_file.write_text(content, encoding="utf-8")
     return chunk_file
 
 
@@ -226,40 +235,44 @@ def manage_toon_size(
     output_dir: Path,
     max_kb: int = MAX_TOON_SIZE_KB,
     prefix: str = "project",
-    verbose: bool = False
+    verbose: bool = False,
 ) -> List[Path]:
     """Main entry point: check and split TOON file if needed.
-    
+
     Strategy:
     - If file <= max_kb: keep as-is
     - If file > max_kb but by < 10% (margin): keep as-is (not worth splitting)
     - If file > max_kb + 10%: split into chunks of 150-250KB preserving structure
-    
+
     Returns list of final TOON file(s).
     """
     size_kb = get_file_size_kb(source_file)
     margin_kb = max_kb * 0.10  # 10% margin - don't split if difference is small
-    
+
     # Don't split if within limit or margin
     if size_kb <= max_kb + margin_kb:
         if verbose:
             if size_kb <= max_kb:
                 print(f"  - {prefix}.toon: {size_kb:.1f}KB (within {max_kb}KB limit)")
             else:
-                print(f"  - {prefix}.toon: {size_kb:.1f}KB (margin: {size_kb-max_kb:.1f}KB < {margin_kb:.0f}KB, keeping single file)")
+                print(
+                    f"  - {prefix}.toon: {size_kb:.1f}KB (margin: {size_kb - max_kb:.1f}KB < {margin_kb:.0f}KB, keeping single file)"
+                )
         return [source_file]
-    
+
     if verbose:
-        print(f"  - {prefix}.toon: {size_kb:.1f}KB → splitting into ~{int(max_kb*0.6)}-{int(max_kb*0.8)}KB chunks")
-    
+        print(
+            f"  - {prefix}.toon: {size_kb:.1f}KB → splitting into ~{int(max_kb * 0.6)}-{int(max_kb * 0.8)}KB chunks"
+        )
+
     # Remove original and create chunks
     chunks = split_toon_file(source_file, output_dir, max_kb, prefix)
-    
+
     if len(chunks) > 1:
         source_file.unlink()  # Remove oversized original
         if verbose:
             for chunk in chunks:
                 chunk_kb = get_file_size_kb(chunk)
                 print(f"    → {chunk.name}: {chunk_kb:.1f}KB")
-    
+
     return chunks
