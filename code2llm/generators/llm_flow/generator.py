@@ -16,6 +16,7 @@ def generate_llm_flow(
     limit_decisions: int,
     limit_calls: int,
 ) -> Dict[str, Any]:
+    """Build a compact LLM-friendly flow dict from a code2llm analysis result."""
     nodes = _collect_nodes(analysis)
     entrypoints = _collect_entrypoints(nodes)
 
@@ -62,6 +63,7 @@ def generate_llm_flow(
 
 
 def render_llm_flow_md(flow: Dict[str, Any]) -> str:
+    """Render a flow dict (from generate_llm_flow) as a Markdown summary string."""
     app = _as_dict(flow.get("app"))
     entrypoints = _as_list(app.get("entrypoints"))
     selected = _as_list(_as_dict(flow.get("flow")).get("selected_functions"))

@@ -283,6 +283,15 @@ def _merge_chunked_results(all_results, source_path: Path):
 
     merged = AnalysisResult(project_path=str(source_path))
 
+    # Track seen (file, simple_name) pairs to deduplicate overlapping chunk scopes.
+    # When the splitter assigns the same directory to multiple chunks (e.g. root and
+    # batch_1 both point at the project root), the same class/function would otherwise
+    # appear multiple times in the merged result and trigger false-positive duplicate
+    # detection in the TOON exporter.
+    _seen_funcs: set = set()
+    _seen_classes: set = set()
+    _seen_modules: set = set()
+
     for name, result, output_dir in all_results:
         if not result:
             continue
@@ -290,14 +299,26 @@ def _merge_chunked_results(all_results, source_path: Path):
         prefix = f"{name}."
 
         for func_name, func_info in result.functions.items():
+            dedup_key = (func_info.file, func_info.name)
+            if dedup_key in _seen_funcs:
+                continue
+            _seen_funcs.add(dedup_key)
             new_name = f"{prefix}{func_name}" if "." not in func_name else func_name
             merged.functions[new_name] = func_info
 
         for class_name, class_info in result.classes.items():
+            dedup_key = (class_info.file, class_info.name)
+            if dedup_key in _seen_classes:
+                continue
+            _seen_classes.add(dedup_key)
             new_name = f"{prefix}{class_name}" if "." not in class_name else class_name
             merged.classes[new_name] = class_info
 
         for mod_name, mod_info in result.modules.items():
+            dedup_key = (mod_info.file, mod_info.name)
+            if dedup_key in _seen_modules:
+                continue
+            _seen_modules.add(dedup_key)
             new_name = f"{prefix}{mod_name}" if "." not in mod_name else mod_name
             merged.modules[new_name] = mod_info
 

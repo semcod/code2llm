@@ -11,11 +11,13 @@ from code2llm.exporters.flow_constants import is_excluded_path
 
 
 def _is_excluded(path: str) -> bool:
+    """Return True if the given file path should be excluded from duplicate analysis."""
     return is_excluded_path(path)
 
 
 @lru_cache(maxsize=4096)
 def _rel_path(fpath: str, project_path: str) -> str:
+    """Return fpath relative to project_path, or fpath unchanged if resolution fails."""
     if not project_path or not fpath:
         return fpath or ""
     try:
@@ -51,6 +53,7 @@ def _package_of_module(module_name: str) -> str:
 
 
 def _traits_from_cfg(fi: FunctionInfo, result: AnalysisResult) -> list:
+    """Derive structural trait labels (loops/cond/ret) from a function's CFG nodes."""
     traits = []
     node_types = set()
     for nid in fi.cfg_nodes or []:
@@ -67,6 +70,7 @@ def _traits_from_cfg(fi: FunctionInfo, result: AnalysisResult) -> list:
 
 
 def _dup_file_set(ctx: Dict[str, Any]) -> Set[str]:
+    """Return the set of file paths that appear in at least one duplicate pair."""
     s: Set[str] = set()
     for d in ctx["duplicates"]:
         s.add(d["fileA"])
@@ -75,6 +79,7 @@ def _dup_file_set(ctx: Dict[str, Any]) -> Set[str]:
 
 
 def _hotspot_description(fi: FunctionInfo, fan_out: int) -> str:
+    """Generate a short human-readable description for a hotspot function."""
     if fi.name == "to_dict":
         return f"{fan_out} conditional field serializations"
     if "format" in fi.name.lower() or "dispatch" in fi.name.lower():

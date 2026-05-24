@@ -44,6 +44,7 @@ class SubProject:
 
     @property
     def file_count(self) -> int:
+        """Return the number of files in this sub-project."""
         return len(self.files)
 
 

@@ -9,10 +9,12 @@ from ._utils import dump_yaml
 
 
 def _strip_bom(text: str) -> str:
+    """Strip UTF-8 BOM from the start of text if present."""
     return text[1:] if text.startswith("\ufeff") else text
 
 
 def _ensure_list(value: Any) -> List[Any]:
+    """Wrap scalar value in a list; return value unchanged if already a list."""
     if value is None:
         return []
     if isinstance(value, list):

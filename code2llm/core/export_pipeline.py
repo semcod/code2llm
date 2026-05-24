@@ -19,23 +19,28 @@ class SharedExportContext:
     __slots__ = ("_result", "_computed")
 
     def __init__(self, result: AnalysisResult):
+        """Wrap an AnalysisResult for lazy computed-metric access."""
         self._result = result
         self._computed: Dict[str, Any] = {}
 
     @property
     def result(self) -> AnalysisResult:
+        """Return the underlying AnalysisResult."""
         return self._result
 
     @property
     def functions(self) -> Dict:
+        """Return the functions dict from the underlying result."""
         return self._result.functions
 
     @property
     def classes(self) -> Dict:
+        """Return the classes dict from the underlying result."""
         return self._result.classes
 
     @property
     def modules(self) -> Dict:
+        """Return the modules dict from the underlying result."""
         return self._result.modules
 
     @property

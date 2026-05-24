@@ -11,6 +11,7 @@ from .generator import generate_llm_flow, render_llm_flow_md
 
 
 def create_parser() -> argparse.ArgumentParser:
+    """Build and return the argument parser for the llm-flow-generator CLI."""
     p = argparse.ArgumentParser(
         prog="llm-flow-generator",
         description="Generate compact LLM-friendly app flow summary from code2llm analysis.yaml",
@@ -39,6 +40,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    """Entry point: parse args, run flow generation, write output files."""
     args = create_parser().parse_args(argv)
 
     input_path = Path(args.input)

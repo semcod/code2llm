@@ -11,6 +11,7 @@ from code2llm.core.lang.base import (
 def _parse_php_metadata(
     content: str, module_name: str, result: Dict
 ) -> Tuple[Optional[str], bool]:
+    """Extract PHP namespace and import declarations from source content."""
     lines = content.split("\n")
     current_namespace = None
     in_php = False
@@ -35,6 +36,7 @@ def _parse_php_metadata(
 
 
 def _adjust_qualified_names(result: Dict, module_name: str, namespace: str) -> None:
+    """Prefix all class/function qualified names with the PHP namespace."""
     ns_prefix = f".{namespace}"
     for key in ["classes", "functions"]:
         new_items = {}
@@ -56,6 +58,7 @@ def _extract_php_traits(
     result: Dict,
     stats: Dict,
 ) -> None:
+    """Detect PHP trait declarations and add them as ClassInfo entries."""
     trait_pattern = re.compile(r"^\s*trait\s+(\w+)")
     for line_no, line in enumerate(content.split("\n"), 1):
         tm = trait_pattern.match(line.strip())
@@ -79,6 +82,7 @@ def _extract_php_traits(
 def analyze_php(
     content: str, file_path: str, module_name: str, ext: str, stats: Dict
 ) -> Dict:
+    """Analyze a PHP source file and return declarations, complexity, and call info."""
     patterns = {
         "import": re.compile(
             r'^(?:include|require|include_once|require_once)\s*["\']([^"\']+)["\']'

@@ -13,6 +13,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
     """Generate context.md from project.yaml data."""
 
     def _render(self, data: Dict[str, Any]) -> List[str]:
+        """Render the full context narrative from project.yaml data."""
         proj = data.get("project", {})
         health = data.get("health", {})
         modules = data.get("modules", [])
@@ -30,6 +31,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_overview(proj: Dict, health: Dict) -> List[str]:
+        """Render the Overview section with key project stats."""
         stats = proj.get("stats", {})
         return [
             "# System Architecture Analysis",
@@ -49,6 +51,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_architecture(modules: List[Dict]) -> List[str]:
+        """Render the Architecture section grouped by directory."""
         lines = ["## Architecture", ""]
         dir_groups: Dict[str, List[Dict]] = {}
         for m in modules:
@@ -81,6 +84,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_exports(modules: List[Dict]) -> List[str]:
+        """Render the Key Exports section (flagged classes and functions)."""
         lines = ["## Key Exports", ""]
         for m in modules:
             for exp in m.get("exports", []):
@@ -104,6 +108,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_hotspots(hotspots: List[Dict]) -> List[str]:
+        """Render the Hotspots section (top 7 by fan-out)."""
         if not hotspots:
             return []
         lines = ["## Hotspots (High Fan-Out)", ""]
@@ -116,6 +121,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_refactoring(refactoring: Dict) -> List[str]:
+        """Render the Refactoring Priorities table."""
         priorities = refactoring.get("priorities", [])
         if not priorities:
             return []

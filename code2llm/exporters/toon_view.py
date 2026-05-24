@@ -52,6 +52,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
     """Generate project.toon.yaml from project.yaml data."""
 
     def _render(self, data: Dict[str, Any]) -> List[str]:
+        """Render the full TOON view from project.yaml data."""
         proj = data.get("project", {})
         health = data.get("health", {})
         modules = data.get("modules", [])
@@ -71,6 +72,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_header(proj: Dict) -> List[str]:
+        """Render single-line project header with key stats."""
         stats = proj.get("stats", {})
         lang = proj.get("language", "unknown")
         return [
@@ -85,6 +87,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_health(health: Dict) -> List[str]:
+        """Render one-line HEALTH summary."""
         return [
             "HEALTH:",
             f"  CC̄={health.get('cc_avg', 0)}  "
@@ -95,6 +98,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_alerts(health: Dict) -> List[str]:
+        """Render ALERTS block (returns empty list if no alerts)."""
         alerts = health.get("alerts", [])
         if not alerts:
             return []
@@ -116,6 +120,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_modules(modules: List[Dict]) -> List[str]:
+        """Render MODULES block with top-15 by size and language breakdown."""
         # Show top modules by size (lines) - works for all languages
         top_by_lines = sorted(modules, key=lambda m: m.get("lines", 0), reverse=True)[
             :15
@@ -149,6 +154,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_hotspots(hotspots: List[Dict]) -> List[str]:
+        """Render HOTSPOTS block (top 5 by fan-out)."""
         if not hotspots:
             return []
         lines = ["", f"HOTSPOTS[{len(hotspots)}]:"]
@@ -161,6 +167,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_refactoring(refactoring: Dict) -> List[str]:
+        """Render REFACTOR block with top 5 refactoring actions."""
         priorities = refactoring.get("priorities", [])
         if not priorities:
             return []

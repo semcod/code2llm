@@ -11,6 +11,7 @@ class StreamingFileCache:
     """Memory-efficient cache with LRU eviction."""
 
     def __init__(self, max_size: int = 100, cache_dir: str = ".code2llm_cache"):
+        """Initialise the hybrid (memory + disk) LRU cache."""
         self.max_size = max_size
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -18,6 +19,7 @@ class StreamingFileCache:
         self._access_order: List[str] = []
 
     def _get_cache_key(self, file_path: str, content: str) -> str:
+        """Derive the cache key for a given file path and content."""
         return make_cache_key(file_path, content)
 
     def _evict_if_needed(self) -> None:

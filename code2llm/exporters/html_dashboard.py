@@ -23,10 +23,12 @@ class HTMLDashboardGenerator:
     """
 
     def __init__(self):
+        """Initialise with a DashboardDataBuilder and DashboardRenderer."""
         self._data_builder = DashboardDataBuilder()
         self._renderer = DashboardRenderer()
 
     def generate(self, data: Dict[str, Any], output_path: str) -> None:
+        """Render dashboard HTML from data and write it to output_path."""
         html = self._render(data)
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:

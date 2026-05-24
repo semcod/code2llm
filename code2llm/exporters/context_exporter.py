@@ -64,6 +64,7 @@ class ContextExporter(BaseExporter):
         return path
 
     def _get_overview(self, result: AnalysisResult) -> List[str]:
+        """Build the Overview section listing language, file counts, and top classes."""
         lang_info = self._detect_languages(result)
         primary = lang_info[0][0] if lang_info else "unknown"
         lang_summary = ", ".join(f"{l}: {c}" for l, c in lang_info[:5])
@@ -99,6 +100,7 @@ class ContextExporter(BaseExporter):
         return sorted(lang_counts.items(), key=lambda x: -x[1])
 
     def _get_architecture_by_module(self, result: AnalysisResult) -> List[str]:
+        """Build the Architecture section grouped by module with stats."""
         lines = ["## Architecture by Module", ""]
         module_stats = []
         for mod_name, mod in result.modules.items():
@@ -121,6 +123,7 @@ class ContextExporter(BaseExporter):
     def _get_important_entries(
         self, result: AnalysisResult
     ) -> List[Tuple[str, int, Any]]:
+        """Return (name, fan_out, func_info) triples for notable entry-point functions."""
         entries = []
         for ep in result.entry_points:
             func = result.functions.get(ep)
@@ -133,6 +136,7 @@ class ContextExporter(BaseExporter):
     def _get_key_entry_points(
         self, important_entries: List[Tuple[str, int, Any]]
     ) -> List[str]:
+        """Build the Key Entry Points section from pre-ranked entry list."""
         lines = ["## Key Entry Points", "", "Main execution flows into the system:", ""]
         for ep, _, func in important_entries[:30]:
             lines.append(f"### {ep}")

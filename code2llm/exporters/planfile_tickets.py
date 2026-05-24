@@ -159,6 +159,7 @@ class PlanfileTicketsExporter(BaseExporter):
 
 
 def _high_cc_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
+    """Yield refactor tickets for functions whose cyclomatic complexity exceeds the limit."""
     tickets: list[PlanfileTicketSuggestion] = []
     for func in result.functions.values():
         cc = _function_cc(func)
@@ -187,6 +188,7 @@ def _high_cc_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
 
 
 def _god_module_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
+    """Yield split tickets for modules that are too large (god-module smell)."""
     tickets: list[PlanfileTicketSuggestion] = []
     for module in result.modules.values():
         class_count = len(module.classes)
@@ -213,6 +215,7 @@ def _god_module_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion
 
 
 def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
+    """Yield deduplication tickets for class pairs with ≥60% method-name overlap."""
     tickets: list[PlanfileTicketSuggestion] = []
     classes = list(result.classes.values())
     for index, left in enumerate(classes):
@@ -251,6 +254,7 @@ def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSugge
 
 
 def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
+    """Yield tickets for structural smells not already covered by other ticket generators."""
     tickets: list[PlanfileTicketSuggestion] = []
     for smell in result.smells:
         if smell.type == "god_function" and smell.context.get("complexity", 0) >= _CC_LIMIT:
@@ -277,6 +281,7 @@ def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
 
 
 def _function_cc(func: FunctionInfo) -> int:
+    """Extract the cyclomatic complexity integer from a FunctionInfo, defaulting to 0."""
     raw = func.complexity.get("cyclomatic_complexity", func.complexity.get("cc", 0))
     try:
         return int(raw)
@@ -285,10 +290,12 @@ def _function_cc(func: FunctionInfo) -> int:
 
 
 def _method_names(cls: ClassInfo) -> set[str]:
+    """Return the set of unqualified method names for a class."""
     return {method.split(".")[-1] for method in cls.methods}
 
 
 def _rel_path(path: str, project_path: str) -> str:
+    """Return path relative to project_path, falling back to the original if resolution fails."""
     if not path:
         return ""
     raw = Path(path)

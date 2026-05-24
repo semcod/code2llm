@@ -11,6 +11,8 @@ from .parsing import _parse_call_label
 
 @dataclass(frozen=True)
 class FuncSummary:
+    """Immutable summary of a single function's decisions and outgoing calls."""
+
     name: str
     file: Optional[str]
     line: Optional[int]
@@ -147,6 +149,7 @@ def _summarize_functions(
 def _build_call_graph(
     func_summaries: Dict[str, FuncSummary], known_functions: Set[str]
 ) -> Dict[str, Set[str]]:
+    """Build adjacency list of internal calls between known functions."""
     g: Dict[str, Set[str]] = defaultdict(set)
     for fn, s in func_summaries.items():
         for callee in s.calls:
@@ -158,6 +161,7 @@ def _build_call_graph(
 def _reachable(
     g: Dict[str, Set[str]], roots: Iterable[str], max_nodes: int
 ) -> List[str]:
+    """BFS from roots through call graph; return up to max_nodes reachable functions."""
     seen: Set[str] = set()
     q: deque[str] = deque([r for r in roots if r])
 
