@@ -43,6 +43,7 @@ from .flow_exporter import FlowExporter
 from .evolution_exporter import EvolutionExporter
 from .readme_exporter import READMEExporter
 from .project_yaml_exporter import ProjectYAMLExporter
+from .planfile_tickets import PlanfileTicketsExporter
 
 # View generators (work from project.yaml data)
 from .report_generators import (
@@ -74,6 +75,7 @@ __all__ = [
     "EvolutionExporter",
     "READMEExporter",
     "ProjectYAMLExporter",
+    "PlanfileTicketsExporter",
     # View generators
     "ToonViewGenerator",
     "ContextViewGenerator",

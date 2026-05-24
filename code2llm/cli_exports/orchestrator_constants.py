@@ -16,6 +16,7 @@ FORMAT_FILENAMES: Dict[str, str] = {
     "yaml": "analysis.yaml",
     "json": "analysis.json",
     "evolution": "evolution.toon.yaml",
+    "planfile": "planfile-tickets.yaml",
     "readme": "README.md",
     "project-yaml": "project.yaml",
 }
@@ -25,6 +26,7 @@ FORMAT_DRY_RUN_FILES: Dict[str, List[str]] = {
     "toon": ["analysis.toon"],
     "map": ["map.toon.yaml"],
     "evolution": ["evolution.toon.yaml"],
+    "planfile": ["planfile-tickets.yaml"],
     "context": ["context.md"],
     "mermaid": ["calls.mmd", "calls.png"],
     "yaml": ["analysis.yaml"],
@@ -41,6 +43,7 @@ FORMAT_LABELS: Dict[str, str] = {
     "yaml": "YAML",
     "json": "JSON",
     "evolution": "EVOLUTION (refactoring queue)",
+    "planfile": "PLANFILE (ticket suggestions)",
     "readme": "README (documentation)",
     "project-yaml": "PROJECT-YAML (single source of truth)",
 }

@@ -48,6 +48,10 @@ def _build_export_config(args, formats: List[str]) -> Dict[str, Any]:
         "full": getattr(args, "full", False),
         "refactor": getattr(args, "refactor", False),
         "data_structures": getattr(args, "data_structures", False),
+        "planfile_apply": getattr(args, "planfile_apply", False),
+        "planfile_source": getattr(args, "planfile_source", "code2llm"),
+        "planfile_sprint": getattr(args, "planfile_sprint", "current"),
+        "planfile_limit": getattr(args, "planfile_limit", None),
     }
 
 
@@ -92,6 +96,7 @@ def _should_skip_export_cache(args, is_chunked: bool) -> bool:
     """Return True when this run must not read or write export cache."""
     return (
         is_chunked or getattr(args, "no_cache", False) or getattr(args, "force", False)
+        or getattr(args, "planfile_apply", False)
     )
 
 
@@ -104,6 +109,8 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     """
     requested_formats = [f.strip() for f in args.format.split(",")]
     formats = _expand_all_formats(requested_formats, getattr(args, "png", False))
+    if getattr(args, "planfile_apply", False) and "planfile" not in formats:
+        formats.append("planfile")
     is_chunked = getattr(args, "chunk", False)
     dry_run = getattr(args, "dry_run", False)
 
@@ -213,7 +220,7 @@ def _expand_all_formats(requested: List[str], include_png: bool = False) -> List
     """Expand 'all' to concrete format list."""
     if "all" not in requested:
         return requested[:]
-    formats = ["toon", "map", "context", "evolution", "mermaid"]
+    formats = ["toon", "map", "context", "evolution", "mermaid", "planfile"]
     return formats
 
 
@@ -226,6 +233,8 @@ def _export_single(
     source_path: Optional[Path] = None,
 ):
     """Export single project results."""
+    formats = _with_planfile_apply_format(args, formats)
+
     # Core formats via registry
     _export_registry_formats(args, result, output_dir, formats)
 
@@ -300,12 +309,25 @@ def _export_registry_formats(args, result, output_dir: Path, formats: List[str])
                 print(f"  - {label} export failed: {e}", file=sys.stderr)
 
 
+def _with_planfile_apply_format(args, formats: List[str]) -> List[str]:
+    """Ensure --planfile-apply has a planfile exporter to apply from."""
+    if getattr(args, "planfile_apply", False) and "planfile" not in formats:
+        return [*formats, "planfile"]
+    return formats
+
+
 def _get_format_kwargs(fmt: str, args) -> Dict[str, Any]:
     """Get format-specific kwargs for export."""
     kwargs: Dict[str, Any] = {}
     if fmt in ("yaml", "json"):
         kwargs["compact"] = not args.full
         kwargs["include_defaults"] = args.full
+    if fmt == "planfile":
+        kwargs["apply"] = getattr(args, "planfile_apply", False)
+        kwargs["source"] = getattr(args, "planfile_source", "code2llm")
+        kwargs["sprint"] = getattr(args, "planfile_sprint", "current")
+        kwargs["limit"] = getattr(args, "planfile_limit", None)
+        kwargs["project_root"] = getattr(args, "planfile_project", None)
     return kwargs
 
 

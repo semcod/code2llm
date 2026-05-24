@@ -56,7 +56,8 @@ Format Options (-f):
   flow         — Data-flow analysis (flow.toon) — legacy, explicit opt-in
   code2logic   — Generate project logic (legacy project.toon) via external code2logic
   project-yaml — Legacy project.yaml export (single source of truth) + generated views
-  all          — Generate core formats (analysis.toon, map.toon.yaml, evolution.toon.yaml, context) plus project.toon.yaml and prompt.txt; mermaid/PNG excluded unless -f mermaid or --png added
+  planfile     — Planfile ticket suggestions (planfile-tickets.yaml); use --planfile-apply to create tickets
+  all          — Generate core formats (analysis.toon, map.toon.yaml, evolution.toon.yaml, context, mermaid, planfile-tickets.yaml) plus project.toon.yaml and prompt.txt; PNG remains opt-in via --png
 
 Strategy Options (--strategy):
   quick     — Fast overview, fewer files analyzed
@@ -94,7 +95,40 @@ Strategy Options (--strategy):
         "-f",
         "--format",
         default="toon",
-        help="Output formats: toon,map,flow,context,code2logic,yaml,json,mermaid,evolution,calls,png,project-yaml,all (default: toon)",
+        help=(
+            "Output formats: toon,map,flow,context,code2logic,yaml,json,mermaid,"
+            "evolution,calls,png,project-yaml,planfile,all (default: toon)"
+        ),
+    )
+
+    parser.add_argument(
+        "--planfile-apply",
+        action="store_true",
+        help="Create planfile tickets from code2llm findings while exporting planfile format.",
+    )
+
+    parser.add_argument(
+        "--planfile-sprint",
+        default="current",
+        help="Sprint used with --planfile-apply (default: current).",
+    )
+
+    parser.add_argument(
+        "--planfile-source",
+        default="code2llm",
+        help="Source tag used with --planfile-apply (default: code2llm).",
+    )
+
+    parser.add_argument(
+        "--planfile-project",
+        help="Project root for planfile auto-discovery (default: analyzed source root).",
+    )
+
+    parser.add_argument(
+        "--planfile-limit",
+        type=int,
+        default=None,
+        help="Maximum number of planfile ticket suggestions to export/apply.",
     )
 
     parser.add_argument(

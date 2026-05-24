@@ -2,13 +2,13 @@
 
 ## AI Cost Tracking
 
-![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.5.152-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
-![AI Cost](https://img.shields.io/badge/AI%20Cost-$7.50-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-75.8h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.5.153-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![AI Cost](https://img.shields.io/badge/AI%20Cost-$7.50-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-77.3h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
-- 🤖 **LLM usage:** $7.5000 (204 commits)
-- 👤 **Human dev:** ~$7584 (75.8h @ $100/h, 30min dedup)
+- 🤖 **LLM usage:** $7.5000 (206 commits)
+- 👤 **Human dev:** ~$7734 (77.3h @ $100/h, 30min dedup)
 
-Generated on 2026-05-06 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
+Generated on 2026-05-24 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
 
 ---
 
@@ -24,6 +24,7 @@ When you run `code2llm ./ -f all`, the following files are created:
 
 | File | Format | Purpose | Key Insights |
 |------|--------|---------|--------------|
+| `planfile-tickets.yaml` | **YAML** | **🎫 Koru-ready ticket feed** - Actionable planfile suggestions from code2llm findings | Import or apply tickets for autonomous execution |
 | `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | 0 refactoring actions needed |
 | `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |
 
@@ -48,6 +49,12 @@ code2llm ./ -f toon
 
 # Generate all formats (what created these files)
 code2llm ./ -f all
+
+# Generate planfile suggestions and create executable tickets for Koru
+code2llm ./ -f all -o ./project --no-chunk --planfile-apply
+
+# Or import the generated manifest later
+planfile ticket import --from ./project/planfile-tickets.yaml --source code2llm
 
 # LLM-ready context only
 code2llm ./ -f context

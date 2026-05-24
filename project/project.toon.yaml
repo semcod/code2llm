@@ -1,52 +1,52 @@
-# code2llm | 2295 func | 185f | 202102L | python | 2026-05-06
+# code2llm | 1233 func | 184f | 36325L | python | 2026-05-24
 # generated in 0.00s
 
 HEALTH:
-  CC̄=2.1  critical=74 (limit:10)  dup=3  cycles=0
+  CC̄=3.9  critical=77 (limit:10)  dup=3  cycles=0
 
 ALERTS[20]:
   !!! high_fan_out     analyze_rust = 24 (limit:10)
   !!! high_fan_out     _summarize_functions = 21 (limit:10)
   !!! high_fan_out     _analyze_go_regex = 20 (limit:10)
+  !!! high_fan_out     _run_exports = 20 (limit:10)
   !!  cc_exceeded      scan_file_sizes = 20 (limit:15)
   !!  high_fan_out     run_benchmark = 18 (limit:10)
   !!  high_fan_out     ProjectYAMLExporter._build_project_yaml = 18 (limit:10)
   !!  high_fan_out     export_calls = 18 (limit:10)
   !!  high_fan_out     _export_simple_formats = 18 (limit:10)
-  !!  high_fan_out     _run_exports = 18 (limit:10)
   !!  high_fan_out     handle_cache_command = 17 (limit:10)
 
-MODULES[267] (top by size):
-  M[project/map.toon.yaml] 121617L C:0 F:543 CC↑0 D:0 (yaml)
-  M[map.toon.yaml] 25199L C:0 F:542 CC↑0 D:71 (yaml)
-  M[project/calls.yaml] 7168L C:0 F:0 CC↑0 D:0 (yaml)
-  M[calls.yaml] 4778L C:0 F:0 CC↑0 D:0 (yaml)
-  M[calls_output/calls.yaml] 3801L C:0 F:0 CC↑0 D:0 (yaml)
+MODULES[235] (top by size):
   M[planfile.yaml] 2077L C:0 F:0 CC↑0 D:0 (yaml)
-  M[project/validation.toon.yaml] 821L C:0 F:0 CC↑0 D:0 (yaml)
   M[code2llm/exporters/index_generator/renderer.py] 637L C:1 F:1 CC↑1 D:0 (python)
-  M[code2llm/.code2llm_incremental.json] 611L C:0 F:0 CC↑0 D:0 (json)
-  M[project/calls.toon.yaml] 531L C:0 F:0 CC↑0 D:0 (yaml)
-  M[code2llm/core/analyzer.py] 494L C:1 F:22 CC↑11 D:0 (python)
-  M[code2llm/core/large_repo.py] 488L C:2 F:20 CC↑9 D:0 (python)
-  M[code2llm/cli_exports/prompt.py] 479L C:0 F:18 CC↑14 D:0 (python)
-  M[code2llm/exporters/toon/renderer.py] 471L C:1 F:26 CC↑11 D:0 (python)
-  M[code2llm/core/lang/base.py] 464L C:0 F:14 CC↑14 D:0 (python)
-  LANGS: python:193/yaml:38/txt:7/java:4/shell:4/go:3/php:3/rust:3/yml:3/typescript:2/toml:2/javascript:1/other:1/json:1/conf:1/ruby:1
+  M[code2llm/core/lang/base.py] 622L C:0 F:14 CC↑14 D:8 (python)
+  M[code2llm/cli_exports/prompt.py] 598L C:0 F:18 CC↑14 D:2 (python)
+  M[code2llm/analysis/data_analysis.py] 565L C:3 F:28 CC↑14 D:0 (python)
+  M[code2llm/core/analyzer.py] 565L C:1 F:22 CC↑11 D:0 (python)
+  M[code2llm/core/large_repo.py] 543L C:2 F:20 CC↑9 D:1 (python)
+  M[code2llm/core/file_analyzer.py] 509L C:1 F:18 CC↑13 D:0 (python)
+  M[code2llm/exporters/toon/renderer.py] 499L C:1 F:26 CC↑11 D:0 (python)
+  M[code2llm/core/persistent_cache.py] 458L C:1 F:22 CC↑10 D:1 (python)
+  M[code2llm/exporters/yaml_exporter.py] 456L C:1 F:25 CC↑8 D:0 (python)
+  M[goal.yaml] 430L C:0 F:0 CC↑0 D:0 (yaml)
+  M[examples/docker-doql-example/run-doql.sh] 427L C:0 F:0 CC↑0 D:0 (shell)
+  M[code2llm/cli_exports/orchestrator.py] 413L C:0 F:15 CC↑15 D:4 (python)
+  M[Taskfile.yml] 411L C:0 F:1 CC↑0 D:38 (yml)
+  LANGS: python:195/yaml:10/java:4/shell:4/go:3/php:3/rust:3/yml:3/typescript:2/toml:2/txt:2/javascript:1/other:1/conf:1/ruby:1
 
 HOTSPOTS[10]:
   ★ analyze_rust fan=24  // Analysis pipeline, 24 stages
   ★ _summarize_functions fan=21  // Summarize functions with their decisions, calls, and location info.
   ★ _analyze_go_regex fan=20  // Analysis pipeline, 20 stages
+  ★ _run_exports fan=20  // Export with 20 outputs
   ★ run_benchmark fan=18  // Run the full format quality benchmark.
-  ★ ProjectYAMLExporter._build_project_yaml fan=18  // Build complete project.yaml structure.
 
-REFACTOR[14]:
-  [1] H/H Split god module code2llm/exporters/index_generator/renderer.py (637L, 1 classes)
-  [2] H/H Split god module calls.yaml (4778L, 0 classes)
-  [3] H/H Split god module calls_output/calls.yaml (3801L, 0 classes)
-  [4] H/H Split god module code2llm/.code2llm_incremental.json (611L, 0 classes)
-  [5] H/H Split god module map.toon.yaml (25199L, 0 classes)
+REFACTOR[13]:
+  [1] H/H Split god module code2llm/analysis/data_analysis.py (565L, 3 classes)
+  [2] H/H Split god module code2llm/cli_exports/prompt.py (598L, 0 classes)
+  [3] H/H Split god module code2llm/core/lang/base.py (622L, 0 classes)
+  [4] H/H Split god module code2llm/core/file_analyzer.py (509L, 1 classes)
+  [5] H/H Split god module code2llm/core/analyzer.py (565L, 1 classes)
 
 EVOLUTION:
-  2026-05-06 CC̄=2.1 crit=74 202102L // Automated analysis
+  2026-05-24 CC̄=3.9 crit=77 36325L // Automated analysis

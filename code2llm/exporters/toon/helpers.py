@@ -5,8 +5,13 @@ from pathlib import Path
 from typing import Any, Dict, Set
 
 from code2llm.core.models import AnalysisResult, FunctionInfo
+from code2llm.exporters.flow_constants import is_excluded_path
 
 # Re-export is_excluded_path from flow_constants to eliminate duplication
+
+
+def _is_excluded(path: str) -> bool:
+    return is_excluded_path(path)
 
 
 @lru_cache(maxsize=4096)
