@@ -357,6 +357,7 @@ def _run_streaming_analysis(args, config, source_path: Path):
     if args.verbose:
 
         def on_progress(update):
+            """Print a progress percentage line in-place."""
             pct = update.get("percentage", 0)
             print(f"\r[{pct:.0f}%] {update.get('message', '')}", end="", flush=True)
 

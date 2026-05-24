@@ -108,6 +108,7 @@ def _extract_functions_ts(
     func_types = FUNCTION_TYPES.get(lang, ())
 
     def visit(node, class_context: Optional[str] = None):
+        """Recursively visit a tree-sitter node, extracting function declarations."""
         if node.type in func_types:
             name_node = _find_name_node(node)
             if name_node:
@@ -156,6 +157,7 @@ def _extract_classes_ts(
     class_types = CLASS_TYPES.get(lang, ())
 
     def visit(node):
+        """Recursively visit a tree-sitter node, extracting class declarations."""
         if node.type in class_types:
             name_node = _find_name_node(node)
             if name_node:

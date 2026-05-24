@@ -69,6 +69,7 @@ def _pick_relevant_functions(
     ]
 
     def score(fn: str) -> int:
+        """Rank function by node count, calls, and entry-point status for flow selection."""
         s = 0
         s += min(500, counts.get(fn, 0))  # node count baseline
         for needle, boost in keyword_boosts:

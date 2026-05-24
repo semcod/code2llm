@@ -32,6 +32,7 @@ def _deep_get(d: Dict[str, Any], path: Tuple[str, ...]) -> Any:
 
 
 def normalize_llm_task(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalise a raw LLM task dict into a canonical structure with all required keys."""
     task = data.get("task") or {}
     context = data.get("context") or {}
     deliverables = data.get("deliverables") or {}
@@ -310,6 +311,7 @@ def load_input(path: Path) -> Dict[str, Any]:
 
 
 def create_parser() -> argparse.ArgumentParser:
+    """Build and return the CLI argument parser for the LLM task generator."""
     p = argparse.ArgumentParser(
         prog="llm-task-generator",
         description="Generate normalized llm_task.yaml from simplified task spec (text/YAML/JSON).",
@@ -327,6 +329,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    """Entry point for the LLM task generator CLI."""
     args = create_parser().parse_args(argv)
 
     input_path = Path(args.input)

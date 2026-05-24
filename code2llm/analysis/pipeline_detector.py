@@ -63,9 +63,11 @@ class Pipeline:
 
     @property
     def purity_ratio(self) -> float:
+        """Fraction of stages that are free of side effects."""
         return self.pure_count / self.total_stages if self.total_stages else 0.0
 
     def to_dict(self) -> Dict[str, Any]:
+        """Serialise the Pipeline to a plain dict."""
         return {
             "name": self.name,
             "domain": self.domain,
@@ -125,6 +127,7 @@ class PipelineDetector:
         type_engine: Optional[TypeInferenceEngine] = None,
         side_effect_detector: Optional[SideEffectDetector] = None,
     ):
+        """Initialise with optional shared type engine and side-effect detector."""
         self._type_engine = type_engine or TypeInferenceEngine()
         self._se_detector = side_effect_detector or SideEffectDetector()
         self._resolver = PipelineResolver()
