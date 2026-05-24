@@ -70,15 +70,17 @@ sprint:
       blocked_by: []
       blocks: []
       created_at: '2026-05-24T17:21:35.846386+00:00'
-      description: '.vscode/mcp.json created with koru server; Taskfile upgraded to v3'
+      description: .vscode/mcp.json created with koru server; Taskfile upgraded to
+        v3
       execution:
         assigned_to: koru-shell
         attempt: 1
+        finished_at: '2026-05-24T18:25:52.106471Z'
         lease_expires_at: '2026-05-24T18:21:39.334298Z'
         max_attempts: 1
         queue: operator
         started_at: '2026-05-24T17:21:39.845534Z'
-        state: completed
+        state: done
       executor:
         kind: shell
         mode: noninteractive
@@ -115,6 +117,13 @@ sprint:
         source: planfile.store
         status: blocked
         timestamp: '2026-05-24T17:21:40.428279+00:00'
+      - action: update
+        changes:
+        - execution
+        execution_state: done
+        previous_execution_state: completed
+        source: planfile.store
+        timestamp: '2026-05-24T18:25:52.130263+00:00'
       id: PLF-002
       inputs:
         api_headers: {}
@@ -157,7 +166,7 @@ sprint:
       sprint: current
       status: done
       sync: {}
-      updated_at: '2026-05-24T19:55:00.000000+00:00'
+      updated_at: '2026-05-24T18:25:52.130234+00:00'
     PLF-003:
       blocked_by: []
       blocks: []
