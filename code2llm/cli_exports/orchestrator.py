@@ -100,6 +100,33 @@ def _should_skip_export_cache(args, is_chunked: bool) -> bool:
     )
 
 
+def _try_serve_from_cache(
+    args, formats: list, output_dir: Path, source_path: Path
+) -> bool:
+    """Return True and restore output from cache if a valid cached export exists."""
+    cache = PersistentCache(str(source_path))
+    config_dict = _build_export_config(args, formats)
+    cached_export_dir = cache.get_export_cache_dir(config_dict)
+    if not cached_export_dir:
+        return False
+    if args.verbose:
+        print(f"  Using cached export from: {cached_export_dir}")
+    _copy_cached_export(cached_export_dir, output_dir, verbose=args.verbose)
+    return True
+
+
+def _save_to_export_cache(args, formats: list, output_dir: Path, source_path: Path) -> None:
+    """Persist the just-produced output_dir contents into the export cache."""
+    cache = PersistentCache(str(source_path))
+    config_dict = _build_export_config(args, formats)
+    export_cache_dir = cache.create_export_cache_dir(config_dict)
+    _copy_to_cache(output_dir, export_cache_dir, verbose=args.verbose)
+    cache.mark_export_complete(export_cache_dir)
+    cache.save()
+    if args.verbose:
+        print(f"  Export cached at: {export_cache_dir}")
+
+
 def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = None):
     """Export analysis results in requested formats.
 
@@ -112,10 +139,8 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     if getattr(args, "planfile_apply", False) and "planfile" not in formats:
         formats.append("planfile")
     is_chunked = getattr(args, "chunk", False)
-    dry_run = getattr(args, "dry_run", False)
 
-    # Dry-run: show what would be exported without writing
-    if dry_run:
+    if getattr(args, "dry_run", False):
         _show_dry_run_plan(formats, output_dir, is_chunked, result)
         return
 
@@ -124,15 +149,7 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     skip_cache = _should_skip_export_cache(args, is_chunked)
 
     if not skip_cache and source_path:
-        cache = PersistentCache(str(source_path))
-        config_dict = _build_export_config(args, formats)
-        cached_export_dir = cache.get_export_cache_dir(config_dict)
-
-        if cached_export_dir:
-            if args.verbose:
-                print(f"  Using cached export from: {cached_export_dir}")
-            # Copy cached files to output_dir
-            _copy_cached_export(cached_export_dir, output_dir, verbose=args.verbose)
+        if _try_serve_from_cache(args, formats, output_dir, source_path):
             return
 
     try:
@@ -145,16 +162,8 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
                 args, result, output_dir, formats, requested_formats, source_path
             )
 
-        # Mark export as complete in cache
         if not skip_cache and source_path:
-            cache = PersistentCache(str(source_path))
-            config_dict = _build_export_config(args, formats)
-            export_cache_dir = cache.create_export_cache_dir(config_dict)
-            _copy_to_cache(output_dir, export_cache_dir, verbose=args.verbose)
-            cache.mark_export_complete(export_cache_dir)
-            cache.save()
-            if args.verbose:
-                print(f"  Export cached at: {export_cache_dir}")
+            _save_to_export_cache(args, formats, output_dir, source_path)
 
     except Exception as e:
         print(f"Error during export: {e}", file=sys.stderr)

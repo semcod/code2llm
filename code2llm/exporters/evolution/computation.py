@@ -35,45 +35,34 @@ def compute_func_data(result: AnalysisResult) -> List[Dict]:
     return sorted(func_data, key=lambda x: x["impact"], reverse=True)
 
 
-def scan_file_sizes(
-    project_path: Optional[Path], result: Optional[AnalysisResult] = None
-) -> Dict[str, int]:
-    """Return per-file line counts, preferring already-analyzed module data."""
+_FS_EXCLUDE = frozenset({
+    ".git", "__pycache__", "node_modules",
+    "venv", ".venv", "env", ".env",
+    "site-packages", "dist", "build", ".tox",
+})
+
+
+def _scan_from_result(result: AnalysisResult) -> Dict[str, int]:
+    """Fast path: derive line counts from already-analyzed module data (no I/O)."""
     file_lines: Dict[str, int] = {}
+    for mi in result.modules.values():
+        if not mi.file or is_excluded(mi.file):
+            continue
+        lc = mi.line_count if hasattr(mi, "line_count") and mi.line_count else 0
+        if lc == 0:
+            lc = len(mi.functions) + len(mi.classes)
+        if lc > 0:
+            file_lines[mi.file] = lc
+    return file_lines
 
-    # Fast path: derive from AnalysisResult modules (no I/O)
-    if result and result.modules:
-        for mi in result.modules.values():
-            if mi.file and not is_excluded(mi.file):
-                lc = mi.line_count if hasattr(mi, "line_count") and mi.line_count else 0
-                if lc == 0:
-                    lc = len(mi.functions) + len(mi.classes)
-                if lc > 0:
-                    file_lines[mi.file] = lc
-        if file_lines:
-            return file_lines
 
-    # Slow fallback: single os.walk (only if result is unavailable)
-    if not project_path or not project_path.is_dir():
-        return file_lines
-
+def _scan_from_filesystem(project_path: Path) -> Dict[str, int]:
+    """Slow fallback: count lines via os.walk when no AnalysisResult is available."""
     import os
 
-    exclude = {
-        ".git",
-        "__pycache__",
-        "node_modules",
-        "venv",
-        ".venv",
-        "env",
-        ".env",
-        "site-packages",
-        "dist",
-        "build",
-        ".tox",
-    }
+    file_lines: Dict[str, int] = {}
     for dirpath, dirnames, filenames in os.walk(str(project_path)):
-        dirnames[:] = [d for d in dirnames if d not in exclude]
+        dirnames[:] = [d for d in dirnames if d not in _FS_EXCLUDE]
         for fn in filenames:
             if not fn.endswith(".py"):
                 continue
@@ -84,6 +73,19 @@ def scan_file_sizes(
             except Exception:
                 pass
     return file_lines
+
+
+def scan_file_sizes(
+    project_path: Optional[Path], result: Optional[AnalysisResult] = None
+) -> Dict[str, int]:
+    """Return per-file line counts, preferring already-analyzed module data."""
+    if result and result.modules:
+        file_lines = _scan_from_result(result)
+        if file_lines:
+            return file_lines
+    if project_path and project_path.is_dir():
+        return _scan_from_filesystem(project_path)
+    return {}
 
 
 def aggregate_file_stats(

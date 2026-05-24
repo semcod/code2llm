@@ -1,0 +1,12 @@
+{
+  "created_ticket_id": "PLF-001",
+  "created_ticket_title": "Architektura heksagonalna w {{project}}",
+  "project": "/home/tom/github/semcod/code2llm",
+  "schema": "koru.onboarding/v1",
+  "selected_ide": "windsurf",
+  "strategy_path": [
+    "architecture",
+    "hexagonal"
+  ],
+  "updated_at": "2026-05-24T17:21:33.686069+00:00"
+}

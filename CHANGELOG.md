@@ -18,6 +18,24 @@
 - Fix Mermaid comment syntax: `.mmd` files use `%%` for comments, not `#`
 - Fix Chromium sandbox crash: pass `--no-sandbox` to puppeteer/mmdc for PNG generation
 
+## [0.5.154] - 2026-05-24
+
+### Docs
+- Update README.md
+
+### Other
+- Update .koru/event-store.jsonl
+- Update .koru/history.jsonl
+- Update .koru/onboarding.json
+- Update .koru/project.json
+- Update .planfile/.koru/autonomous-state.json
+- Update .planfile/.koru/autonomy-telemetry.json
+- Update .planfile/.koru/event-store.jsonl
+- Update .planfile/.koru/nfo-events.jsonl
+- Update .planfile/.koru/operator-steps/mcp_koru.ticket
+- Update .planfile/.koru/queue-runner.lock
+- ... and 10 more files
+
 ## [0.5.153] - 2026-05-24
 
 ### Docs

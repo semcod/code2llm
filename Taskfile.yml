@@ -1,29 +1,7 @@
-version: '1'
-name: code2llm
-description: Minimal Taskfile
-variables:
+version: '3'
+
+vars:
   APP_NAME: code2llm
-environments:
-  local:
-    container_runtime: docker
-    compose_command: docker compose
-pipeline:
-  python_version: "3.12"
-  runner_image: ubuntu-latest
-  branches: [main]
-  cache: [~/.cache/pip]
-  artifacts: [dist/]
-
-  stages:
-    - name: lint
-      tasks: [lint]
-
-    - name: test
-      tasks: [test]
-
-    - name: build
-      tasks: [build]
-      when: "branch:main"
 
 tasks:
   install:

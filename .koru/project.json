@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-05-24T17:23:22.701063+00:00",
+  "project": "/home/tom/github/semcod/code2llm",
+  "runtime_dir": ".planfile/.koru",
+  "schema": "koru.project/v1",
+  "source": "auto",
+  "updated_at": "2026-05-24T17:53:27.955940+00:00"
+}
