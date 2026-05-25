@@ -110,8 +110,10 @@ class StreamingAnalyzer:
         raw_files = self.scanner.collect_files(project_path)
         prioritized = self.prioritizer.prioritize_files(raw_files, project_path)
         total_files = len(prioritized)
-        self._report_progress(phase="collect", current=0, total=total_files,
-                               message=f"Found {total_files} files to analyze")
+        self._report_progress(
+            phase="collect", current=0, total=total_files,
+            message=f"Found {total_files} files to analyze"
+        )
         quick_results: list = []
         processed = 0
         for event in self._phase_quick_scan(prioritized, start_time, total_files, quick_results):
@@ -159,7 +161,3 @@ class StreamingAnalyzer:
                     "message": message,
                 }
             )
-
-
-# Re-export for backward compatibility
-from .streaming import ScanStrategy
