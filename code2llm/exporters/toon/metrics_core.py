@@ -83,30 +83,39 @@ class CoreMetricsComputer:
         return idx
 
     @staticmethod
+    def _update_importers_from_called_by(
+        fi, src_file: str, importers: dict, functions: dict
+    ) -> None:
+        """Record that src_file is imported by each caller in fi.called_by."""
+        for callee in fi.called_by:
+            ci = functions.get(callee)
+            if ci and ci.file != src_file:
+                importers[src_file].add(ci.file)
+
+    @staticmethod
+    def _update_importers_from_calls(
+        fi, src_file: str, importers: dict, functions: dict, suffix_idx: dict
+    ) -> None:
+        """Record fan-in contribution from each outgoing call in fi.calls."""
+        for callee in fi.calls:
+            ci = functions.get(callee)
+            if ci and ci.file != src_file:
+                importers[ci.file].add(src_file)
+            elif not ci:
+                for _qn, ci2 in suffix_idx.get(callee, []):
+                    if ci2.file != src_file:
+                        importers[ci2.file].add(src_file)
+                        break
+
+    @staticmethod
     def _compute_fan_in(files: Dict, result: AnalysisResult) -> None:
         """Compute fan-in per file (how many other files call into this file)."""
         importers: Dict[str, set] = defaultdict(set)
         suffix_idx = CoreMetricsComputer._build_suffix_index(result)
-
         for fname, fi in result.functions.items():
             src_file = fi.file
-            # Forward: who calls me? (called_by)
-            for callee in fi.called_by:
-                callee_info = result.functions.get(callee)
-                if callee_info and callee_info.file != src_file:
-                    importers[src_file].add(callee_info.file)
-            # Reverse: who do I call? → target file gets fan-in
-            for callee in fi.calls:
-                callee_info = result.functions.get(callee)
-                if callee_info and callee_info.file != src_file:
-                    importers[callee_info.file].add(src_file)
-                elif not callee_info:
-                    # O(1) suffix lookup instead of O(F) scan
-                    for qn, ci in suffix_idx.get(callee, []):
-                        if ci.file != src_file:
-                            importers[ci.file].add(src_file)
-                            break
-
+            CoreMetricsComputer._update_importers_from_called_by(fi, src_file, importers, result.functions)
+            CoreMetricsComputer._update_importers_from_calls(fi, src_file, importers, result.functions, suffix_idx)
         for fpath in files:
             files[fpath]["fan_in"] = len(importers.get(fpath, set()))
 
