@@ -1,38 +1,30 @@
-# code2llm/evolution | 1037 func | 154f | 2026-05-24
-# generated in 0.01s
+# code2llm/evolution | 1034 func | 156f | 2026-05-24
+# generated in 0.00s
 
-NEXT[5] (ranked by impact):
-  [1] !! SPLIT           code2llm/core/lang/base.py
-      WHY: 622L, 0 classes, max CC=14
-      EFFORT: ~4h  IMPACT: 8708
+NEXT[3] (ranked by impact):
+  [1] !! SPLIT           deps.json
+      WHY: 3198L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
 
-  [2] !! SPLIT           code2llm/cli_exports/prompt.py
-      WHY: 598L, 0 classes, max CC=14
-      EFFORT: ~4h  IMPACT: 8372
+  [2] !! SPLIT           CHANGELOG.md
+      WHY: 3096L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
 
-  [3] !! SPLIT           code2llm/exporters/index_generator/renderer.py
-      WHY: 637L, 1 classes, max CC=1
-      EFFORT: ~4h  IMPACT: 637
-
-  [4] !  SPLIT-FUNC      _run_exports  CC=15  fan=20
-      WHY: CC=15 exceeds 15
-      EFFORT: ~1h  IMPACT: 300
-
-  [5] !  SPLIT-FUNC      scan_file_sizes  CC=20  fan=11
-      WHY: CC=20 exceeds 15
-      EFFORT: ~1h  IMPACT: 220
+  [3] !! SPLIT           planfile.yaml
+      WHY: 2077L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
 
 
 RISKS[3]:
-  ⚠ Splitting code2llm/exporters/index_generator/renderer.py may break 1 import paths
-  ⚠ Splitting code2llm/core/lang/base.py may break 14 import paths
-  ⚠ Splitting code2llm/cli_exports/prompt.py may break 18 import paths
+  ⚠ Splitting deps.json may break 0 import paths
+  ⚠ Splitting CHANGELOG.md may break 0 import paths
+  ⚠ Splitting planfile.yaml may break 0 import paths
 
 METRICS-TARGET:
   CC̄:          4.2 → ≤2.9
-  max-CC:      20 → ≤10
-  god-modules: 7 → 0
-  high-CC(≥15): 2 → ≤1
+  max-CC:      14 → ≤7
+  god-modules: 11 → 0
+  high-CC(≥15): 0 → ≤0
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -60,4 +52,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  prev CC̄=2.0 → now CC̄=4.2
+  prev CC̄=4.2 → now CC̄=4.2

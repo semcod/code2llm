@@ -409,9 +409,9 @@ sprint:
         timestamp: '2026-05-24T17:21:38.414874+00:00'
         tool: koru-scan
       sprint: current
-      status: open
+      status: done
       sync: {}
-      updated_at: '2026-05-24T17:21:38.414874+00:00'
+      updated_at: '2026-05-24T20:02:00.000000+00:00'
     PLF-007:
       blocked_by: []
       blocks: []
@@ -474,9 +474,9 @@ sprint:
         timestamp: '2026-05-24T17:21:38.451155+00:00'
         tool: koru-scan
       sprint: current
-      status: open
+      status: done
       sync: {}
-      updated_at: '2026-05-24T17:21:38.451155+00:00'
+      updated_at: '2026-05-24T20:02:00.000000+00:00'
     PLF-008:
       blocked_by: []
       blocks: []
@@ -531,6 +531,61 @@ sprint:
         timestamp: '2026-05-24T17:21:38.496631+00:00'
         tool: koru-scan
       sprint: current
-      status: open
+      status: done
       sync: {}
-      updated_at: '2026-05-24T17:21:38.496631+00:00'
+      updated_at: '2026-05-24T20:02:00.000000+00:00'
+    PLF-009:
+      id: PLF-009
+      name: Remove 62 duplicated classes (code2llm analysis)
+      status: done
+      priority: high
+      sprint: current
+      source:
+        tool: koru-scan
+        timestamp: '2026-05-24T18:44:43.963603+00:00'
+        context:
+          input: '`project/analysis.toon.yaml` reports **62** duplicated classes.
+            Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+          signal: code2llm_dup
+          dedupe_key: koru-scan:code2llm_dup:project/analysis.toon.yaml
+      description: '`project/analysis.toon.yaml` reports **62** duplicated classes.
+        Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - code2llm
+      - duplication
+      - refactor
+      - scan
+      blocked_by: []
+      blocks: []
+      files:
+      - project/analysis.toon.yaml
+      executor:
+        kind: human
+        mode: interactive
+      execution:
+        queue: default
+        state: ready
+        attempt: 0
+        max_attempts: 1
+      inputs:
+        prompt: '`project/analysis.toon.yaml` reports **62** duplicated classes. Extract
+          shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+        env_keys: []
+        api_method: GET
+        api_headers: {}
+        api_timeout_seconds: 30.0
+      outputs:
+        artifacts: []
+        notes: []
+      sync: {}
+      history:
+      - timestamp: '2026-05-24T18:44:43.963603+00:00'
+        action: created
+        source: koru task
+        message: '`project/analysis.toon.yaml` reports **62** duplicated classes.
+          Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+      created_at: '2026-05-24T18:44:43.963603+00:00'
+      updated_at: '2026-05-24T18:44:43.963603+00:00'

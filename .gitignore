@@ -201,6 +201,9 @@ TODO/
 secrets/
 credentials/
 
+# koru runtime logs
+.planfile/.koru/
+
 # Separate projects
 webops/
 .redsl/
