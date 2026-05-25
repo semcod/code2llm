@@ -18,6 +18,23 @@
 # ── Progress helpers ──────────────────────────────────────────────────────────
 # _wrap_tqdm()             : conditionally wrap iterator with tqdm progress bar.
 # _log_verbose_progress()  : log progress every N% when tqdm is unavailable.
+#
+# ── Data flow ─────────────────────────────────────────────────────────────────
+# analyze_project(path, config)
+#   → _collect_files()                    # list (file_path, module_name) pairs
+#   → _load_from_persistent_cache()       # warm start: hit → skip re-analysis
+#   → _run_analysis(files, workers)       # parallel or sequential
+#       → _analyze_parallel()  OR  _analyze_sequential()
+#       → each worker calls _analyze_single_file(file_path, module_name, cfg)
+#   → _merge_results(results)             # aggregate all dicts → AnalysisResult
+#   → _build_call_graph(merged)           # resolve cross-module call edges
+#   → _store_to_persistent_cache(merged)  # persist for next run
+#   → return AnalysisResult
+#
+# ── Parallelism notes ─────────────────────────────────────────────────────────
+# Parallel mode is used when workers > 1 AND project has > PARALLEL_THRESHOLD files.
+# Config is serialised to a plain dict before pickling (dataclasses are not picklable).
+# Results from worker processes are plain dicts; _merge_results rebuilds dataclasses.
 
 import logging
 import os

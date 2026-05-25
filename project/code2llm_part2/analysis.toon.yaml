@@ -1,6 +1,6 @@
-# code2llm | 165f 26834L | python:160,md:2,yaml:1 | 2026-05-24
+# code2llm | 169f 26899L | python:164,md:2,yaml:1 | 2026-05-25
 # generated in 0.05s
-# CC̄=4.3 | critical:0/976 | dups:0 | cycles:0
+# CC̅=4.0 | critical:0/1067 | dups:0 | cycles:0
 
 HEALTH[0]: ok
 
@@ -13,113 +13,192 @@ PIPELINES[588]:
       PURITY: 100% pure
   [3] Src [analyze_file]: analyze_file → analyze
       PURITY: 100% pure
-  [4] Src [analyze_data_flow]: analyze_data_flow
+  [4] Src [_categorize_functions]: _categorize_functions
       PURITY: 100% pure
-  [5] Src [analyze_data_structures]: analyze_data_structures
+  [5] Src [analyze_data_flow]: analyze_data_flow → _find_data_pipelines
+      PURITY: 100% pure
+  [6] Src [analyze_data_structures]: analyze_data_structures → _analyze_data_types → _detect_types_from_name
+      PURITY: 100% pure
+  [7] Src [analyze]: analyze
+      PURITY: 100% pure
+  [8] Src [find_data_pipelines]: find_data_pipelines → _find_data_pipelines
+      PURITY: 100% pure
+  [9] Src [find_state_patterns]: find_state_patterns → _find_state_patterns → _is_state_func
+      PURITY: 100% pure
+  [10] Src [find_data_dependencies]: find_data_dependencies → _find_data_dependencies
+      PURITY: 100% pure
+  [11] Src [find_event_flows]: find_event_flows → _find_event_flows → _is_event_func
+      PURITY: 100% pure
+  [12] Src [analyze]: analyze → _analyze_data_types → _detect_types_from_name
+      PURITY: 100% pure
+  [13] Src [analyze_data_types]: analyze_data_types → _analyze_data_types → _detect_types_from_name
+      PURITY: 100% pure
+  [14] Src [build_data_flow_graph]: build_data_flow_graph → _build_data_flow_graph → _get_function_data_types
+      PURITY: 100% pure
+  [15] Src [identify_process_patterns]: identify_process_patterns → _identify_process_patterns
+      PURITY: 100% pure
+  [16] Src [analyze_optimization_opportunities]: analyze_optimization_opportunities → _analyze_optimization_opportunities → _type_consolidations
+      PURITY: 100% pure
+  [17] Src [__init__]: __init__
+      PURITY: 100% pure
+  [18] Src [detect]: detect
+      PURITY: 100% pure
+  [19] Src [_build_graph]: _build_graph
+      PURITY: 100% pure
+  [20] Src [_process_components]: _process_components
+      PURITY: 100% pure
+  [21] Src [_find_pipeline_paths]: _find_pipeline_paths
+      PURITY: 100% pure
+  [22] Src [_longest_path_from]: _longest_path_from
+      PURITY: 100% pure
+  [23] Src [_longest_path_in_dag]: _longest_path_in_dag
+      PURITY: 100% pure
+  [24] Src [_build_pipelines]: _build_pipelines
+      PURITY: 100% pure
+  [25] Src [_build_stages]: _build_stages
+      PURITY: 100% pure
+  [26] Src [__init__]: __init__
+      PURITY: 100% pure
+  [27] Src [enrich_function]: enrich_function → find_function_node
+      PURITY: 100% pure
+  [28] Src [get_arg_types]: get_arg_types
+      PURITY: 100% pure
+  [29] Src [get_return_type]: get_return_type
+      PURITY: 100% pure
+  [30] Src [get_typed_signature]: get_typed_signature
+      PURITY: 100% pure
+  [31] Src [extract_all_types]: extract_all_types
+      PURITY: 100% pure
+  [32] Src [_extract_from_node]: _extract_from_node
+      PURITY: 100% pure
+  [33] Src [_extract_args]: _extract_args
+      PURITY: 100% pure
+  [34] Src [_annotation_to_str]: _annotation_to_str
+      PURITY: 100% pure
+  [35] Src [_ann_constant]: _ann_constant
+      PURITY: 100% pure
+  [36] Src [_ann_attribute]: _ann_attribute
+      PURITY: 100% pure
+  [37] Src [_ann_subscript]: _ann_subscript
+      PURITY: 100% pure
+  [38] Src [_ann_tuple]: _ann_tuple
+      PURITY: 100% pure
+  [39] Src [_ann_binop]: _ann_binop
+      PURITY: 100% pure
+  [40] Src [_infer_from_name]: _infer_from_name
+      PURITY: 100% pure
+  [41] Src [_infer_arg_type]: _infer_arg_type
+      PURITY: 100% pure
+  [42] Src [__getattr__]: __getattr__
+      PURITY: 100% pure
+  [43] Src [_strip_self_prefix]: _strip_self_prefix
+      PURITY: 100% pure
+  [44] Src [_get_suffix_candidates]: _get_suffix_candidates
+      PURITY: 100% pure
+  [45] Src [_select_same_class_candidate]: _select_same_class_candidate
+      PURITY: 100% pure
+  [46] Src [__init__]: __init__
+      PURITY: 100% pure
+  [47] Src [extract]: extract
+      PURITY: 100% pure
+  [48] Src [visit_FunctionDef]: visit_FunctionDef
+      PURITY: 100% pure
+  [49] Src [visit_Assign]: visit_Assign
+      PURITY: 100% pure
+  [50] Src [visit_AugAssign]: visit_AugAssign
       PURITY: 100% pure
 
 LAYERS:
-  cli_exports/                    CC̄=5.1    ←in:4  →out:11  !! split
-  │ !! prompt                     598L  0C   18m  CC=14     ←2
-  │ orchestrator               422L  0C   17m  CC=14     ←4
-  │ formats                    363L  0C   16m  CC=13     ←4
+  cli_exports/                    CC̄=4.6    ←in:4  →out:11  !! split
+  │ !! prompt                     590L  0C   19m  CC=9      ←2
+  │ orchestrator               404L  0C   19m  CC=10     ←4
+  │ formats                    374L  0C   18m  CC=8      ←4
   │ orchestrator_handlers      184L  0C    8m  CC=6      ←0
   │ code2logic                 142L  0C    8m  CC=6      ←2
   │ orchestrator_chunked        94L  0C    3m  CC=9      ←0
   │ orchestrator_constants      55L  0C    0m  CC=0.0    ←0
   │ __init__                    54L  0C    0m  CC=0.0    ←0
   │
-  refactor/                       CC̄=5.0    ←in:0  →out:0
-  │ prompt_engine              179L  1C    7m  CC=12     ←0
-  │ __init__                     0L  0C    0m  CC=0.0    ←0
+  patterns/                       CC̄=4.6    ←in:0  →out:0
+  │ detector                   187L  1C    8m  CC=9      ←0
   │
-  ./                              CC̄=4.9    ←in:0  →out:0
-  │ cli_analysis               385L  0C   11m  CC=14     ←1
-  │ cli_parser                 354L  0C    2m  CC=2      ←1
-  │ cli_commands               349L  0C   13m  CC=12     ←1
-  │ api                         73L  0C    2m  CC=2      ←0
-  │ cli                         65L  0C    1m  CC=7      ←0
-  │ __init__                    59L  0C    1m  CC=3      ←0
-  │ __main__                     6L  0C    0m  CC=0.0    ←0
-  │
-  generators/                     CC̄=4.9    ←in:1  →out:1
-  │ llm_task                   353L  0C   16m  CC=14     ←0
+  generators/                     CC̄=4.3    ←in:1  →out:1
+  │ llm_task                   391L  0C   18m  CC=9      ←0
   │ png                        329L  0C    8m  CC=8      ←3
-  │ analysis                   183L  1C    5m  CC=14     ←1
-  │ fix                        150L  0C    7m  CC=8      ←1
-  │ validation                 130L  0C    6m  CC=12     ←1
-  │ generator                  119L  0C    2m  CC=10     ←1
+  │ analysis                   184L  1C    7m  CC=8      ←1
+  │ fix                        151L  0C    7m  CC=8      ←1
+  │ validation                 137L  0C    7m  CC=10     ←1
+  │ generator                  121L  0C    2m  CC=10     ←1
   │ nodes                      107L  0C    7m  CC=7      ←1
+  │ utils                       99L  0C    8m  CC=7      ←3
   │ __init__                    98L  0C    0m  CC=0.0    ←0
-  │ utils                       87L  0C    5m  CC=12     ←3
-  │ cli                         76L  0C    2m  CC=3      ←0
+  │ cli                         78L  0C    2m  CC=3      ←0
   │ __init__                    70L  0C    0m  CC=0.0    ←0
   │ parsing                     39L  0C    2m  CC=5      ←2
   │ _utils                      15L  0C    1m  CC=1      ←2
   │ __init__                    15L  0C    0m  CC=0.0    ←0
   │ mermaid                      0L  0C    1m  CC=1      ←0
   │
-  patterns/                       CC̄=4.6    ←in:0  →out:0
-  │ detector                   186L  1C    8m  CC=9      ←0
-  │
-  exporters/                      CC̄=4.5    ←in:65  →out:32  !! split
+  exporters/                      CC̄=4.1    ←in:63  →out:32  !! split
   │ !! renderer                   637L  1C    1m  CC=1      ←0
-  │ renderer                   499L  1C   26m  CC=11     ←0
   │ yaml_exporter              456L  1C   25m  CC=8      ←0
-  │ flow_exporter              398L  1C   14m  CC=10     ←0
-  │ planfile_tickets           361L  2C   15m  CC=13     ←5
-  │ dashboard_renderer         355L  1C    4m  CC=6      ←0
+  │ planfile_tickets           413L  2C   16m  CC=8      ←5
+  │ flow_exporter              404L  1C   14m  CC=10     ←0
+  │ context_exporter           358L  1C   15m  CC=10     ←0
+  │ dashboard_renderer         356L  1C    4m  CC=6      ←0
   │ content                    348L  0C    1m  CC=1      ←1
-  │ context_exporter           335L  1C   15m  CC=10     ←0
-  │ metrics_core               317L  1C   13m  CC=12     ←0
-  │ mermaid_flow_helpers       273L  0C   12m  CC=11     ←3
-  │ __init__                   240L  1C   11m  CC=9      ←0
+  │ metrics_core               311L  1C   16m  CC=9      ←0
+  │ mermaid_flow_helpers       295L  0C   14m  CC=8      ←3
+  │ __init__                   241L  1C   11m  CC=9      ←0
   │ computation                211L  0C   10m  CC=10     ←2
   │ dashboard_data             208L  1C    9m  CC=7      ←0
   │ render                     195L  0C    6m  CC=10     ←1
-  │ toon_view                  186L  1C    8m  CC=6      ←0
-  │ flow_renderer              183L  1C    6m  CC=14     ←2
+  │ toon_view                  194L  1C    8m  CC=6      ←0
+  │ _render_section_helpers    191L  0C   10m  CC=10     ←1
+  │ flow_renderer              180L  1C    9m  CC=10     ←2
   │ flow_compact               180L  0C    9m  CC=9      ←1
-  │ base                       172L  2C    8m  CC=2      ←2
-  │ module_detail              172L  1C    9m  CC=7      ←1
-  │ helpers                    170L  0C    9m  CC=14     ←4
-  │ article_view               168L  1C    8m  CC=7      ←0
-  │ modules                    157L  0C    7m  CC=11     ←1
-  │ context_view               146L  1C    7m  CC=11     ←0
+  │ article_view               176L  1C    8m  CC=7      ←0
+  │ base                       174L  2C    8m  CC=2      ←2
+  │ module_detail              173L  1C    9m  CC=7      ←1
+  │ renderer                   161L  1C   13m  CC=6      ←0
+  │ helpers                    155L  0C   11m  CC=8      ←4
+  │ context_view               154L  1C    8m  CC=9      ←0
+  │ _render_coupling_helpers   152L  0C   10m  CC=7      ←1
+  │ modules                    152L  0C    8m  CC=9      ←1
   │ scanner                    133L  1C    7m  CC=5      ←0
-  │ core                       130L  1C    3m  CC=12     ←0
-  │ yaml_export                126L  0C    1m  CC=11     ←0
-  │ metrics_health             122L  1C    6m  CC=7      ←0
-  │ validate_project           121L  0C    3m  CC=11     ←1
-  │ hotspots                   118L  0C    3m  CC=13     ←2
+  │ metrics_health             123L  1C    6m  CC=7      ←0
   │ yaml_export                118L  0C    5m  CC=8      ←0
-  │ health                     115L  0C    3m  CC=13     ←2
-  │ details                    112L  0C    5m  CC=13     ←0
+  │ validate_project           114L  0C    4m  CC=9      ←1
+  │ core                       113L  1C    4m  CC=9      ←0
+  │ hotspots                   112L  0C    7m  CC=7      ←2
+  │ health                     107L  0C    5m  CC=7      ←2
   │ classic                    106L  0C    4m  CC=8      ←0
-  │ metrics                    102L  1C    4m  CC=5      ←0
+  │ details                    104L  0C    6m  CC=8      ←0
+  │ metrics                    103L  1C    4m  CC=5      ←0
   │ utils                      101L  0C    8m  CC=6      ←7
-  │ metrics_duplicates          96L  1C    4m  CC=8      ←0
+  │ yaml_export                100L  0C    3m  CC=8      ←0
+  │ metrics_duplicates          97L  1C    4m  CC=8      ←0
   │ sections                    93L  0C    3m  CC=7      ←1
+  │ report_generators           87L  0C    4m  CC=7      ←1
   │ __init__                    86L  0C    0m  CC=0.0    ←0
   │ alerts                      84L  0C    4m  CC=8      ←1
   │ flow_detailed               84L  0C    1m  CC=1      ←0
   │ flow_full                   84L  0C    1m  CC=1      ←0
   │ evolution_exporter          81L  1C    3m  CC=1      ←8
+  │ html_dashboard              81L  1C    3m  CC=1      ←0
   │ header                      81L  0C    4m  CC=8      ←0
   │ readme_exporter             80L  1C    1m  CC=5      ←0
-  │ report_generators           79L  0C    1m  CC=13     ←1
-  │ html_dashboard              78L  1C    3m  CC=1      ←0
   │ __init__                    78L  0C    0m  CC=0.0    ←0
   │ utils                       74L  0C    4m  CC=8      ←4
   │ __init__                    73L  1C    5m  CC=1      ←0
+  │ calls                       70L  0C    2m  CC=7      ←0
   │ mermaid_exporter            70L  1C    0m  CC=0.0    ←0
-  │ compact                     69L  0C    1m  CC=13     ←0
-  │ calls                       68L  0C    1m  CC=13     ←0
   │ __init__                    66L  0C    0m  CC=0.0    ←0
   │ flow_constants              63L  0C    1m  CC=2      ←7
   │ __init__                    60L  0C    0m  CC=0.0    ←0
-  │ insights                    54L  0C    1m  CC=13     ←1
+  │ insights                    58L  0C    3m  CC=7      ←1
   │ map_exporter                53L  1C    2m  CC=1      ←0
+  │ compact                     52L  0C    3m  CC=7      ←0
   │ evolution                   46L  0C    2m  CC=6      ←3
   │ constants                   41L  0C    0m  CC=0.0    ←0
   │ __init__                    40L  0C    0m  CC=0.0    ←0
@@ -131,72 +210,87 @@ LAYERS:
   │ __init__                    15L  0C    0m  CC=0.0    ←0
   │ constants                   15L  0C    0m  CC=0.0    ←0
   │ llm_exporter                12L  0C    0m  CC=0.0    ←0
+  │ constants                    9L  0C    0m  CC=0.0    ←0
   │
-  analysis/                       CC̄=4.2    ←in:2  →out:7
-  │ !! data_analysis              565L  3C   28m  CC=14     ←0
-  │ side_effects               385L  2C   15m  CC=14     ←0
-  │ pipeline_detector          360L  3C    9m  CC=13     ←0
-  │ type_inference             298L  1C   17m  CC=9      ←0
-  │ cfg                        286L  1C   16m  CC=5      ←0
-  │ dfg                        241L  1C   12m  CC=7      ←0
-  │ smells                     224L  1C    9m  CC=7      ←0
-  │ call_graph                 207L  1C   12m  CC=9      ←0
+  ./                              CC̄=3.9    ←in:0  →out:0
+  │ cli_analysis               359L  0C   15m  CC=10     ←1
+  │ cli_parser                 354L  0C    2m  CC=2      ←1
+  │ cli_commands               335L  0C   16m  CC=9      ←1
+  │ api                         73L  0C    2m  CC=2      ←0
+  │ cli                         65L  0C    1m  CC=7      ←0
+  │ __init__                    59L  0C    1m  CC=3      ←0
+  │ __main__                     6L  0C    0m  CC=0.0    ←0
+  │
+  analysis/                       CC̄=3.9    ←in:2  →out:7
+  │ _data_impl                 392L  0C   21m  CC=9      ←1
+  │ side_effects               365L  2C   17m  CC=8      ←0
+  │ pipeline_detector          355L  3C   10m  CC=8      ←0
+  │ type_inference             304L  1C   17m  CC=9      ←0
+  │ cfg                        285L  1C   16m  CC=5      ←0
+  │ dfg                        242L  1C   12m  CC=7      ←0
+  │ smells                     225L  1C    9m  CC=7      ←0
+  │ call_graph                 208L  1C   12m  CC=9      ←0
+  │ data_analysis              177L  3C   14m  CC=8      ←0
   │ pipeline_classifier        132L  1C    5m  CC=8      ←0
   │ pipeline_resolver           92L  1C    5m  CC=10     ←1
   │ ast_helpers                 87L  0C    5m  CC=8      ←5
-  │ coupling                    78L  1C    5m  CC=7      ←0
+  │ coupling                    79L  1C    5m  CC=7      ←0
   │ __init__                    38L  0C    1m  CC=2      ←0
   │ __init__                    17L  0C    0m  CC=0.0    ←0
   │
-  core/                           CC̄=4.1    ←in:9  →out:9  !! split
-  │ !! analyzer                   565L  1C   22m  CC=11     ←0
-  │ !! large_repo                 543L  2C   20m  CC=9      ←1
-  │ !! file_analyzer              509L  1C   18m  CC=13     ←0
-  │ persistent_cache           458L  1C   22m  CC=10     ←1
+  core/                           CC̄=3.9    ←in:9  →out:9  !! split
+  │ !! analyzer                   594L  1C   25m  CC=10     ←0
+  │ !! large_repo                 552L  2C   20m  CC=9      ←1
+  │ !! file_analyzer              532L  1C   21m  CC=10     ←0
+  │ persistent_cache           462L  1C   22m  CC=10     ←1
   │ config                     398L  6C    3m  CC=3      ←0
-  │ _c_parser                  391L  0C    9m  CC=14     ←4
+  │ _c_parser                  396L  0C   10m  CC=10     ←4
   │ toon_size_manager          278L  0C    8m  CC=10     ←1
-  │ source_classifier          254L  0C    6m  CC=14     ←5
-  │ refactoring                232L  1C   11m  CC=9      ←0
+  │ source_classifier          250L  0C    7m  CC=9      ←5
+  │ refactoring                233L  1C   11m  CC=9      ←0
   │ repo_files                 215L  0C    8m  CC=8      ←1
-  │ ts_extractors              209L  0C    5m  CC=7      ←2
-  │ scanner                    208L  1C    6m  CC=14     ←0
+  │ ts_extractors              211L  0C    5m  CC=7      ←2
   │ models                     207L  11C    6m  CC=8      ←0
+  │ scanner                    207L  1C    8m  CC=10     ←0
   │ file_filter                187L  1C    9m  CC=9      ←0
-  │ streaming_analyzer         178L  1C    6m  CC=12     ←0
-  │ __init__                   170L  1C    5m  CC=1      ←0
-  │ ruby                       167L  1C    4m  CC=14     ←1
-  │ ts_parser                  161L  1C    9m  CC=7      ←2
-  │ export_pipeline            153L  2C    5m  CC=4      ←0
+  │ __init__                   171L  1C    5m  CC=1      ←0
+  │ streaming_analyzer         165L  1C    8m  CC=8      ←0
+  │ ts_parser                  163L  1C    9m  CC=7      ←2
+  │ export_pipeline            162L  2C    5m  CC=4      ←0
+  │ ruby                       153L  1C    8m  CC=9      ←1
   │ incremental                150L  1C   10m  CC=4      ←0
   │ gitignore                  147L  2C    8m  CC=7      ←2
-  │ prioritizer                132L  2C    4m  CC=9      ←0
+  │ prioritizer                133L  2C    4m  CC=9      ←0
   │ go_lang                    126L  0C    2m  CC=10     ←1
-  │ php                        118L  0C    4m  CC=8      ←1
+  │ php                        122L  0C    4m  CC=8      ←1
   │ rust                       116L  0C    1m  CC=9      ←1
-  │ file_cache                 107L  1C   10m  CC=5      ←1
+  │ file_cache                 108L  1C   10m  CC=5      ←1
   │ ast_registry               102L  1C    9m  CC=5      ←0
   │ _calls                      96L  0C    2m  CC=9      ←6
-  │ generic                     88L  0C    1m  CC=11     ←1
-  │ incremental                 77L  1C    5m  CC=5      ←0
-  │ base                        76L  0C    1m  CC=5      ←3
+  │ incremental                 78L  1C    5m  CC=5      ←0
   │ _complexity                 73L  0C    2m  CC=10     ←6
+  │ generic                     71L  0C    2m  CC=6      ←1
   │ typescript                  71L  0C    3m  CC=1      ←1
   │ strategies                  69L  1C    0m  CC=0.0    ←0
-  │ __init__                    68L  0C    1m  CC=6      ←0
+  │ __init__                    65L  0C    1m  CC=6      ←0
+  │ base                        62L  0C    1m  CC=5      ←3
   │ java                        58L  0C    1m  CC=1      ←1
   │ csharp                      57L  0C    1m  CC=1      ←1
-  │ cache                       50L  1C    5m  CC=4      ←0
+  │ cache                       52L  1C    5m  CC=4      ←0
   │ cpp                         41L  0C    1m  CC=1      ←1
   │ __init__                     7L  0C    0m  CC=0.0    ←0
   │
   parsers/                        CC̄=3.7    ←in:0  →out:0
   │ toon_parser                147L  0C   10m  CC=8      ←0
   │
+  refactor/                       CC̄=3.5    ←in:0  →out:0
+  │ prompt_engine              185L  1C   11m  CC=5      ←0
+  │ __init__                     0L  0C    0m  CC=0.0    ←0
+  │
   nlp/                            CC̄=2.7    ←in:0  →out:0
   │ pipeline                   397L  3C   20m  CC=10     ←0
-  │ entity_resolution          328L  3C   16m  CC=13     ←0
   │ intent_matching            323L  3C   15m  CC=7      ←0
+  │ entity_resolution          314L  3C   17m  CC=9      ←0
   │ normalization              123L  2C   13m  CC=6      ←0
   │ config.yaml                 86L  0C    0m  CC=0.0    ←0
   │ __init__                    23L  0C    0m  CC=0.0    ←0
@@ -212,11 +306,11 @@ LAYERS:
      refactor/__init__.py                      0L
 
 COUPLING:
-                                       exporters       exporters.mermaid  exporters.project_yaml          exporters.toon                    core             cli_exports           exporters.map               core.lang                analysis            cli_commands                     cli          analysis.utils     exporters.evolution        exporters.readme                code2llm
+                                       exporters       exporters.mermaid  exporters.project_yaml          exporters.toon                    core             cli_exports           exporters.map               core.lang                analysis            cli_commands                     cli          analysis.utils     exporters.evolution        exporters.readme            cli_analysis
                exporters                      ──                      15                     ←16                       1                                              ←6                       1                                               2                                                                                               7                       6                          hub
        exporters.mermaid                      15                      ──                                                                                                                                                                                                                                                                                                                          hub
   exporters.project_yaml                      16                                              ──                       1                                              ←2                      ←2                                                                                                                                                                                                  !! fan-out
-          exporters.toon                      19                                              ←1                      ──                                                                                                                                                                                                                                                                          !! fan-out
+          exporters.toon                      17                                              ←1                      ──                                                                                                                                                                                                                                                                          !! fan-out
                     core                                                                                                                      ──                      ←1                                               9                                              ←3                                                                                                                      ←1  hub
              cli_exports                       6                                               2                                               1                      ──                                                                                              ←1                      ←1                                                                                              ←2  !! fan-out
            exporters.map                       9                                               2                                                                                              ──                                                                                                                                                                                                  !! fan-out
@@ -227,21 +321,21 @@ COUPLING:
           analysis.utils                                                                                                                                                                                                                      ←7                                                                      ──                                                                          hub
      exporters.evolution                      ←7                                                                                                                                                                                                                                                                                              ──                                                  hub
         exporters.readme                      ←6                                                                                                                                                                                                                                                                                                                      ──                          hub
-                code2llm                                                                                                                       1                       2                                                                                                                      ←1                                                                                              ──
+            cli_analysis                                                                                                                       1                       2                                                                                                                      ←1                                                                                              ──
   CYCLES: none
-  HUB: exporters.mermaid/ (fan-in=15)
-  HUB: core/ (fan-in=9)
-  HUB: analysis.utils/ (fan-in=7)
-  HUB: cli_commands/ (fan-in=5)
   HUB: core.lang/ (fan-in=9)
-  HUB: exporters.readme/ (fan-in=6)
-  HUB: exporters/ (fan-in=65)
+  HUB: cli_commands/ (fan-in=5)
+  HUB: exporters.mermaid/ (fan-in=15)
+  HUB: analysis.utils/ (fan-in=7)
+  HUB: core/ (fan-in=9)
   HUB: exporters.evolution/ (fan-in=7)
+  HUB: exporters.readme/ (fan-in=6)
+  HUB: exporters/ (fan-in=63)
   SMELL: exporters.mermaid/ fan-out=15 → split needed
-  SMELL: exporters.toon/ fan-out=19 → split needed
-  SMELL: core/ fan-out=9 → split needed
   SMELL: cli_exports/ fan-out=11 → split needed
   SMELL: cli/ fan-out=8 → split needed
+  SMELL: exporters.toon/ fan-out=17 → split needed
+  SMELL: core/ fan-out=9 → split needed
   SMELL: exporters/ fan-out=32 → split needed
   SMELL: exporters.map/ fan-out=11 → split needed
   SMELL: exporters.project_yaml/ fan-out=17 → split needed

@@ -113,9 +113,9 @@ class DashboardDataBuilder:
             lang_lines[lang] += m.get("lines", 0)
 
         sorted_langs = sorted(lang_files.items(), key=lambda x: -x[1])
-        names = [l[0] for l in sorted_langs]
-        files = [l[1] for l in sorted_langs]
-        lines = [lang_lines[l[0]] for l in sorted_langs]
+        names = [item[0] for item in sorted_langs]
+        files = [item[1] for item in sorted_langs]
+        lines = [lang_lines[item[0]] for item in sorted_langs]
         colors = [_LANG_COLORS.get(n, "#6b7280") for n in names]
         return {"names": names, "files": files, "lines": lines, "colors": colors}
 

@@ -1,6 +1,6 @@
-# code2llm | 284f 53825L | python:194,md:42,yaml:13,shell:4,yml:3,txt:2,toml:2,php:2,java:2,json:1,typescript:1,conf:1,go:1,rust:1,javascript:1,ruby:1 | 2026-05-24
-# generated in 0.09s
-# CC̄=3.9 | critical:0/1236 | dups:0 | cycles:0
+# code2llm | 286f 53933L | python:198,md:42,yaml:11,shell:4,yml:3,txt:2,toml:2,php:2,java:2,json:1,typescript:1,conf:1,go:1,rust:1,javascript:1,ruby:1 | 2026-05-25
+# generated in 0.10s
+# CC̅=3.7 | critical:0/1327 | dups:0 | cycles:0
 
 HEALTH[0]: ok
 
@@ -17,149 +17,242 @@ PIPELINES[730]:
       PURITY: 100% pure
   [5] Src [run_pipeline]: run_pipeline → analyze
       PURITY: 100% pure
+  [6] Src [NewUserService]: NewUserService
+      PURITY: 100% pure
+  [7] Src [AddUser]: AddUser
+      PURITY: 100% pure
+  [8] Src [GetUser]: GetUser
+      PURITY: 100% pure
+  [9] Src [ProcessUsers]: ProcessUsers
+      PURITY: 100% pure
+  [10] Src [main]: main → add_user
+      PURITY: 100% pure
+  [11] Src [add]: add
+      PURITY: 100% pure
+  [12] Src [list_all]: list_all
+      PURITY: 100% pure
+  [13] Src [processUsers]: processUsers
+      PURITY: 100% pure
+  [14] Src [service]: service → addUser
+      PURITY: 100% pure
+  [15] Src [main]: main → addUser
+      PURITY: 100% pure
+  [16] Src [NewUserService]: NewUserService
+      PURITY: 100% pure
+  [17] Src [AddUser]: AddUser
+      PURITY: 100% pure
+  [18] Src [new]: new
+      PURITY: 100% pure
+  [19] Src [getUser]: getUser
+      PURITY: 100% pure
+  [20] Src [service]: service → addUser
+      PURITY: 100% pure
+  [21] Src [__init__]: __init__
+      PURITY: 100% pure
+  [22] Src [generate]: generate
+      PURITY: 100% pure
+  [23] Src [main]: main → run_analysis
+      PURITY: 100% pure
+  [24] Src [main]: main → HealthHandler
+      PURITY: 100% pure
+  [25] Src [handle]: handle → sendResponse → mapToJson
+      PURITY: 100% pure
+  [26] Src [do_GET]: do_GET
+      PURITY: 100% pure
+  [27] Src [log_message]: log_message
+      PURITY: 100% pure
+  [28] Src [healthHandler]: healthHandler
+      PURITY: 100% pure
+  [29] Src [apiHandler]: apiHandler
+      PURITY: 100% pure
+  [30] Src [main]: main
+      PURITY: 100% pure
+  [31] Src [process_message]: process_message
+      PURITY: 100% pure
+  [32] Src [main]: main
+      PURITY: 100% pure
+  [33] Src [sendResponse]: sendResponse
+      PURITY: 100% pure
+  [34] Src [http]: http
+      PURITY: 100% pure
+  [35] Src [os]: os
+      PURITY: 100% pure
+  [36] Src [PORT]: PORT
+      PURITY: 100% pure
+  [37] Src [SERVICE_NAME]: SERVICE_NAME
+      PURITY: 100% pure
+  [38] Src [DB_HOST]: DB_HOST
+      PURITY: 100% pure
+  [39] Src [server]: server
+      PURITY: 100% pure
+  [40] Src [generate]: generate
+      PURITY: 100% pure
+  [41] Src [__init__]: __init__
+      PURITY: 100% pure
+  [42] Src [generate]: generate
+      PURITY: 100% pure
+  [43] Src [supports]: supports
+      PURITY: 100% pure
+  [44] Src [prepare]: prepare
+      PURITY: 100% pure
+  [45] Src [_apply_path_defaults]: _apply_path_defaults
+      PURITY: 100% pure
+  [46] Src [_apply_find_flags]: _apply_find_flags
+      PURITY: 100% pure
+  [47] Src [supports]: supports
+      PURITY: 100% pure
+  [48] Src [prepare]: prepare
+      PURITY: 100% pure
+  [49] Src [supports]: supports
+      PURITY: 100% pure
+  [50] Src [prepare]: prepare
+      PURITY: 100% pure
 
 LAYERS:
-  code2llm/                       CC̄=4.3    ←in:1  →out:8  !! split
+  code2llm/                       CC̄=4.0    ←in:1  →out:8  !! split
   │ !! renderer                   637L  1C    1m  CC=1      ←0
-  │ !! prompt                     598L  0C   18m  CC=14     ←2
-  │ !! data_analysis              565L  3C   28m  CC=14     ←0
-  │ !! analyzer                   565L  1C   22m  CC=11     ←0
-  │ !! large_repo                 543L  2C   20m  CC=9      ←1
-  │ !! file_analyzer              509L  1C   18m  CC=13     ←0
-  │ renderer                   499L  1C   26m  CC=11     ←0
-  │ persistent_cache           458L  1C   22m  CC=10     ←1
+  │ !! analyzer                   594L  1C   25m  CC=10     ←0
+  │ !! prompt                     590L  0C   19m  CC=9      ←2
+  │ !! large_repo                 552L  2C   20m  CC=9      ←1
+  │ !! file_analyzer              532L  1C   21m  CC=10     ←0
+  │ persistent_cache           462L  1C   22m  CC=10     ←1
   │ yaml_exporter              456L  1C   25m  CC=8      ←0
-  │ orchestrator               422L  0C   17m  CC=14     ←4
+  │ planfile_tickets           413L  2C   16m  CC=8      ←5
+  │ flow_exporter              404L  1C   14m  CC=10     ←0
+  │ orchestrator               404L  0C   19m  CC=10     ←4
   │ config                     398L  6C    3m  CC=3      ←0
-  │ flow_exporter              398L  1C   14m  CC=10     ←0
   │ pipeline                   397L  3C   20m  CC=10     ←0
-  │ _c_parser                  391L  0C    9m  CC=14     ←4
-  │ cli_analysis               385L  0C   11m  CC=14     ←1
-  │ side_effects               385L  2C   15m  CC=14     ←0
-  │ formats                    363L  0C   16m  CC=13     ←4
-  │ planfile_tickets           361L  2C   15m  CC=13     ←5
-  │ pipeline_detector          360L  3C    9m  CC=13     ←0
-  │ dashboard_renderer         355L  1C    4m  CC=6      ←0
+  │ _c_parser                  396L  0C   10m  CC=10     ←4
+  │ _data_impl                 392L  0C   21m  CC=9      ←1
+  │ llm_task                   391L  0C   18m  CC=9      ←0
+  │ formats                    374L  0C   18m  CC=8      ←4
+  │ side_effects               365L  2C   17m  CC=8      ←0
+  │ cli_analysis               359L  0C   15m  CC=10     ←1
+  │ context_exporter           358L  1C   15m  CC=10     ←0
+  │ dashboard_renderer         356L  1C    4m  CC=6      ←0
+  │ pipeline_detector          355L  3C   10m  CC=8      ←0
   │ cli_parser                 354L  0C    2m  CC=2      ←1
-  │ llm_task                   353L  0C   16m  CC=14     ←0
-  │ cli_commands               349L  0C   13m  CC=12     ←1
   │ content                    348L  0C    1m  CC=1      ←1
-  │ context_exporter           335L  1C   15m  CC=10     ←0
+  │ cli_commands               335L  0C   16m  CC=9      ←1
   │ png                        329L  0C    8m  CC=8      ←3
-  │ entity_resolution          328L  3C   16m  CC=13     ←0
   │ intent_matching            323L  3C   15m  CC=7      ←0
-  │ metrics_core               317L  1C   13m  CC=12     ←0
-  │ type_inference             298L  1C   17m  CC=9      ←0
-  │ cfg                        286L  1C   16m  CC=5      ←0
+  │ entity_resolution          314L  3C   17m  CC=9      ←0
+  │ metrics_core               311L  1C   16m  CC=9      ←0
+  │ type_inference             304L  1C   17m  CC=9      ←0
+  │ mermaid_flow_helpers       295L  0C   14m  CC=8      ←3
+  │ cfg                        285L  1C   16m  CC=5      ←0
   │ toon_size_manager          278L  0C    8m  CC=10     ←1
-  │ mermaid_flow_helpers       273L  0C   12m  CC=11     ←3
-  │ source_classifier          254L  0C    6m  CC=14     ←5
-  │ dfg                        241L  1C   12m  CC=7      ←0
-  │ __init__                   240L  1C   11m  CC=9      ←0
-  │ refactoring                232L  1C   11m  CC=9      ←0
-  │ smells                     224L  1C    9m  CC=7      ←0
+  │ source_classifier          250L  0C    7m  CC=9      ←5
+  │ dfg                        242L  1C   12m  CC=7      ←0
+  │ __init__                   241L  1C   11m  CC=9      ←0
+  │ refactoring                233L  1C   11m  CC=9      ←0
+  │ smells                     225L  1C    9m  CC=7      ←0
   │ repo_files                 215L  0C    8m  CC=8      ←1
+  │ ts_extractors              211L  0C    5m  CC=7      ←2
   │ computation                211L  0C   10m  CC=10     ←2
-  │ ts_extractors              209L  0C    5m  CC=7      ←2
-  │ scanner                    208L  1C    6m  CC=14     ←0
+  │ call_graph                 208L  1C   12m  CC=9      ←0
   │ dashboard_data             208L  1C    9m  CC=7      ←0
-  │ call_graph                 207L  1C   12m  CC=9      ←0
   │ models                     207L  11C    6m  CC=8      ←0
+  │ scanner                    207L  1C    8m  CC=10     ←0
   │ render                     195L  0C    6m  CC=10     ←1
+  │ toon_view                  194L  1C    8m  CC=6      ←0
+  │ _render_section_helpers    191L  0C   10m  CC=10     ←1
   │ file_filter                187L  1C    9m  CC=9      ←0
-  │ toon_view                  186L  1C    8m  CC=6      ←0
-  │ detector                   186L  1C    8m  CC=9      ←0
+  │ detector                   187L  1C    8m  CC=9      ←0
+  │ prompt_engine              185L  1C   11m  CC=5      ←0
+  │ analysis                   184L  1C    7m  CC=8      ←1
   │ orchestrator_handlers      184L  0C    8m  CC=6      ←0
-  │ flow_renderer              183L  1C    6m  CC=14     ←2
-  │ analysis                   183L  1C    5m  CC=14     ←1
+  │ flow_renderer              180L  1C    9m  CC=10     ←2
   │ flow_compact               180L  0C    9m  CC=9      ←1
-  │ prompt_engine              179L  1C    7m  CC=12     ←0
-  │ streaming_analyzer         178L  1C    6m  CC=12     ←0
-  │ base                       172L  2C    8m  CC=2      ←2
-  │ module_detail              172L  1C    9m  CC=7      ←1
-  │ __init__                   170L  1C    5m  CC=1      ←0
-  │ helpers                    170L  0C    9m  CC=14     ←4
-  │ article_view               168L  1C    8m  CC=7      ←0
-  │ ruby                       167L  1C    4m  CC=14     ←1
-  │ ts_parser                  161L  1C    9m  CC=7      ←2
-  │ modules                    157L  0C    7m  CC=11     ←1
-  │ export_pipeline            153L  2C    5m  CC=4      ←0
+  │ data_analysis              177L  3C   14m  CC=8      ←0
+  │ article_view               176L  1C    8m  CC=7      ←0
+  │ base                       174L  2C    8m  CC=2      ←2
+  │ module_detail              173L  1C    9m  CC=7      ←1
+  │ __init__                   171L  1C    5m  CC=1      ←0
+  │ streaming_analyzer         165L  1C    8m  CC=8      ←0
+  │ ts_parser                  163L  1C    9m  CC=7      ←2
+  │ export_pipeline            162L  2C    5m  CC=4      ←0
+  │ renderer                   161L  1C   13m  CC=6      ←0
+  │ helpers                    155L  0C   11m  CC=8      ←4
+  │ context_view               154L  1C    8m  CC=9      ←0
+  │ ruby                       153L  1C    8m  CC=9      ←1
+  │ _render_coupling_helpers   152L  0C   10m  CC=7      ←1
+  │ modules                    152L  0C    8m  CC=9      ←1
+  │ fix                        151L  0C    7m  CC=8      ←1
   │ incremental                150L  1C   10m  CC=4      ←0
-  │ fix                        150L  0C    7m  CC=8      ←1
   │ gitignore                  147L  2C    8m  CC=7      ←2
   │ toon_parser                147L  0C   10m  CC=8      ←1
-  │ context_view               146L  1C    7m  CC=11     ←0
   │ code2logic                 142L  0C    8m  CC=6      ←2
+  │ validation                 137L  0C    7m  CC=10     ←1
+  │ prioritizer                133L  2C    4m  CC=9      ←0
   │ scanner                    133L  1C    7m  CC=5      ←0
   │ pipeline_classifier        132L  1C    5m  CC=8      ←0
-  │ prioritizer                132L  2C    4m  CC=9      ←0
-  │ core                       130L  1C    3m  CC=12     ←0
-  │ validation                 130L  0C    6m  CC=12     ←1
   │ go_lang                    126L  0C    2m  CC=10     ←1
-  │ yaml_export                126L  0C    1m  CC=11     ←0
   │ normalization              123L  2C   13m  CC=6      ←0
-  │ metrics_health             122L  1C    6m  CC=7      ←0
-  │ validate_project           121L  0C    3m  CC=11     ←1
-  │ generator                  119L  0C    2m  CC=10     ←1
-  │ php                        118L  0C    4m  CC=8      ←1
-  │ hotspots                   118L  0C    3m  CC=13     ←2
+  │ metrics_health             123L  1C    6m  CC=7      ←0
+  │ php                        122L  0C    4m  CC=8      ←1
+  │ generator                  121L  0C    2m  CC=10     ←1
   │ yaml_export                118L  0C    5m  CC=8      ←0
   │ rust                       116L  0C    1m  CC=9      ←1
-  │ health                     115L  0C    3m  CC=13     ←2
-  │ details                    112L  0C    5m  CC=13     ←0
-  │ file_cache                 107L  1C   10m  CC=5      ←1
+  │ validate_project           114L  0C    4m  CC=9      ←1
+  │ core                       113L  1C    4m  CC=9      ←0
+  │ hotspots                   112L  0C    7m  CC=7      ←2
+  │ file_cache                 108L  1C   10m  CC=5      ←1
+  │ health                     107L  0C    5m  CC=7      ←2
   │ nodes                      107L  0C    7m  CC=7      ←1
   │ classic                    106L  0C    4m  CC=8      ←0
+  │ details                    104L  0C    6m  CC=8      ←0
+  │ metrics                    103L  1C    4m  CC=5      ←0
   │ ast_registry               102L  1C    9m  CC=5      ←0
-  │ metrics                    102L  1C    4m  CC=5      ←0
   │ utils                      101L  0C    8m  CC=6      ←7
+  │ yaml_export                100L  0C    3m  CC=8      ←0
+  │ utils                       99L  0C    8m  CC=7      ←3
   │ __init__                    98L  0C    0m  CC=0.0    ←0
+  │ metrics_duplicates          97L  1C    4m  CC=8      ←0
   │ _calls                      96L  0C    2m  CC=9      ←6
-  │ metrics_duplicates          96L  1C    4m  CC=8      ←0
   │ orchestrator_chunked        94L  0C    3m  CC=9      ←0
   │ sections                    93L  0C    3m  CC=7      ←1
   │ pipeline_resolver           92L  1C    5m  CC=10     ←1
-  │ generic                     88L  0C    1m  CC=11     ←1
   │ ast_helpers                 87L  0C    5m  CC=8      ←5
-  │ utils                       87L  0C    5m  CC=12     ←3
+  │ report_generators           87L  0C    4m  CC=7      ←1
   │ config.yaml                 86L  0C    0m  CC=0.0    ←0
   │ __init__                    86L  0C    0m  CC=0.0    ←0
   │ alerts                      84L  0C    4m  CC=8      ←1
   │ flow_detailed               84L  0C    1m  CC=1      ←0
   │ flow_full                   84L  0C    1m  CC=1      ←0
   │ evolution_exporter          81L  1C    3m  CC=1      ←8
+  │ html_dashboard              81L  1C    3m  CC=1      ←0
   │ header                      81L  0C    4m  CC=8      ←0
   │ readme_exporter             80L  1C    1m  CC=5      ←0
-  │ report_generators           79L  0C    1m  CC=13     ←1
-  │ coupling                    78L  1C    5m  CC=7      ←0
-  │ html_dashboard              78L  1C    3m  CC=1      ←0
+  │ coupling                    79L  1C    5m  CC=7      ←0
+  │ incremental                 78L  1C    5m  CC=5      ←0
+  │ cli                         78L  0C    2m  CC=3      ←0
   │ __init__                    78L  0C    0m  CC=0.0    ←0
-  │ incremental                 77L  1C    5m  CC=5      ←0
-  │ base                        76L  0C    1m  CC=5      ←3
-  │ cli                         76L  0C    2m  CC=3      ←0
   │ utils                       74L  0C    4m  CC=8      ←4
   │ api                         73L  0C    2m  CC=2      ←1
   │ _complexity                 73L  0C    2m  CC=10     ←6
   │ __init__                    73L  1C    5m  CC=1      ←0
+  │ generic                     71L  0C    2m  CC=6      ←1
   │ typescript                  71L  0C    3m  CC=1      ←1
+  │ calls                       70L  0C    2m  CC=7      ←0
   │ mermaid_exporter            70L  1C    0m  CC=0.0    ←0
   │ __init__                    70L  0C    0m  CC=0.0    ←0
-  │ compact                     69L  0C    1m  CC=13     ←0
   │ strategies                  69L  1C    0m  CC=0.0    ←0
-  │ __init__                    68L  0C    1m  CC=6      ←0
-  │ calls                       68L  0C    1m  CC=13     ←0
   │ __init__                    66L  0C    0m  CC=0.0    ←0
   │ cli                         65L  0C    1m  CC=7      ←0
+  │ __init__                    65L  0C    1m  CC=6      ←0
   │ flow_constants              63L  0C    1m  CC=2      ←7
+  │ base                        62L  0C    1m  CC=5      ←3
   │ __init__                    60L  0C    0m  CC=0.0    ←0
   │ __init__                    59L  0C    1m  CC=3      ←0
   │ java                        58L  0C    1m  CC=1      ←1
+  │ insights                    58L  0C    3m  CC=7      ←1
   │ csharp                      57L  0C    1m  CC=1      ←1
   │ orchestrator_constants      55L  0C    0m  CC=0.0    ←0
-  │ insights                    54L  0C    1m  CC=13     ←1
   │ __init__                    54L  0C    0m  CC=0.0    ←0
   │ map_exporter                53L  1C    2m  CC=1      ←0
-  │ cache                       50L  1C    5m  CC=4      ←0
+  │ cache                       52L  1C    5m  CC=4      ←0
+  │ compact                     52L  0C    3m  CC=7      ←0
   │ evolution                   46L  0C    2m  CC=6      ←3
   │ cpp                         41L  0C    1m  CC=1      ←1
   │ constants                   41L  0C    0m  CC=0.0    ←0
@@ -180,19 +273,16 @@ LAYERS:
   │ constants                   15L  0C    0m  CC=0.0    ←0
   │ __init__                    15L  0C    0m  CC=0.0    ←0
   │ llm_exporter                12L  0C    0m  CC=0.0    ←0
+  │ constants                    9L  0C    0m  CC=0.0    ←0
   │ __init__                     7L  0C    0m  CC=0.0    ←0
   │ __main__                     6L  0C    0m  CC=0.0    ←0
   │ config                       0L  5C    2m  CC=1      ←0
   │ mermaid                      0L  0C    1m  CC=1      ←0
   │ __init__                     0L  0C    0m  CC=0.0    ←0
   │
-  scripts/                        CC̄=3.9    ←in:0  →out:0
-  │ benchmark_badges           401L  0C    9m  CC=13     ←0
-  │ bump_version               102L  0C    7m  CC=4      ←0
-  │
   ./                              CC̄=3.6    ←in:0  →out:0
   │ !! deps.json                 3198L  0C    0m  CC=0.0    ←0
-  │ !! CHANGELOG.md              3096L  0C    0m  CC=0.0    ←0
+  │ !! CHANGELOG.md              3155L  0C    0m  CC=0.0    ←0
   │ !! planfile.yaml             2077L  0C    0m  CC=0.0    ←0
   │ goal.yaml                  430L  0C    0m  CC=0.0    ←0
   │ validate_toon              398L  0C   21m  CC=7      ←0
@@ -209,15 +299,19 @@ LAYERS:
   │ prefact.yaml                82L  0C    0m  CC=0.0    ←0
   │ redsl.yaml                  78L  0C    0m  CC=0.0    ←0
   │ setup                       76L  0C    2m  CC=2      ←0
+  │ regix.yaml                  57L  0C    0m  CC=0.0    ←0
   │ pyqual.yaml                 55L  0C    0m  CC=0.0    ←0
   │ project.sh                  53L  0C    0m  CC=0.0    ←0
-  │ regix.yaml                  51L  0C    0m  CC=0.0    ←0
   │ project2.sh                 50L  0C    0m  CC=0.0    ←0
   │ redsl_refactor_report.md    39L  0C    0m  CC=0.0    ←0
   │ redsl_refactor_plan.md      25L  0C    0m  CC=0.0    ←0
   │ redsl_refactor_report.toon.yaml    21L  0C    0m  CC=0.0    ←0
   │ redsl_refactor_plan.toon.yaml    18L  0C    0m  CC=0.0    ←0
   │ requirements.txt             9L  0C    0m  CC=0.0    ←0
+  │
+  scripts/                        CC̄=3.5    ←in:0  →out:0
+  │ benchmark_badges           393L  0C    9m  CC=7      ←0
+  │ bump_version               102L  0C    7m  CC=4      ←0
   │
   benchmarks/                     CC̄=3.0    ←in:0  →out:0
   │ benchmark_performance      317L  0C    7m  CC=6      ←0
@@ -308,7 +402,7 @@ LAYERS:
   │ README.md                  155L  0C    0m  CC=0.0    ←0
   │
   docs/                           CC̄=0.0    ←in:0  →out:0
-  │ !! README.md                 1057L  0C    0m  CC=0.0    ←0
+  │ !! README.md                 1078L  0C    0m  CC=0.0    ←0
   │ COMPARISON_AND_OPTIMIZATION.md   478L  0C    0m  CC=0.0    ←0
   │ API.md                     396L  0C    0m  CC=0.0    ←0
   │ METHODOLOGY.md             358L  0C    0m  CC=0.0    ←0
@@ -328,9 +422,7 @@ LAYERS:
   │ README.md                  162L  0C    0m  CC=0.0    ←0
   │
   testql-scenarios/               CC̄=0.0    ←in:0  →out:0
-  │ generated-api-smoke.testql.toon.yaml    23L  0C    0m  CC=0.0    ←0
   │ generated-cli-tests.testql.toon.yaml    20L  0C    0m  CC=0.0    ←0
-  │ generated-from-pytests.testql.toon.yaml    12L  0C    0m  CC=0.0    ←0
   │
   project_calls_test/             CC̄=0.0    ←in:0  →out:0
   │ context.md                  51L  0C    0m  CC=0.0    ←0

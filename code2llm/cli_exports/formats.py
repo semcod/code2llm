@@ -2,6 +2,17 @@
 
 # Each _export_* function handles one output format; _export_mermaid_pngs handles optional PNG generation.
 # Format routing is centralised in cli_exports/orchestrator.py and cli_exports/orchestrator_handlers.py.
+#
+# Exported functions (called via orchestrator dispatch table):
+#   _export_toon()          : analysis.toon.yaml  (ToonExporter)
+#   _export_map()           : map.toon.yaml        (MapExporter)
+#   _export_flow()          : flow.toon.yaml        (FlowExporter)
+#   _export_context()       : context.md            (ContextExporter)
+#   _export_yaml()          : project.yaml          (YAMLExporter)
+#   _export_json()          : analysis.json         (JSONExporter)
+#   _export_mermaid()       : *.mmd + calls.yaml    (MermaidExporter)
+#   _export_evolution()     : evolution.yaml        (EvolutionExporter)
+#   _export_project_yaml()  : project.yaml bundle   (ProjectYAMLExporter)
 
 _CONTEXT_MD = "context.md"
 _PROJECT_TOON_YAML = "project.toon.yaml"

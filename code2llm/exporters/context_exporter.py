@@ -6,6 +6,16 @@ Produces LLM-ready architecture summary with flows, patterns, and API surface.
 # Output: context.md — markdown narrative for LLM consumption.
 # Sections: architecture overview, entry points, call flows, data patterns, side effects.
 # Public API: ContextExporter.export() → writes context.md to output_dir.
+#
+# Section builders (all return List[str]):
+#   _get_overview()             : language breakdown, file/class counts.
+#   _get_architecture()         : entry points and top-level call chains.
+#   _get_process_flows()        : traced execution flows per entry point (depth=3).
+#   _get_key_classes()          : top classes ranked by method count.
+#   _get_data_transformations() : functions matched against data-indicator keywords.
+#   _get_behavioral_patterns()  : detected design patterns (confidence-ranked).
+#   _get_api_surface()          : non-private public functions sorted by fan-out.
+#   _get_system_interactions()  : Mermaid component-interaction graph.
 
 from collections import defaultdict
 from pathlib import Path
@@ -70,7 +80,7 @@ class ContextExporter(BaseExporter):
         """Build the Overview section listing language, file counts, and top classes."""
         lang_info = self._detect_languages(result)
         primary = lang_info[0][0] if lang_info else "unknown"
-        lang_summary = ", ".join(f"{l}: {c}" for l, c in lang_info[:5])
+        lang_summary = ", ".join(f"{lang}: {c}" for lang, c in lang_info[:5])
         return [
             "## Overview",
             "",

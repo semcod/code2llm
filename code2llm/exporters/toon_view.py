@@ -148,7 +148,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
             lang_counts[lang] += 1
         if lang_counts:
             sorted_langs = sorted(lang_counts.items(), key=lambda x: -x[1])
-            lang_str = "/".join(f"{l}:{c}" for l, c in sorted_langs)
+            lang_str = "/".join(f"{lang}:{c}" for lang, c in sorted_langs)
             lines.append(f"  LANGS: {lang_str}")
         return lines
 
