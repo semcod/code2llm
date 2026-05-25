@@ -282,63 +282,38 @@ def _build_missing_files_section(output_dir: Path, output_rel_path: str) -> List
     return lines
 
 
+# (has_key, file_key, candidate_filenames, default_path)
+_OUTPUT_FILE_SPECS = [
+    ("has_analysis_toon",    "analysis_file",      ("analysis.toon", "analysis.toon.yaml"),                "analysis.toon"),
+    ("has_map_toon",         "map_file",           ("map.toon.yaml",),                                     "map.toon.yaml"),
+    ("has_evolution_toon",   "evolution_file",     ("evolution.toon.yaml",),                               "evolution.toon.yaml"),
+    ("has_project_toon_yaml","project_toon_file",  ("project.toon.yaml",),                                 "project.toon.yaml"),
+    ("has_context_md",       "context_file",       ("context.md",),                                        "context.md"),
+    ("has_readme_md",        "readme_file",        ("README.md",),                                         "README.md"),
+    ("has_project_logic",    "project_logic_file", ("project.toon", "project/project.toon", "project.toon.txt"), "project.toon"),
+    ("has_validation_toon",  "validation_file",    ("project/validation.toon.yaml",),                     "project/validation.toon.yaml"),
+    ("has_duplication_toon", "duplication_file",   ("project/duplication.toon.yaml",),                    "project/duplication.toon.yaml"),
+]
+_ACTIONABLE_KEYS = {"has_analysis_toon", "has_map_toon", "has_evolution_toon",
+                    "has_project_toon_yaml", "has_project_logic",
+                    "has_validation_toon", "has_duplication_toon"}
+
+
+def _probe_output_files(output_dir: Path) -> dict:
+    """Probe output_dir for known generated files, returning presence flags and paths."""
+    result: dict = {}
+    for has_key, file_key, candidates, default in _OUTPUT_FILE_SPECS:
+        found = _find_existing_prompt_file(output_dir, candidates)
+        result[has_key] = found is not None
+        result[file_key] = found or default
+    return result
+
+
 def _analyze_generated_files(output_dir: Path, subprojects: list = None) -> dict:
     """Analyze which files were generated and determine appropriate focus areas."""
-    analysis_file = _find_existing_prompt_file(
-        output_dir, ("analysis.toon", "analysis.toon.yaml")
-    )
-    map_file = _find_existing_prompt_file(output_dir, ("map.toon.yaml",))
-    evolution_file = _find_existing_prompt_file(output_dir, ("evolution.toon.yaml",))
-    project_toon_file = _find_existing_prompt_file(output_dir, ("project.toon.yaml",))
-    context_file = _find_existing_prompt_file(output_dir, ("context.md",))
-    readme_file = _find_existing_prompt_file(output_dir, ("README.md",))
-    project_logic_file = _find_existing_prompt_file(
-        output_dir, ("project.toon", "project/project.toon", "project.toon.txt")
-    )
-    validation_file = _find_existing_prompt_file(
-        output_dir, ("project/validation.toon.yaml",)
-    )
-    duplication_file = _find_existing_prompt_file(
-        output_dir, ("project/duplication.toon.yaml",)
-    )
-
-    analysis = {
-        "has_analysis_toon": analysis_file is not None,
-        "analysis_file": analysis_file or "analysis.toon",
-        "has_map_toon": map_file is not None,
-        "map_file": map_file or "map.toon.yaml",
-        "has_evolution_toon": evolution_file is not None,
-        "evolution_file": evolution_file or "evolution.toon.yaml",
-        "has_project_toon_yaml": project_toon_file is not None,
-        "project_toon_file": project_toon_file or "project.toon.yaml",
-        "has_context_md": context_file is not None,
-        "context_file": context_file or "context.md",
-        "has_readme_md": readme_file is not None,
-        "readme_file": readme_file or "README.md",
-        "has_project_logic": project_logic_file is not None,
-        "project_logic_file": project_logic_file or "project.toon",
-        "has_validation_toon": validation_file is not None,
-        "validation_file": validation_file or "project/validation.toon.yaml",
-        "has_duplication_toon": duplication_file is not None,
-        "duplication_file": duplication_file or "project/duplication.toon.yaml",
-        "is_chunked": subprojects is not None and len(subprojects) > 0,
-        "file_count": 0,
-    }
-
-    # Count total files
-    actionable_keys = {
-        "has_analysis_toon",
-        "has_map_toon",
-        "has_evolution_toon",
-        "has_project_toon_yaml",
-        "has_project_logic",
-        "has_validation_toon",
-        "has_duplication_toon",
-    }
-    for key, exists in analysis.items():
-        if key in actionable_keys and exists:
-            analysis["file_count"] += 1
-
+    analysis = _probe_output_files(output_dir)
+    analysis["is_chunked"] = bool(subprojects)
+    analysis["file_count"] = sum(1 for k in _ACTIONABLE_KEYS if analysis.get(k))
     return analysis
 
 

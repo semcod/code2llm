@@ -218,30 +218,28 @@ def _analyze_all_subprojects(args, subprojects, output_dir: Path) -> list:
     return all_results
 
 
+def _build_filter_config(args):
+    """Build a FilterConfig from CLI args (exclude patterns, gitignore flag)."""
+    from .core.config import FilterConfig
+    fc = FilterConfig()
+    if getattr(args, "exclude", None):
+        custom = [
+            f"*{p}*" if not p.startswith("*") and not p.endswith("*") else p
+            for p in args.exclude
+        ]
+        fc.exclude_patterns = list(set(fc.exclude_patterns + custom))
+    if getattr(args, "no_gitignore", False):
+        fc.gitignore_enabled = False
+    return fc
+
+
 def _analyze_subproject(args, subproject, output_dir: Path):
     """Analyze and export a single subproject."""
     from .core.analyzer import ProjectAnalyzer
-    from .core.config import Config, FilterConfig
+    from .core.config import Config
     from .cli_exports import _export_simple_formats, _export_evolution
 
-    # Start with default filter config
-    filter_config = FilterConfig()
-
-    # Apply custom exclude patterns if provided
-    if hasattr(args, "exclude") and args.exclude:
-        default_patterns = filter_config.exclude_patterns
-        custom_patterns = [
-            f"*{pattern}*"
-            if not pattern.startswith("*") and not pattern.endswith("*")
-            else pattern
-            for pattern in args.exclude
-        ]
-        filter_config.exclude_patterns = list(set(default_patterns + custom_patterns))
-
-    # Apply gitignore setting
-    if hasattr(args, "no_gitignore") and args.no_gitignore:
-        filter_config.gitignore_enabled = False
-
+    filter_config = _build_filter_config(args)
     config = Config(
         mode=args.mode,
         max_depth_enumeration=args.max_depth,

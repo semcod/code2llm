@@ -13,27 +13,29 @@ from .utils import (
 )
 
 
-def export_calls(result: AnalysisResult, output_path: str) -> None:
-    """Export simplified call graph — only connected nodes."""
-    lines = ["flowchart LR"]
-
-    # Build name index for O(1) callee resolution
-    name_index = build_name_index(result.functions)
-
-    # Collect connected nodes first
+def _collect_call_edges(
+    functions: dict, name_index: dict
+) -> Tuple[Set[str], List[Tuple[str, str]]]:
+    """Collect connected nodes and edges from call graph (max 500 edges)."""
     connected: Set[str] = set()
     edges: List[Tuple[str, str]] = []
-    for func_name, fi in result.functions.items():
+    for func_name, fi in functions.items():
         for callee in fi.calls[:10]:
-            resolved = resolve_callee(callee, result.functions, name_index)
+            resolved = resolve_callee(callee, functions, name_index)
             if resolved and resolved != func_name:
                 connected.add(func_name)
                 connected.add(resolved)
                 edges.append((func_name, resolved))
                 if len(edges) >= 500:
-                    break
-        if len(edges) >= 500:
-            break
+                    return connected, edges
+    return connected, edges
+
+
+def export_calls(result: AnalysisResult, output_path: str) -> None:
+    """Export simplified call graph — only connected nodes."""
+    lines = ["flowchart LR"]
+    name_index = build_name_index(result.functions)
+    connected, edges = _collect_call_edges(result.functions, name_index)
 
     # Group connected nodes by module
     from .utils import module_of

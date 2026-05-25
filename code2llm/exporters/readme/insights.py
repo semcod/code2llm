@@ -4,50 +4,54 @@ from pathlib import Path
 from typing import Any, Dict
 
 
+def _parse_toon_metrics(content: str) -> Dict[str, Any]:
+    """Parse critical/god/health flags from analysis.toon text content."""
+    result: Dict[str, Any] = {"critical_functions": 0, "god_modules": 0, "has_health_issues": False}
+    for line in content.split("\n"):
+        if "critical:" in line:
+            try:
+                result["critical_functions"] = int(line.split("critical:")[1].split("/")[0].strip())
+            except (ValueError, IndexError):
+                pass
+        elif "GOD" in line and "🔴" in line:
+            result["god_modules"] += 1
+        elif line.strip().startswith("🔴"):
+            result["has_health_issues"] = True
+    return result
+
+
+def _parse_evolution_actions(content: str) -> int:
+    """Count numbered refactoring steps in evolution.toon.yaml content."""
+    return sum(
+        1 for line in content.split("\n")
+        if line.strip().startswith(("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9."))
+    )
+
+
 def extract_insights(output_dir: Path) -> Dict[str, Any]:
     """Extract insights from existing analysis files."""
-    insights = {
+    insights: Dict[str, Any] = {
         "critical_functions": 0,
         "god_modules": 0,
         "refactoring_actions": 0,
         "has_health_issues": False,
         "has_evolution_plan": False,
     }
-
-    # Check analysis.toon for health metrics
-    analysis_toon = output_dir / "analysis.toon"
-    if analysis_toon.exists():
+    toon_path = output_dir / "analysis.toon"
+    if toon_path.exists():
         try:
-            content = analysis_toon.read_text(encoding="utf-8")
-            # Extract critical functions count
-            for line in content.split("\n"):
-                if "critical:" in line:
-                    # Format: critical:57/537
-                    parts = line.split("critical:")[1].split("/")[0]
-                    insights["critical_functions"] = int(parts.strip())
-                elif "GOD" in line and "🔴" in line:
-                    insights["god_modules"] += 1
-                elif line.strip().startswith("🔴"):
-                    insights["has_health_issues"] = True
+            insights.update(_parse_toon_metrics(toon_path.read_text(encoding="utf-8")))
         except Exception:
             pass
-
-    # Check evolution.toon.yaml for refactoring plan
-    evolution_toon = output_dir / "evolution.toon.yaml"
-    if evolution_toon.exists():
+    evo_path = output_dir / "evolution.toon.yaml"
+    if evo_path.exists():
         try:
-            content = evolution_toon.read_text(encoding="utf-8")
+            content = evo_path.read_text(encoding="utf-8")
             if "REFACTOR[" in content:
-                # Count refactoring actions
-                for line in content.split("\n"):
-                    if line.strip().startswith(
-                        ("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.")
-                    ):
-                        insights["refactoring_actions"] += 1
+                insights["refactoring_actions"] = _parse_evolution_actions(content)
                 insights["has_evolution_plan"] = True
         except Exception:
             pass
-
     return insights
 
 
