@@ -157,6 +157,7 @@ class SideEffectInfo:
 
     @property
     def is_pure(self) -> bool:
+        """Return True when the function has no side effects."""
         return self.classification == "pure"
 
     @property
@@ -176,6 +177,7 @@ class SideEffectInfo:
         return "; ".join(parts) if parts else "pure"
 
     def to_dict(self) -> Dict[str, Any]:
+        """Serialise the side-effect analysis result to a plain dict."""
         return {
             "function": self.function_name,
             "qualified_name": self.qualified_name,

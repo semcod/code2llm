@@ -36,6 +36,7 @@ class PlanfileTicketSuggestion:
     dedupe_key: str = ""
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialise ticket suggestion to a plain dict."""
         return asdict(self)
 
 
@@ -126,6 +127,7 @@ class PlanfileTicketsExporter(BaseExporter):
         output_path: str,
         **kwargs: Any,
     ) -> Optional[Path]:
+        """Export code2llm analysis findings as planfile-ready ticket YAML."""
         limit = kwargs.get("limit")
         suggestions = collect_planfile_tickets(
             result,

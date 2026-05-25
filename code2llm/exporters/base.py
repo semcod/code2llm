@@ -100,6 +100,7 @@ class ViewGeneratorMixin:
     """
 
     def generate(self, data: Dict[str, Any], output_path: str) -> None:
+        """Render data and write the result to output_path."""
         lines = self._render(data)
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
@@ -133,6 +134,7 @@ def export_format(
     """
 
     def decorator(cls: Type[BaseExporter]) -> Type[BaseExporter]:
+        """Apply format metadata to the exporter class and register it."""
         cls.format_name = name
         cls.description = description or f"{name} format"
         cls.file_extension = extension

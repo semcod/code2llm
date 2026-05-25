@@ -156,6 +156,7 @@ class ModuleDetailRenderer:
         called = set()
 
         def render_method(fi: FunctionInfo, depth: int, prefix: str) -> None:
+            """Render one method line with CC marker and recurse into calls."""
             cc = fi.complexity.get("cyclomatic_complexity", 0)
             arity = len(fi.args) - (1 if fi.is_method else 0)
             cc_marker = "  !" if cc >= CC_WARNING else ""

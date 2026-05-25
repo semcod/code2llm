@@ -307,6 +307,7 @@ new Chart(modFuncsCtx, {{
         lines = last.get("lines", 0)
 
         def trend(cur, prv_val):
+            """Return trend arrow comparing current value to previous."""
             if prv_val is None:
                 return "→"
             if cur < prv_val:
