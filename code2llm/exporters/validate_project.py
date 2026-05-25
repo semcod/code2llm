@@ -9,6 +9,18 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 
+def _log_validation_result(verbose: bool, issues: list) -> None:
+    """Print validation outcome when verbose mode is active."""
+    if not verbose:
+        return
+    if not issues:
+        print("  ✓ project.yaml validation passed")
+    else:
+        print(f"  ⚠ project.yaml validation: {len(issues)} issue(s)")
+        for issue in issues:
+            print(f"    - {issue}")
+
+
 def validate_project_yaml(
     output_dir: Path, verbose: bool = False
 ) -> Tuple[bool, List[str]]:
@@ -17,44 +29,25 @@ def validate_project_yaml(
     Returns (is_valid, list_of_issues).
     """
     issues: List[str] = []
-
     yaml_path = output_dir / "project.yaml"
     toon_path = output_dir / "project.toon.yaml"
-
     if not yaml_path.exists():
         issues.append(f"project.yaml not found in {output_dir}")
         return False, issues
-
-    # Load project.yaml
     try:
         import yaml as _yaml
-
         with open(yaml_path, "r", encoding="utf-8") as f:
             data = _yaml.safe_load(f)
     except Exception as e:
         issues.append(f"Failed to parse project.yaml: {e}")
         return False, issues
-
-    # Validate structure
     issues.extend(_check_required_keys(data))
-
-    # Validate views exist
-    expected_views = ["project.toon.yaml", "dashboard.html"]
-    for view in expected_views:
+    for view in ["project.toon.yaml", "dashboard.html"]:
         if not (output_dir / view).exists():
             issues.append(f"Expected view {view} not found")
-
-    # Cross-check project.toon.yaml if it exists
     if toon_path.exists():
         issues.extend(_cross_check_toon(data, toon_path))
-
-    if verbose and not issues:
-        print("  ✓ project.yaml validation passed")
-    elif verbose and issues:
-        print(f"  ⚠ project.yaml validation: {len(issues)} issue(s)")
-        for issue in issues:
-            print(f"    - {issue}")
-
+    _log_validation_result(verbose, issues)
     return len(issues) == 0, issues
 
 

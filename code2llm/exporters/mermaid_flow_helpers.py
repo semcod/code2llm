@@ -159,6 +159,24 @@ def _render_module_subgraphs(
         lines.append("")
 
 
+def _resolve_callee(callee, funcs, resolve, name_index):
+    """Resolve callee name using index-aware or simple resolver."""
+    if name_index:
+        return resolve(callee, funcs, name_index)
+    return resolve(callee, funcs)
+
+
+def _add_edge_if_new(src, dst, seen_edges, lines, limit):
+    """Add a Mermaid edge if not already seen; return True if limit reached."""
+    edge = (src, dst)
+    if edge not in seen_edges:
+        seen_edges.add(edge)
+        lines.append(f"    {src} --> {dst}")
+        if limit is not None and len(seen_edges) >= limit:
+            return True
+    return False
+
+
 def _render_flow_edges(
     lines: List[str],
     funcs: Dict[str, Any],
@@ -173,19 +191,11 @@ def _render_flow_edges(
     for func_name, fi in funcs.items():
         src = readable_id(func_name)
         for callee in fi.calls[:calls_per_function]:
-            resolved = (
-                resolve(callee, funcs, name_index)
-                if name_index
-                else resolve(callee, funcs)
-            )
+            resolved = _resolve_callee(callee, funcs, resolve, name_index)
             if resolved and resolved != func_name:
                 dst = readable_id(resolved)
-                edge = (src, dst)
-                if edge not in seen_edges:
-                    seen_edges.add(edge)
-                    lines.append(f"    {src} --> {dst}")
-                    if limit is not None and len(seen_edges) >= limit:
-                        return
+                if _add_edge_if_new(src, dst, seen_edges, lines, limit):
+                    return
         if limit is not None and len(seen_edges) >= limit:
             return
 
