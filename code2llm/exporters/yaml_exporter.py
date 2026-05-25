@@ -96,9 +96,9 @@ class YAMLExporter(BaseExporter):
             )
 
     def export_data_flow(
-        self, result: AnalysisResult, output_path: str, compact: bool = True
+        self, result: AnalysisResult, output_path: str, _compact: bool = True
     ) -> None:
-        """Export detailed data flow analysis."""
+        """Export detailed data flow analysis; _compact accepted for API compat."""
         flow_data = self.analyzer.analyze_data_flow(result)
         flow_data.update(
             {"project_path": result.project_path, "analysis_type": "data_flow"}
@@ -115,9 +115,9 @@ class YAMLExporter(BaseExporter):
             )
 
     def export_data_structures(
-        self, result: AnalysisResult, output_path: str, compact: bool = True
+        self, result: AnalysisResult, output_path: str, _compact: bool = True
     ) -> None:
-        """Export data structure analysis."""
+        """Export data structure analysis; _compact accepted for API compat."""
         structure_data = self.analyzer.analyze_data_structures(result)
         structure_data.update(
             {"project_path": result.project_path, "analysis_type": "data_structures"}
@@ -290,8 +290,8 @@ class YAMLExporter(BaseExporter):
                 nodes[fn] = self._create_node(fi, fn, calls_in_counts.get(fn, 0))
         return nodes
 
-    def _create_node(self, fi: FunctionInfo, fn: str, calls_in: int) -> Dict:
-        """Create node dict with function metadata."""
+    def _create_node(self, fi: FunctionInfo, _fn: str, calls_in: int) -> Dict:
+        """Create node dict with function metadata; _fn accepted for API compat."""
         return {
             "name": fi.name,
             "module": fi.module,
@@ -408,7 +408,6 @@ class YAMLExporter(BaseExporter):
         self, result: AnalysisResult, nodes: Dict, edges: List, modules: Dict
     ) -> List[str]:
         """Render header section for calls.toon.yaml."""
-        nfuncs = len(result.functions)
         all_cc = [self._get_cc(fi) for fi in result.functions.values()]
         avg_cc = round(sum(all_cc) / len(all_cc), 1) if all_cc else 0.0
 
@@ -436,8 +435,8 @@ class YAMLExporter(BaseExporter):
             )
         return lines
 
-    def _render_modules(self, modules: Dict, nodes: Dict, edges: List) -> List[str]:
-        """Render modules section with functions and call relationships."""
+    def _render_modules(self, modules: Dict, nodes: Dict, _edges: List) -> List[str]:
+        """Render modules section with functions and call relationships; _edges for API compat."""
         lines = ["MODULES:"]
         for module, funcs in sorted(modules.items()):
             lines.append(f"  {module}  [{len(funcs)} funcs]")

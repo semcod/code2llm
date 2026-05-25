@@ -132,7 +132,7 @@ def is_toon_file(filepath):
         with open(filepath, "r") as f:
             first_line = f.readline()
             return first_line.startswith("# code2llm") or first_line.startswith("# CC")
-    except:
+    except Exception:
         return False
 
 
