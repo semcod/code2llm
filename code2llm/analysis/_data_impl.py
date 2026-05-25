@@ -4,6 +4,26 @@ Extracted to keep data_analysis.py under the MI hard-gate threshold.
 All functions here are module-private (leading underscore) and called
 exclusively from DataAnalyzer in data_analysis.py.
 """
+# ── Data pipeline helpers ─────────────────────────────────────────────────────
+# _find_data_pipelines()   : detect sequential transform chains from call graph.
+# ── State-machine helpers ─────────────────────────────────────────────────────
+# _is_state_func()         : heuristic; True if name contains state keyword.
+# _state_affected_by()     : callers that mutate the given function's state.
+# _find_state_patterns()   : aggregate state-machine detections per module.
+# ── Data-dependency helpers ───────────────────────────────────────────────────
+# _find_data_dependencies() : build producer→consumer edges from shared types.
+# ── Event-flow helpers ────────────────────────────────────────────────────────
+# _is_event_func()         : heuristic; True if name contains event keyword.
+# _event_handlers()        : functions that consume outputs of an event source.
+# _find_event_flows()      : aggregate event-flow detections across the project.
+# ── Type-inference helpers ────────────────────────────────────────────────────
+# _detect_types_from_name(): keyword-match on function name + docstring.
+# _create_type_entry()     : initialise a type-usage dict entry.
+# _update_type_stats()     : accumulate consumed/produced counts per type.
+# _infer_parameter_types() : extract type hints from function parameters.
+# _infer_return_types()    : extract type hints from function return annotation.
+# _analyze_data_types()    : top-level driver; returns list of type-usage entries.
+# _get_function_data_types(): merge name-based + annotation-based type signals.
 
 from typing import Any, Dict, List
 from code2llm.core.models import AnalysisResult

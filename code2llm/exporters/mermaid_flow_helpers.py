@@ -1,5 +1,17 @@
 """Shared helpers for Mermaid flow rendering."""
 
+# ── Node / edge helpers ───────────────────────────────────────────────────────
+# _filtered_functions, _entry_points: filter and rank functions for graph nodes.
+# _group_functions_by_module: group by module for subgraph layout.
+# _classify_architecture_module, _group_architecture_functions: architecture view.
+# _select_key_functions: cap node count to keep diagrams readable.
+# ── Rendering helpers ─────────────────────────────────────────────────────────
+# _append_flow_node: emit a single Mermaid node line.
+# _render_module_subgraphs: emit all subgraph blocks.
+# _resolve_callee, _add_edge_if_new, _render_flow_edges: edge rendering.
+# _append_entry_styles, _render_flow_styles: CSS class application.
+# _render_architecture_view: top-level architecture view renderer.
+
 from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 

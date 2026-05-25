@@ -1,5 +1,7 @@
 """C-family declaration parser helpers (classes, functions, methods, decorators)."""
 
+# Brace tracking, decorator detection, class/function extraction for C/Java/Go/Rust/TS/C++.
+
 from typing import Dict
 
 

@@ -1,5 +1,22 @@
 """Prompt generation — prompt.txt for LLM consumption (regular and chunked)."""
 
+# ── Public entry points ────────────────────────────────────────────────────────
+# _export_prompt_txt()         : generate a single prompt.txt from output_dir.
+# _export_chunked_prompt_txt() : split prompt.txt into numbered chunk files.
+# ── Path / header helpers ─────────────────────────────────────────────────────
+# _get_prompt_paths()          : resolve source_path and output paths.
+# _build_prompt_header()       : generate introductory header lines for prompt.
+# _find_existing_prompt_file() : locate pre-existing prompt source in output_dir.
+# _build_prompt_file_lines()   : assemble lines from all discovered source files.
+# ── Section builders ──────────────────────────────────────────────────────────
+# _build_main_files_section()      : embed primary analysis files (toon, context).
+# _build_optional_files_section()  : embed supplementary files if present.
+# _build_subprojects_section()     : embed per-subproject summaries.
+# _build_missing_files_section()   : report which expected files are absent.
+# ── Utilities ─────────────────────────────────────────────────────────────────
+# _format_size()               : human-readable byte count (B/KB/MB).
+# _get_missing_files()         : list expected output files not yet generated.
+
 import time
 from pathlib import Path
 from typing import List, Optional, Tuple

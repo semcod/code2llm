@@ -1,3 +1,27 @@
+# ── llm_task.py overview ──────────────────────────────────────────────────────
+# Module: CLI tool and library for loading, normalising, and parsing LLM task files.
+# ── Utility helpers ───────────────────────────────────────────────────────────
+# _strip_bom()            : remove UTF-8 BOM from raw string.
+# _ensure_list()          : coerce scalar/None to list.
+# _deep_get()             : safe nested dict access via key path tuple.
+# _sec() / _sget()        : dict helpers with dict/str default values.
+# ── Normalisation ─────────────────────────────────────────────────────────────
+# normalize_llm_task()    : canonicalise raw task dict to required schema.
+# ── Text parser ───────────────────────────────────────────────────────────────
+# _parse_bullets()        : extract bullet-point items from a line list.
+# _parse_sections()       : split text into named sections by heading patterns.
+# _create_empty_task_data(): baseline empty task dict for parser output.
+# _apply_simple_sections(): populate scalar section fields from parsed sections.
+# _apply_bullet_sections(): populate list section fields from parsed sections.
+# _parse_acceptance_tests(): extract Given/When/Then rows from acceptance section.
+# parse_llm_task_text()   : orchestrate above parsers; return normalised dict.
+# ── File loaders ──────────────────────────────────────────────────────────────
+# _load_yaml() / _load_json(): parse raw text; raise on invalid syntax.
+# load_input()            : auto-detect format by extension; return task dict.
+# ── CLI ───────────────────────────────────────────────────────────────────────
+# create_parser()         : build argparse parser for llm_task CLI.
+# main()                  : CLI entry point; load → normalise → print JSON.
+
 import argparse
 import sys
 from pathlib import Path

@@ -1,5 +1,44 @@
 """Planfile ticket exporter for code2llm findings."""
 
+# ── Module overview ────────────────────────────────────────────────────────────
+# Generates planfile-compatible YAML tickets from code2llm analysis findings.
+# Findings are derived from: high-CC functions, god modules, duplicate classes,
+# and code smell detections.  Tickets follow the koru/planfile schema:
+#   signal, title, description, priority, labels, files, dedupe_key.
+# ── Data class ────────────────────────────────────────────────────────────────
+# PlanfileTicketSuggestion (frozen dataclass)
+#   .signal         : machine-readable signal type (e.g. "high_cc").
+#   .title          : one-line ticket title.
+#   .description    : markdown body for the ticket.
+#   .priority       : "critical" | "high" | "normal" | "low".
+#   .labels         : tuple of label strings.
+#   .files          : tuple of affected file paths.
+#   .dedupe_key     : stable key for deduplication against existing tickets.
+#   .to_dict()      : serialise to plain dict via dataclasses.asdict().
+# ── Public API ────────────────────────────────────────────────────────────────
+# collect_planfile_tickets(result) : build all ticket suggestions from result.
+# apply_planfile_tickets(…)        : write new tickets to planfile queue.
+# PlanfileTicketsExporter.export() : export() wrapper for BaseExporter protocol.
+# ── Ticket generators ─────────────────────────────────────────────────────────
+# _high_cc_tickets()         : one ticket per function exceeding CC threshold.
+# _god_module_tickets()      : one ticket per module exceeding line/class limits.
+# _duplicate_class_tickets() : one ticket per duplicate class group.
+# _smell_tickets()           : one ticket per detected code smell.
+# ── Internal helpers ──────────────────────────────────────────────────────────
+# _function_cc()             : extract cyclomatic_complexity from FunctionInfo.
+# _method_names()            : return set of method qualified names from ClassInfo.
+# _rel_path()                : make path relative to project root.
+# _project_root()            : resolve project root path.
+# _description_with_dedupe() : format description that embeds dedupe_key.
+# _default_runner()          : subprocess.run wrapper (default CLI executor).
+# _parse_ticket_title()      : extract title from planfile entry dict/object.
+# _existing_planfile_titles(): read titles of already-queued tickets.
+# ── Constants ─────────────────────────────────────────────────────────────────
+# _PRIORITY_RANK   : sort key mapping priority names to integers.
+# _TERMINAL_STATUSES : statuses that mark a ticket as closed/resolved.
+# _CC_LIMIT        : cyclomatic complexity threshold for high-CC tickets.
+# _GOD_MODULE_LINES / _GOD_MODULE_CLASSES : thresholds for god module detection.
+
 import json
 import re
 import subprocess

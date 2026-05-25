@@ -1,5 +1,24 @@
 """Optimized project analyzer with caching and parallel processing."""
 
+# ── ProjectAnalyzer class overview ────────────────────────────────────────────
+# analyze_project()        : public entry point; orchestrates cache, run, merge.
+# _load_from_persistent_cache(): restore prior results; skip unchanged files.
+# _run_analysis()          : dispatch to _analyze_parallel or _analyze_sequential.
+# _analyze_parallel()      : ProcessPoolExecutor-based multi-file analysis.
+# _analyze_sequential()    : fallback single-process loop with progress logging.
+# _merge_results()         : combine per-file dicts into a single AnalysisResult.
+# _build_call_graph()      : post-process phase; resolves call edges and entry pts.
+# ── Caching helpers ───────────────────────────────────────────────────────────
+# _log_cache_stats()       : verbose stats for cache hit/miss/prune.
+# _store_to_persistent_cache(): serialise merged result back to disk cache.
+# ── File collection ───────────────────────────────────────────────────────────
+# _collect_files()         : walk project_path; apply gitignore + exclude filters.
+# _should_collect_file()   : per-file predicate (language support, size, patterns).
+# _compute_module_name()   : derive dotted module name from relative path.
+# ── Progress helpers ──────────────────────────────────────────────────────────
+# _wrap_tqdm()             : conditionally wrap iterator with tqdm progress bar.
+# _log_verbose_progress()  : log progress every N% when tqdm is unavailable.
+
 import logging
 import os
 import time

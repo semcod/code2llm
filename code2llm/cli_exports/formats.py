@@ -1,5 +1,8 @@
 """Format export functions — toon, map, context, yaml, json, mermaid, evolution, and legacy project-yaml/flow exports."""
 
+# Each _export_* function handles one output format; _export_mermaid_pngs handles optional PNG generation.
+# Format routing is centralised in cli_exports/orchestrator.py and cli_exports/orchestrator_handlers.py.
+
 import sys
 import time
 from pathlib import Path

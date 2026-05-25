@@ -1,5 +1,30 @@
 """File analyzer for analyzing individual source files across multiple languages."""
 
+# ── FileAnalyzer class overview ───────────────────────────────────────────────
+# analyze_file()                 : public entry point; routes to language backend.
+# _route_to_language_analyzer()  : dispatch by extension to Python/JS/Ruby/C/Go…
+# _cache_get() / _cache_put()    : per-file result cache (hash-keyed).
+# ── Python analysis pipeline ──────────────────────────────────────────────────
+# _analyze_python()              : parse source → AST; extract functions/classes.
+# _analyze_ast()                 : walk AST nodes; collect function metadata.
+# _calculate_complexity()        : compute cyclomatic + Halstead complexity.
+# _perform_deep_analysis()       : optional deep pass (CFG, DFG, patterns).
+# ── AST helpers ───────────────────────────────────────────────────────────────
+# _process_class()               : extract class info + method list from AST.
+# _extract_func_calls()          : collect all call-target names in a function.
+# ── Module-level helper ───────────────────────────────────────────────────────
+# _analyze_single_file()         : picklable wrapper used by ProcessPoolExecutor.
+# ── Language dispatch table ───────────────────────────────────────────────────
+# Extensions → backend:  .py → _analyze_python(); .js/.ts → analyze_js();
+#   .rb → analyze_ruby(); .go → _analyze_go_regex(); .rs → analyze_rust();
+#   .java/.c/.cpp/.h/.cs/.kt/.swift → analyze_c_family(); else → analyze_generic().
+# ── Complexity metrics ────────────────────────────────────────────────────────
+# Cyclomatic complexity : radon cc_visit() per function; grade via cc_rank().
+# Halstead Volume       : radon h_visit() per module; stored in result["halstead"].
+# ── Caching strategy ──────────────────────────────────────────────────────────
+# Cache key: SHA-256 of raw file bytes → avoids re-analysis on unchanged files.
+# Invalidation: handled by ProjectAnalyzer._load_from_persistent_cache() on mtime.
+
 import ast
 from pathlib import Path
 from typing import Dict, List, Optional

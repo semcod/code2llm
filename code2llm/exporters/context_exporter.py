@@ -3,6 +3,9 @@
 Rename from llm_exporter.py → context_exporter.py (Sprint 4, v0.3.3).
 Produces LLM-ready architecture summary with flows, patterns, and API surface.
 """
+# Output: context.md — markdown narrative for LLM consumption.
+# Sections: architecture overview, entry points, call flows, data patterns, side effects.
+# Public API: ContextExporter.export() → writes context.md to output_dir.
 
 from collections import defaultdict
 from pathlib import Path
