@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from code2llm.core.models import AnalysisResult
 
 from .helpers import _dup_file_set
-from .constants import CC_CRITICAL, CC_WARNING, GOD_MODULE_LINES, MAX_FUNCTIONS_SHOWN
+from .constants import CC_CRITICAL, MAX_FUNCTIONS_SHOWN
 from ._render_coupling_helpers import (
     _select_top_packages,
     _render_coupling_header,

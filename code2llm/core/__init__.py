@@ -1,14 +1,11 @@
 """Core analysis components for code2llm."""
 
-from .config import Config, FAST_CONFIG, PerformanceConfig, FilterConfig
+from .config import Config, FAST_CONFIG
 from .models import (
     AnalysisResult,
-    FlowNode,
-    FlowEdge,
     FunctionInfo,
     ClassInfo,
     ModuleInfo,
-    Pattern,
 )
 
 __all__ = [

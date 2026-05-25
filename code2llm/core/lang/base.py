@@ -6,25 +6,11 @@ Public API is preserved for backward compatibility; implementation lives in:
 - _c_parser.py    — C-family declaration parser helpers
 """
 
-from typing import Dict, List
+from typing import Dict
 
-from code2llm.core.config import (
-    CC_HIGH_THRESHOLD,
-    CC_LOW_THRESHOLD,
-    CC_MEDIUM_THRESHOLD,
-)
-from code2llm.core.lang._calls import (
-    CALL_PATTERN_C_FAMILY,
-    _CALL_KEYWORDS,
-    _resolve_call,
-    extract_calls_regex,
-)
+from code2llm.core.lang._calls import extract_calls_regex
 from code2llm.core.lang._c_parser import _extract_declarations
-from code2llm.core.lang._complexity import (
-    CC_PATTERNS,
-    calculate_complexity_regex,
-    extract_function_body,
-)
+from code2llm.core.lang._complexity import calculate_complexity_regex
 
 
 
