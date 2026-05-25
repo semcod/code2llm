@@ -163,32 +163,8 @@ def _export_simple_formats(args, result, output_dir: Path, formats):
             if args.verbose:
                 print(f"  - {label}: {filepath} ({elapsed:.2f}s)")
 
-    # Unified project.yaml (single source of truth)
     if "project-yaml" in formats:
-        yaml_path = _export_project_yaml(args, result, output_dir)
-        # Auto-generate all views from project.yaml
-        data = load_project_yaml(str(yaml_path))
-        view_map = {
-            "project.toon.yaml": ToonViewGenerator(),
-            "context.md": ContextViewGenerator(),
-            "dashboard.html": HTMLDashboardGenerator(),
-        }
-        for filename, generator in view_map.items():
-            filepath = output_dir / filename
-            generator.generate(data, str(filepath))
-            if args.verbose:
-                print(f"  - Generated view: {filepath}")
-
-        # Auto-validate consistency
-        from ..exporters.validate_project import validate_project_yaml
-
-        is_valid, issues = validate_project_yaml(output_dir, verbose=args.verbose)
-        if not is_valid and not args.verbose:
-            print(
-                f"  ⚠ project.yaml validation: {len(issues)} issue(s)", file=sys.stderr
-            )
-            for issue in issues:
-                print(f"    - {issue}", file=sys.stderr)
+        _export_project_yaml_bundle(args, result, output_dir)
 
     if "yaml" in formats:
         _export_yaml(args, result, output_dir)
@@ -219,6 +195,28 @@ def _export_yaml(args, result, output_dir: Path):
         exporter.export(result, str(filepath), include_defaults=args.full)
         if args.verbose:
             print(f"  - YAML: {filepath}")
+
+
+def _export_project_yaml_bundle(args, result, output_dir: Path) -> None:
+    """Export project.yaml and auto-generate all derived views, then validate."""
+    yaml_path = _export_project_yaml(args, result, output_dir)
+    data = load_project_yaml(str(yaml_path))
+    view_map = {
+        "project.toon.yaml": ToonViewGenerator(),
+        "context.md": ContextViewGenerator(),
+        "dashboard.html": HTMLDashboardGenerator(),
+    }
+    for filename, generator in view_map.items():
+        filepath = output_dir / filename
+        generator.generate(data, str(filepath))
+        if args.verbose:
+            print(f"  - Generated view: {filepath}")
+    from ..exporters.validate_project import validate_project_yaml
+    is_valid, issues = validate_project_yaml(output_dir, verbose=args.verbose)
+    if not is_valid and not args.verbose:
+        print(f"  \u26a0 project.yaml validation: {len(issues)} issue(s)", file=sys.stderr)
+        for issue in issues:
+            print(f"    - {issue}", file=sys.stderr)
 
 
 def _export_mermaid_pngs(args, output_dir: Path) -> None:

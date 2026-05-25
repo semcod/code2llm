@@ -8,61 +8,44 @@ from code2llm.core.models import AnalysisResult
 from .utils import safe_module, resolve_callee, write_file, build_name_index
 
 
-def export_compact(result: AnalysisResult, output_path: str) -> None:
-    """Export module-level graph: one node per module, weighted edges."""
-    lines = ["flowchart TD"]
-
-    from .utils import module_of
-
-    # Build name index for O(1) callee resolution
-    name_index = build_name_index(result.functions)
-
-    # Compute module stats
+def _compute_module_stats(functions: dict, module_of) -> Tuple[Dict, Dict]:
+    """Return (mod_funcs, mod_lines) counters keyed by module name."""
     mod_funcs: Dict[str, int] = defaultdict(int)
     mod_lines: Dict[str, int] = defaultdict(int)
-    for func_name, fi in result.functions.items():
-        module = module_of(func_name)
-        mod_funcs[module] += 1
-        mod_lines[module] += (
-            fi.end_line - fi.line if hasattr(fi, "end_line") and fi.end_line else 0
-        )
+    for func_name, fi in functions.items():
+        mod = module_of(func_name)
+        mod_funcs[mod] += 1
+        mod_lines[mod] += (fi.end_line - fi.line if getattr(fi, "end_line", None) else 0)
+    return mod_funcs, mod_lines
 
-    # Cross-module edges with weights
+
+def _compute_cross_edges(functions: dict, name_index: dict, module_of) -> Dict[Tuple[str, str], int]:
+    """Return weighted cross-module edge counter."""
     cross_edges: Dict[Tuple[str, str], int] = defaultdict(int)
-    for func_name, fi in result.functions.items():
+    for func_name, fi in functions.items():
         src_mod = module_of(func_name)
         for callee in fi.calls:
-            resolved = resolve_callee(callee, result.functions, name_index)
+            resolved = resolve_callee(callee, functions, name_index)
             if resolved:
                 dst_mod = module_of(resolved)
                 if dst_mod != src_mod:
                     cross_edges[(src_mod, dst_mod)] += 1
+    return cross_edges
 
-    # Only modules with cross-edges
-    active_mods: Set[str] = set()
-    for s, d in cross_edges:
-        active_mods.add(s)
-        active_mods.add(d)
 
-    # Add all modules with functions as fallback
-    if not active_mods:
-        active_mods = set(mod_funcs.keys())
-
-    # Nodes — module boxes
+def export_compact(result: AnalysisResult, output_path: str) -> None:
+    """Export module-level graph: one node per module, weighted edges."""
+    from .utils import module_of
+    lines = ["flowchart TD"]
+    name_index = build_name_index(result.functions)
+    mod_funcs, _ = _compute_module_stats(result.functions, module_of)
+    cross_edges = _compute_cross_edges(result.functions, name_index, module_of)
+    active_mods: Set[str] = {m for pair in cross_edges for m in pair} or set(mod_funcs)
     for mod in sorted(active_mods):
-        sid = safe_module(mod)
-        nf = mod_funcs.get(mod, 0)
-        lines.append(f'    {sid}["{mod}<br/>{nf} funcs"]')
-
-    # Weighted edges
+        lines.append(f'    {safe_module(mod)}["{mod}<br/>{mod_funcs.get(mod, 0)} funcs"]')
     for (src, dst), weight in sorted(cross_edges.items(), key=lambda x: -x[1]):
-        s = safe_module(src)
-        d = safe_module(dst)
-        if weight > 3:
-            lines.append(f"    {s} ==>|{weight}| {d}")
-        else:
-            lines.append(f"    {s} -->|{weight}| {d}")
-
+        arrow = "==>" if weight > 3 else "-->"
+        lines.append(f"    {safe_module(src)} {arrow}|{weight}| {safe_module(dst)}")
     write_file(output_path, lines)
 
 
