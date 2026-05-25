@@ -365,7 +365,7 @@ class ProjectAnalyzer:
             completed = 0
             iterator = self._wrap_tqdm(as_completed(future_to_file), total=len(files))
             for future in iterator:
-                file_path, module_name = future_to_file[future]
+                file_path, _ = future_to_file[future]
                 try:
                     result = future.result()
                     if result:

@@ -63,7 +63,7 @@ def _adjust_ruby_module_qualnames(
     new_prefix = f"{module_name}{mod_prefix}."
 
     new_classes = {}
-    for qname, cls in list(result["classes"].items()):
+    for qname, cls in result["classes"].items():
         new_qname = qname.replace(old_prefix, new_prefix, 1)
         cls.qualified_name = new_qname
         new_classes[new_qname] = cls
@@ -71,7 +71,7 @@ def _adjust_ruby_module_qualnames(
     result["module"].classes = list(new_classes.keys())
 
     new_functions = {}
-    for qname, func in list(result["functions"].items()):
+    for qname, func in result["functions"].items():
         new_qname = qname.replace(old_prefix, new_prefix, 1)
         func.qualified_name = new_qname
         new_functions[new_qname] = func
@@ -113,7 +113,7 @@ def _compute_ruby_cc(content: str, func_info) -> None:
 
 
 def analyze_ruby(
-    content: str, file_path: str, module_name: str, ext: str, stats: Dict
+    content: str, file_path: str, module_name: str, _ext: str, stats: Dict
 ) -> Dict:
     """Analyze Ruby files using shared extraction."""
     patterns = {

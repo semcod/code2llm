@@ -3,6 +3,10 @@
 # Each _export_* function handles one output format; _export_mermaid_pngs handles optional PNG generation.
 # Format routing is centralised in cli_exports/orchestrator.py and cli_exports/orchestrator_handlers.py.
 
+_CONTEXT_MD = "context.md"
+_PROJECT_TOON_YAML = "project.toon.yaml"
+_CALLS_YAML = "calls.yaml"
+
 import sys
 import time
 from pathlib import Path
@@ -60,7 +64,7 @@ def _export_context_fallback(args, result, output_dir: Path, formats: list):
     if "context" in formats or "all" in formats:
         return
     exporter = ContextExporter()
-    filepath = output_dir / "context.md"
+    filepath = output_dir / _CONTEXT_MD
     t0 = time.monotonic()
     exporter.export(result, str(filepath))
     elapsed = time.monotonic() - t0
@@ -105,7 +109,7 @@ def _export_project_toon(args, result, output_dir: Path):
     data = project_yaml_exporter._build_project_yaml(result, prev_evolution)
 
     exporter = ToonViewGenerator()
-    filepath = output_dir / "project.toon.yaml"
+    filepath = output_dir / _PROJECT_TOON_YAML
     t0 = time.monotonic()
     exporter.generate(data, str(filepath))
     elapsed = time.monotonic() - t0
@@ -128,8 +132,8 @@ def _run_report(args, project_yaml_path: str, output_dir: Path) -> None:
         report_formats = ["toon", "context", "article", "html"]
 
     generator_map = {
-        "toon": ("project.toon.yaml", ToonViewGenerator(), "TOON view"),
-        "context": ("context.md", ContextViewGenerator(), "Context view"),
+        "toon": (_PROJECT_TOON_YAML, ToonViewGenerator(), "TOON view"),
+        "context": (_CONTEXT_MD, ContextViewGenerator(), "Context view"),
         "article": ("status.md", ArticleViewGenerator(), "Article view"),
         "html": ("dashboard.html", HTMLDashboardGenerator(), "HTML dashboard"),
     }
@@ -151,7 +155,7 @@ def _export_simple_formats(args, result, output_dir: Path, formats):
         "toon": (ToonExporter, "analysis.toon.yaml", "TOON (diagnostics)"),
         "map": (MapExporter, "map.toon.yaml", "MAP (structure)"),
         "flow": (FlowExporter, "flow.toon.yaml", "FLOW (data-flow)"),
-        "context": (ContextExporter, "context.md", "CONTEXT (LLM narrative)"),
+        "context": (ContextExporter, _CONTEXT_MD, "CONTEXT (LLM narrative)"),
     }
 
     for fmt, (exporter_cls, filename, label) in format_map.items():
@@ -205,8 +209,8 @@ def _export_project_yaml_bundle(args, result, output_dir: Path) -> None:
     yaml_path = _export_project_yaml(args, result, output_dir)
     data = load_project_yaml(str(yaml_path))
     view_map = {
-        "project.toon.yaml": ToonViewGenerator(),
-        "context.md": ContextViewGenerator(),
+        _PROJECT_TOON_YAML: ToonViewGenerator(),
+        _CONTEXT_MD: ContextViewGenerator(),
         "dashboard.html": HTMLDashboardGenerator(),
     }
     for filename, generator in view_map.items():
@@ -262,7 +266,7 @@ def _export_calls_format(args, result, output_dir: Path, toon: bool = False) -> 
         if args.verbose:
             print(f"  - CALLS (toon format): {output_dir / 'calls.toon.yaml'}")
     else:
-        yaml_exporter.export_calls(result, str(output_dir / "calls.yaml"))
+        yaml_exporter.export_calls(result, str(output_dir / _CALLS_YAML))
         if args.verbose:
             print(f"  - CALLS (call graph YAML): {output_dir / 'calls.yaml'}")
 
@@ -303,7 +307,7 @@ def _export_mermaid(args, result, output_dir: Path):
 
     # Export calls.yaml (structured call graph data) and calls.toon.yaml (human-readable)
     yaml_exporter = YAMLExporter()
-    yaml_exporter.export_calls(result, str(output_dir / "calls.yaml"))
+    yaml_exporter.export_calls(result, str(output_dir / _CALLS_YAML))
     yaml_exporter.export_calls_toon(result, str(output_dir / "calls.toon.yaml"))
 
     if args.verbose:
@@ -312,7 +316,7 @@ def _export_mermaid(args, result, output_dir: Path):
             files.append("flow_detailed.mmd")
         if getattr(args, "flow_full", False):
             files.append("flow_full.mmd")
-        files.extend(["calls.mmd", "compact_flow.mmd", "calls.yaml"])
+        files.extend(["calls.mmd", "compact_flow.mmd", _CALLS_YAML])
         print(f"  - Mermaid: {output_dir}/*.mmd ({', '.join(files)})")
 
     _export_mermaid_pngs(args, output_dir)
