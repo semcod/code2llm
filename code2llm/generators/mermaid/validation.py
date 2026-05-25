@@ -94,12 +94,28 @@ def _scan_brackets(
                 paren_stack.pop()
 
 
+def _check_single_node_line(
+    line: str, line_num: int, node_pattern, errors: List[str]
+) -> None:
+    """Validate a single mermaid node line and append error if invalid."""
+    import re
+    if not any(char in line for char in ["[", "(", "{"]):
+        return
+    if node_pattern.match(line):
+        return
+    match = re.match(r"^\s*([A-Za-z0-9_]+)", line)
+    if match:
+        node_id = match.group(1)
+        if not re.match(r"^[A-Z]\d+$|^[Ff]\d+_\w+$", node_id):
+            errors.append(
+                f"Line {line_num}: Invalid node ID '{node_id}' (should be like 'N1' or 'F123_name')"
+            )
+
+
 def _check_node_ids(lines: List[str], errors: List[str]) -> None:
     """Check for invalid node IDs."""
     import re
-
     node_pattern = re.compile(r'^\s*([A-Z]\d+|[Ff]\d+_\w+)\s*["\'\[\{]')
-
     for line_num, line in enumerate(lines, 1):
         line = line.strip()
         if not line or line.startswith("%%"):
@@ -108,16 +124,7 @@ def _check_node_ids(lines: List[str], errors: List[str]) -> None:
             continue
         if _is_balanced_node_line(line):
             continue
-
-        if any(char in line for char in ["[", "(", "{"]):
-            if not node_pattern.match(line):
-                match = re.match(r"^\s*([A-Za-z0-9_]+)", line)
-                if match:
-                    node_id = match.group(1)
-                    if not re.match(r"^[A-Z]\d+$|^[Ff]\d+_\w+$", node_id):
-                        errors.append(
-                            f"Line {line_num}: Invalid node ID '{node_id}' (should be like 'N1' or 'F123_name')"
-                        )
+        _check_single_node_line(line, line_num, node_pattern, errors)
 
 
 __all__ = [

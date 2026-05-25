@@ -42,32 +42,38 @@ def _find_data_pipelines(result: AnalysisResult, categorize_fn, make_stage_fn, m
     return pipelines
 
 
+_STATE_INDICATORS = ["state", "status", "mode", "phase", "lifecycle", "session", "context"]
+_TRANSITION_INDICATORS = ["transition", "change", "update", "set_state", "switch"]
+
+
+def _is_state_func(name_lower: str) -> bool:
+    """Return True if the function name suggests state management."""
+    return any(ind in name_lower for ind in _STATE_INDICATORS + _TRANSITION_INDICATORS)
+
+
+def _state_affected_by(func, functions: dict) -> list:
+    """Return calls that look like state-managing functions."""
+    return [
+        call for call in list(func.calls)[:10]
+        if (cf := functions.get(call)) and any(ind in cf.name.lower() for ind in _STATE_INDICATORS)
+    ]
+
+
 def _find_state_patterns(result: AnalysisResult) -> list:
     """Find state management patterns."""
     patterns: list = []
-    state_indicators = ["state", "status", "mode", "phase", "lifecycle", "session", "context"]
-    transition_indicators = ["transition", "change", "update", "set_state", "switch"]
-
     for func_name, func in result.functions.items():
         name_lower = func.name.lower()
-        if any(ind in name_lower for ind in state_indicators + transition_indicators):
-            affected_states = []
-            for call in list(func.calls)[:10]:
-                call_func = result.functions.get(call)
-                if call_func and any(ind in call_func.name.lower() for ind in state_indicators):
-                    affected_states.append(call)
-            patterns.append(
-                {
-                    "function": func_name,
-                    "type": "state_manager"
-                    if "set" in name_lower or "update" in name_lower
-                    else "state_reader",
-                    "affects_states": affected_states[:5],
-                    "description": func.docstring[:150] if func.docstring else "N/A",
-                }
-            )
-            if len(patterns) >= 20:
-                break
+        if not _is_state_func(name_lower):
+            continue
+        patterns.append({
+            "function": func_name,
+            "type": "state_manager" if ("set" in name_lower or "update" in name_lower) else "state_reader",
+            "affects_states": _state_affected_by(func, result.functions)[:5],
+            "description": func.docstring[:150] if func.docstring else "N/A",
+        })
+        if len(patterns) >= 20:
+            break
     return patterns
 
 

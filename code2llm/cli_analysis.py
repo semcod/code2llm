@@ -275,54 +275,38 @@ def _analyze_subproject(args, subproject, output_dir: Path):
         return None
 
 
+def _merge_item_dict(src: dict, seen: set, prefix: str, dst: dict) -> None:
+    """Copy items from src into dst, deduplicating by (file, name) key."""
+    for item_name, info in src.items():
+        key = (info.file, info.name)
+        if key in seen:
+            continue
+        seen.add(key)
+        dst[f"{prefix}{item_name}" if "." not in item_name else item_name] = info
+
+
 def _merge_chunked_results(all_results, source_path: Path):
     """Merge results from multiple subproject analyses."""
     from .core.models import AnalysisResult
 
     merged = AnalysisResult(project_path=str(source_path))
-
     # Track seen (file, simple_name) pairs to deduplicate overlapping chunk scopes.
     # When the splitter assigns the same directory to multiple chunks (e.g. root and
     # batch_1 both point at the project root), the same class/function would otherwise
     # appear multiple times in the merged result and trigger false-positive duplicate
     # detection in the TOON exporter.
-    _seen_funcs: set = set()
-    _seen_classes: set = set()
-    _seen_modules: set = set()
-
+    seen_funcs: set = set()
+    seen_classes: set = set()
+    seen_modules: set = set()
     for name, result, output_dir in all_results:
         if not result:
             continue
-
         prefix = f"{name}."
-
-        for func_name, func_info in result.functions.items():
-            dedup_key = (func_info.file, func_info.name)
-            if dedup_key in _seen_funcs:
-                continue
-            _seen_funcs.add(dedup_key)
-            new_name = f"{prefix}{func_name}" if "." not in func_name else func_name
-            merged.functions[new_name] = func_info
-
-        for class_name, class_info in result.classes.items():
-            dedup_key = (class_info.file, class_info.name)
-            if dedup_key in _seen_classes:
-                continue
-            _seen_classes.add(dedup_key)
-            new_name = f"{prefix}{class_name}" if "." not in class_name else class_name
-            merged.classes[new_name] = class_info
-
-        for mod_name, mod_info in result.modules.items():
-            dedup_key = (mod_info.file, mod_info.name)
-            if dedup_key in _seen_modules:
-                continue
-            _seen_modules.add(dedup_key)
-            new_name = f"{prefix}{mod_name}" if "." not in mod_name else mod_name
-            merged.modules[new_name] = mod_info
-
+        _merge_item_dict(result.functions, seen_funcs, prefix, merged.functions)
+        _merge_item_dict(result.classes, seen_classes, prefix, merged.classes)
+        _merge_item_dict(result.modules, seen_modules, prefix, merged.modules)
         merged.nodes.update(result.nodes)
         merged.edges.extend(result.edges)
-
     return merged
 
 
