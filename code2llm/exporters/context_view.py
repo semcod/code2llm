@@ -141,6 +141,7 @@ class ContextViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_guidelines() -> List[str]:
+        """Return the standard LLM context guidelines section as a list of lines."""
         return [
             "## Context for LLM",
             "",

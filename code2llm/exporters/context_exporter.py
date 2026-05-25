@@ -153,6 +153,7 @@ class ContextExporter(BaseExporter):
     def _get_process_flows(
         self, result: AnalysisResult, important_entries: List[Tuple[str, int, Any]]
     ) -> List[str]:
+        """Build the '## Process Flows' section by tracing from each entry-point function."""
         lines = ["## Process Flows", "", "Key execution flows identified:", ""]
         flow_id, seen_flows, seen_base_names = 1, set(), set()
         for ep_name, _, ep_func in important_entries[:20]:
@@ -172,6 +173,7 @@ class ContextExporter(BaseExporter):
         return lines
 
     def _get_key_classes(self, result: AnalysisResult) -> List[str]:
+        """Build the '## Key Classes' section listing top classes by method count."""
         if not result.classes:
             return []
         lines = ["## Key Classes", ""]
@@ -191,6 +193,7 @@ class ContextExporter(BaseExporter):
         return lines
 
     def _get_data_transformations(self, result: AnalysisResult) -> List[str]:
+        """Build '## Data Transformation Functions' section from indicator-matched functions."""
         lines = [
             "## Data Transformation Functions",
             "",
@@ -224,6 +227,7 @@ class ContextExporter(BaseExporter):
         return lines
 
     def _get_behavioral_patterns(self, result: AnalysisResult) -> List[str]:
+        """Build '## Behavioral Patterns' section from detected design patterns."""
         if not result.patterns:
             return []
         lines = ["## Behavioral Patterns", ""]
@@ -237,6 +241,7 @@ class ContextExporter(BaseExporter):
         return lines
 
     def _get_api_surface(self, result: AnalysisResult) -> List[str]:
+        """Build '## Public API Surface' section listing non-private public functions."""
         lines = [
             "## Public API Surface",
             "",
@@ -260,6 +265,7 @@ class ContextExporter(BaseExporter):
     def _get_system_interactions(
         self, important_entries: List[Tuple[str, int, Any]]
     ) -> List[str]:
+        """Build '## System Interactions' section with a Mermaid graph of component calls."""
         lines = [
             "## System Interactions",
             "",

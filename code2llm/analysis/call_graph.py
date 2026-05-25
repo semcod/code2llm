@@ -204,4 +204,5 @@ class CallGraphExtractor(ast.NodeVisitor):
         return None
 
     def _expr_to_str(self, node: ast.AST) -> str:
+        """Unparse an AST expression node to a source string (empty string on failure)."""
         return ast_unparse(node, default_none="")

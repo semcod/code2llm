@@ -71,6 +71,7 @@ def _fix_edge_line(line: str) -> str:
 
     # Sanitize edge label content inside |...|
     def _sanitize_edge_label(m):
+        """Replace unsafe characters inside a Mermaid |label| with safe equivalents."""
         return f"|{_sanitize_label_text(m.group(1))}|"
 
     if "|" in line:

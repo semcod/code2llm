@@ -85,6 +85,7 @@ def register_language(*extensions: str, name: str = ""):
     """
 
     def decorator(cls_or_func):
+        """Register cls_or_func as a language parser/function for the given extensions."""
         if isinstance(cls_or_func, type) and issubclass(cls_or_func, LanguageParser):
             # It's a class
             parser = cls_or_func()

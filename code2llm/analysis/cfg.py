@@ -274,6 +274,7 @@ class CFGExtractor(ast.NodeVisitor):
             return str(node)[:50]
 
     def _expr_to_str(self, node: ast.AST) -> str:
+        """Unparse an AST expression node to a source string."""
         return ast_unparse(node)
 
     def _format_except(self, handler: ast.ExceptHandler) -> str:

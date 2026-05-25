@@ -221,25 +221,31 @@ class TypeInferenceEngine:
             return None
 
     def _ann_constant(self, node: ast.Constant) -> str:
+        """Convert a Constant annotation node to its string representation."""
         return str(node.value)
 
     def _ann_name(self, node: ast.Name) -> str:
+        """Return the identifier string from a Name annotation node."""
         return node.id
 
     def _ann_attribute(self, node: ast.Attribute) -> str:
+        """Convert an Attribute annotation node (e.g. typing.Optional) to dotted string."""
         value = self._annotation_to_str(node.value)
         return f"{value}.{node.attr}" if value else node.attr
 
     def _ann_subscript(self, node: ast.Subscript) -> Optional[str]:
+        """Convert a Subscript annotation node (e.g. List[str]) to string."""
         base = self._annotation_to_str(node.value)
         slice_str = self._annotation_to_str(node.slice)
         return f"{base}[{slice_str}]" if (base and slice_str) else base
 
     def _ann_tuple(self, node: ast.Tuple) -> str:
+        """Convert a Tuple annotation node (e.g. Tuple[int, str]) to comma-separated string."""
         parts = [self._annotation_to_str(e) for e in node.elts]
         return ", ".join(p for p in parts if p)
 
     def _ann_binop(self, node: ast.BinOp) -> Optional[str]:
+        """Convert a BinOp annotation node (X | Y union syntax) to string."""
         left = self._annotation_to_str(node.left)
         right = self._annotation_to_str(node.right)
         return f"{left} | {right}" if (left and right) else None

@@ -35,6 +35,7 @@ class HTMLDashboardGenerator:
             f.write(html)
 
     def _render(self, data: Dict[str, Any]) -> str:
+        """Render the full HTML dashboard string from a project data dict."""
         proj = data.get("project", {})
         health = data.get("health", {})
         modules = data.get("modules", [])

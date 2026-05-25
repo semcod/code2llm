@@ -47,6 +47,7 @@ def _ensure_list(value: Any) -> List[Any]:
 
 
 def _deep_get(d: Dict[str, Any], path: Tuple[str, ...]) -> Any:
+    """Return the value at a nested key path in d, or None if any key is absent."""
     cur: Any = d
     for key in path:
         if not isinstance(cur, dict) or key not in cur:
@@ -122,6 +123,7 @@ _SECTION_KEYS = {
 
 
 def _parse_bullets(lines: List[str]) -> List[str]:
+    """Extract bullet items (lines starting with '-' or '*') from a list of text lines."""
     items: List[str] = []
     for raw in lines:
         s = raw.strip()
@@ -140,6 +142,7 @@ def _parse_sections(lines: List[str]) -> Dict[str, List[str]]:
     current: Optional[str] = None
 
     def start_section(name: str) -> None:
+        """Mark `name` as the active section header being parsed."""
         nonlocal current
         current = name
         sections.setdefault(name, [])

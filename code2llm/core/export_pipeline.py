@@ -45,6 +45,7 @@ class SharedExportContext:
 
     @property
     def entry_points(self) -> List[str]:
+        """Return the list of detected entry-point function names."""
         return self._result.entry_points
 
     @property
@@ -89,6 +90,7 @@ class SharedExportContext:
     # ------------------------------------------------------------------
 
     def _compute_metrics_summary(self) -> Dict[str, Any]:
+        """Aggregate function/class/CC metrics into a summary dict (cached via metrics_summary)."""
         funcs = self._result.functions
         classes = self._result.classes
 
@@ -109,6 +111,7 @@ class SharedExportContext:
         }
 
     def _compute_cc_distribution(self) -> Dict[str, int]:
+        """Count functions per CC rank (A/B/C/D/unknown) across all analysed functions."""
         dist = {"A": 0, "B": 0, "C": 0, "D": 0, "unknown": 0}
         for f in self._result.functions.values():
             cc_data = getattr(f, "complexity", None)
@@ -138,6 +141,7 @@ class ExportPipeline:
 
     @property
     def context(self) -> SharedExportContext:
+        """Return the shared export context passed to all exporters."""
         return self._ctx
 
     def run(self, exporters: List, output_dir: str) -> Dict[str, bool]:

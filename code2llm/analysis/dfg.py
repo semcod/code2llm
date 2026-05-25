@@ -230,6 +230,7 @@ class DFGExtractor(ast.NodeVisitor):
         return names
 
     def _expr_to_str(self, node: ast.AST) -> str:
+        """Unparse an AST expression node to a source string."""
         return ast_unparse(node)
 
     def _build_data_flow_edges(self):

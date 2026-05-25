@@ -349,6 +349,7 @@ def _rel_path(path: str, project_path: str) -> str:
 
 
 def _project_root(result: AnalysisResult, override: object = None) -> Path:
+    """Resolve the project root path from result or an explicit override."""
     if override:
         return Path(str(override)).resolve()
     if result.project_path:
@@ -357,6 +358,7 @@ def _project_root(result: AnalysisResult, override: object = None) -> Path:
 
 
 def _description_with_dedupe(suggestion: PlanfileTicketSuggestion) -> str:
+    """Append a dedupe footer to the ticket description if a dedupe_key is present."""
     if not suggestion.dedupe_key:
         return suggestion.description
     return f"{suggestion.description}\n\ncode2llm-dedupe: {suggestion.dedupe_key}"
@@ -366,6 +368,7 @@ def _default_runner(
     cmd: Sequence[str],
     cwd: Path,
 ) -> subprocess.CompletedProcess[str]:
+    """Execute cmd in cwd via subprocess.run; used as the default koru CLI executor."""
     return subprocess.run(
         list(cmd),
         cwd=cwd,

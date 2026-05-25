@@ -32,6 +32,7 @@ class FileCache:
             return f"{Path(file_path).stem}_unknown"
 
     def _get_cache_key(self, file_path: str, content: str) -> str:
+        """Return a content-addressed cache key for the given file path and content."""
         return make_cache_key(file_path, content)
 
     def _get_cache_path(self, cache_key: str) -> Path:

@@ -79,6 +79,7 @@ class FlowExporter(BaseExporter):
     # context builder
     # ------------------------------------------------------------------
     def _build_context(self, result: AnalysisResult) -> Dict[str, Any]:
+        """Build the full Jinja2 template context dict from an AnalysisResult."""
         ctx: Dict[str, Any] = {}
         ctx["result"] = result
         ctx["timestamp"] = datetime.now().strftime("%Y-%m-%d")
@@ -175,6 +176,7 @@ class FlowExporter(BaseExporter):
         return transforms[:15]
 
     def _transform_label(self, fi: FunctionInfo, fan_out: int) -> str:
+        """Return a diagnostic label for a function based on its name and fan-out."""
         if fi.name == "main" or fi.name == "__main__":
             return "!! script-in-disguise"
         if fan_out >= 30:
@@ -236,6 +238,7 @@ class FlowExporter(BaseExporter):
         return type_list[:20]
 
     def _normalize_type(self, t: str) -> str:
+        """Strip Optional/List/Dict wrappers and return the bare type name, or empty string."""
         t = t.strip().strip("'\"")
         # Remove Optional[], List[], Dict[] wrappers for base type
         for wrapper in ["Optional[", "List[", "Dict[", "Set[", "Tuple["]:
@@ -244,6 +247,7 @@ class FlowExporter(BaseExporter):
         return t if t and t not in ("None", "Any") else ""
 
     def _type_label(self, t: str, consumed: int, produced: int) -> str:
+        """Return a diagnostic label for a data type based on its consumed/produced counts."""
         if consumed >= HUB_TYPE_THRESHOLD:
             return "!! HUB-TYPE \u2192 split interface"
         if consumed >= 5 and produced <= 1:
@@ -396,4 +400,5 @@ class FlowExporter(BaseExporter):
     # utility helpers
     # ------------------------------------------------------------------
     def _is_excluded(self, path: str) -> bool:
+        """Return True if path matches the configured exclusion patterns."""
         return is_excluded_path(path)

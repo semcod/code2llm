@@ -180,6 +180,7 @@ class ToonViewGenerator(ViewGeneratorMixin):
 
     @staticmethod
     def _render_evolution(evolution: List[Dict]) -> List[str]:
+        """Render up to 3 most-recent evolution entries as EVOLUTION: section lines."""
         if not evolution:
             return []
         lines = ["", "EVOLUTION:"]

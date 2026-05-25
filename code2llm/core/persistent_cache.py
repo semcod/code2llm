@@ -45,6 +45,7 @@ _ENV_TTL_DAYS = "CODE2LLM_CACHE_TTL_DAYS"
 
 
 def _pack(obj: Any) -> bytes:
+    """Serialise obj to bytes using pickle protocol 4."""
     # Always pickle: analysis results contain dataclasses (ModuleInfo,
     # FunctionInfo, ...) and graph objects that msgpack cannot serialize
     # natively. Falling back to pickle unconditionally keeps the cache
@@ -53,6 +54,7 @@ def _pack(obj: Any) -> bytes:
 
 
 def _unpack(data: bytes) -> Any:
+    """Deserialise bytes previously packed with _pack()."""
     return pickle.loads(data)
 
 
@@ -412,6 +414,7 @@ class PersistentCache:
     # ------------------------------------------------------------------
 
     def _load_manifest(self) -> Dict[str, Any]:
+        """Load the JSON manifest from disk, or return a fresh empty manifest."""
         if self._manifest_path.exists():
             try:
                 m = json.loads(self._manifest_path.read_text())
@@ -422,6 +425,7 @@ class PersistentCache:
         return {"version": VERSION, "files": {}, "project_dir": self._project_dir}
 
     def _compute_run_hash(self, config_dict: Dict) -> str:
+        """Compute a short hash combining the manifest file-hashes and the config dict."""
         manifest_hash = hashlib.md5(
             json.dumps(self._manifest["files"], sort_keys=True).encode()
         ).hexdigest()[:12]

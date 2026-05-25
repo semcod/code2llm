@@ -500,27 +500,35 @@ class HierarchicalRepoSplitter:
 
     # Backward compatibility: delegate to module-level functions
     def _collect_files_in_dir(self, dir_path, project_path):
+        """Delegate to module-level collect_files_in_dir for backward compatibility."""
         return collect_files_in_dir(dir_path, project_path)
 
     def _collect_files_recursive(self, dir_path, project_path):
+        """Delegate to collect_files_in_dir (alias kept for backward compatibility)."""
         return collect_files_in_dir(dir_path, project_path)
 
     def _collect_root_files(self, project_path):
+        """Delegate to module-level collect_root_files for backward compatibility."""
         return collect_root_files(project_path)
 
     def _count_py_files(self, path):
+        """Delegate to module-level count_py_files for backward compatibility."""
         return count_py_files(path)
 
     def _contains_python_files(self, dir_path):
+        """Delegate to module-level contains_python_files for backward compatibility."""
         return contains_python_files(dir_path)
 
     def _should_skip_file(self, file_str):
+        """Delegate to module-level should_skip_file for backward compatibility."""
         return should_skip_file(file_str)
 
     def _calculate_priority(self, name, level):
+        """Delegate to module-level calculate_priority for backward compatibility."""
         return calculate_priority(name, level)
 
     def _get_level1_dirs(self, project_path):
+        """Delegate to module-level get_level1_dirs for backward compatibility."""
         return get_level1_dirs(project_path)
 
 
