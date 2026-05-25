@@ -56,39 +56,18 @@ class StreamingAnalyzer:
         """Cancel ongoing analysis."""
         self._cancelled = True
 
-    def analyze_streaming(
-        self, project_path: str, _output_callback: Optional[callable] = None
+    def _phase_quick_scan(
+        self, prioritized: list, start_time: float, total_files: int, quick_results: list
     ) -> Iterator[Dict]:
-        """Analyze project with streaming output (yields partial results)."""
-        start_time = time.time()
-        project_path = Path(project_path).resolve()
-
-        # Phase 1: Collect and prioritize files
-        raw_files = self.scanner.collect_files(project_path)
-        prioritized = self.prioritizer.prioritize_files(raw_files, project_path)
-
-        total_files = len(prioritized)
+        """Phase 2: quick-scan each file, populate quick_results, yield file_complete events."""
         processed = 0
-
-        self._report_progress(
-            phase="collect",
-            current=0,
-            total=total_files,
-            message=f"Found {total_files} files to analyze",
-        )
-
-        # Phase 2: Quick scan (functions/classes only)
-        quick_results = []
         for priority in prioritized:
             if self._cancelled:
                 break
-
             result = self.scanner.quick_scan_file(priority)
             if result:
                 quick_results.append(result)
                 processed += 1
-
-                # Yield incremental result
                 yield {
                     "type": "file_complete",
                     "file": priority.file_path,
@@ -96,50 +75,58 @@ class StreamingAnalyzer:
                     "functions": len(result.get("functions", {})),
                     "classes": len(result.get("classes", {})),
                     "progress": processed / total_files,
-                    "eta_seconds": self._estimate_eta(
-                        start_time, processed, total_files
-                    ),
+                    "eta_seconds": self._estimate_eta(start_time, processed, total_files),
                 }
-
                 self._report_progress(
-                    phase="quick_scan",
-                    current=processed,
-                    total=total_files,
+                    phase="quick_scan", current=processed, total=total_files,
                     message=f"Scanned {priority.module_name} (priority: {priority.priority_score:.1f})",
                 )
 
-        # Phase 3: Build call graph (memory efficient)
+    def _phase_deep_scan(
+        self, prioritized: list, quick_results: list
+    ) -> Iterator[Dict]:
+        """Phase 4: deep-analyze important files and yield deep_complete events."""
+        important_files = self.scanner.select_important_files(prioritized, quick_results)
+        deep_processed = 0
+        for priority in important_files[:50]:
+            if self._cancelled:
+                break
+            result = self.scanner.deep_analyze_file(priority)
+            if result:
+                deep_processed += 1
+                yield {
+                    "type": "deep_complete",
+                    "file": priority.file_path,
+                    "nodes": len(result.get("nodes", {})),
+                    "progress": deep_processed / len(important_files),
+                }
+
+    def analyze_streaming(
+        self, project_path: str, _output_callback: Optional[callable] = None
+    ) -> Iterator[Dict]:
+        """Analyze project with streaming output (yields partial results)."""
+        start_time = time.time()
+        project_path = Path(project_path).resolve()
+        raw_files = self.scanner.collect_files(project_path)
+        prioritized = self.prioritizer.prioritize_files(raw_files, project_path)
+        total_files = len(prioritized)
+        self._report_progress(phase="collect", current=0, total=total_files,
+                               message=f"Found {total_files} files to analyze")
+        quick_results: list = []
+        processed = 0
+        for event in self._phase_quick_scan(prioritized, start_time, total_files, quick_results):
+            yield event
+            if event["type"] == "file_complete":
+                processed += 1
         if self.strategy.phase_2_call_graph and not self._cancelled:
             call_graph = self.scanner.build_call_graph_streaming(quick_results)
-
             yield {
                 "type": "call_graph_complete",
                 "functions": len(call_graph),
                 "edges": sum(len(calls) for calls in call_graph.values()),
             }
-
-        # Phase 4: Deep analysis for important files (selective CFG)
         if self.strategy.phase_3_deep_analysis and not self._cancelled:
-            important_files = self.scanner.select_important_files(
-                prioritized, quick_results
-            )
-
-            deep_processed = 0
-            for priority in important_files[:50]:  # Limit to top 50
-                if self._cancelled:
-                    break
-
-                result = self.scanner.deep_analyze_file(priority)
-                if result:
-                    deep_processed += 1
-                    yield {
-                        "type": "deep_complete",
-                        "file": priority.file_path,
-                        "nodes": len(result.get("nodes", {})),
-                        "progress": deep_processed / len(important_files),
-                    }
-
-        # Final summary
+            yield from self._phase_deep_scan(prioritized, quick_results)
         yield {
             "type": "complete",
             "total_files": total_files,
