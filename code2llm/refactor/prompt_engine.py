@@ -85,57 +85,62 @@ class PromptEngine:
         }
         return mapping.get(smell_type)
 
-    def _build_context_for_smell(self, smell: CodeSmell) -> Dict[str, Any]:
-        """Prepare context data for the Jinja2 template."""
-        # Extract source code for context
-        source_code = self._get_source_context(smell.file, smell.line)
-
-        # Prepare metrics
-        metrics = self.result.metrics.get(
-            smell.name.split(": ")[-1], {}
-        )  # Heuristic to find function name
+    def _get_smell_metrics(self, smell: CodeSmell) -> dict:
+        """Look up metrics for the function identified by smell name."""
+        target = smell.name.split(": ")[-1]
+        metrics = self.result.metrics.get(target, {})
         if not metrics and "function" in smell.context:
             metrics = self.result.metrics.get(smell.context["function"], {})
+        return metrics
 
-        # Prepare mutations
+    def _get_smell_mutations(self, smell: CodeSmell) -> tuple:
+        """Return (mutations list, summary string) for the smell's target function."""
+        target = smell.name.split(": ")[-1]
         mutations = [
-            m
-            for m in self.result.mutations
-            if m.scope in (smell.name.split(": ")[-1], smell.context.get("function"))
+            m for m in self.result.mutations
+            if m.scope in (target, smell.context.get("function"))
         ]
-        mutations_summary = f"{len(mutations)} modifications recorded: {', '.join(set([m.variable for m in mutations[:5]]))}..."
+        summary = f"{len(mutations)} modifications recorded: {', '.join(set(m.variable for m in mutations[:5]))}..."
+        return mutations, summary
 
-        context = {
-            "target_function": smell.name.split(": ")[-1],
+    @staticmethod
+    def _get_target_module(smell: CodeSmell) -> str:
+        """Return target module name for feature_envy smells."""
+        if smell.type == "feature_envy":
+            return smell.context.get("foreign_mutations", ["other_module"])[0].split(".")[0]
+        return "other_module"
+
+    def _get_reachability(self, target: str) -> str:
+        """Return reachability for a function, or 'unknown' if not available."""
+        func = self.result.functions.get(target)
+        if hasattr(func, "reachability"):
+            return func.reachability
+        return "unknown"
+
+    def _build_context_for_smell(self, smell: CodeSmell) -> Dict[str, Any]:
+        """Prepare context data for the Jinja2 template."""
+        source_code = self._get_source_context(smell.file, smell.line)
+        metrics = self._get_smell_metrics(smell)
+        mutations, mutations_summary = self._get_smell_mutations(smell)
+        target = smell.name.split(": ")[-1]
+        foreign = smell.context.get("foreign_mutations", [])
+        return {
+            "target_function": target,
             "reason": smell.description,
             "metrics": metrics,
             "mutations_context": mutations_summary,
             "source_file": smell.file,
             "start_line": smell.line,
-            "end_line": smell.line + 20,  # Heuristic: end of function or next 20 lines
+            "end_line": smell.line + 20,
             "source_code": source_code,
             "instruction": self._get_instruction_for_smell(smell),
-            # move_method specific
             "source_module": smell.file.split("/")[-1].replace(".py", ""),
-            "target_module": smell.context.get("foreign_mutations", ["other_module"])[
-                0
-            ].split(".")[0]
-            if smell.type == "feature_envy"
-            else "other_module",
-            "foreign_mutations": ", ".join(smell.context.get("foreign_mutations", [])),
-            "foreign_mutations_context": f"This code mutates state in {', '.join(set([v.split('.')[0] for v in smell.context.get('foreign_mutations', []) if '.' in v]))}",
-            "dependencies": ", ".join(
-                set([m.variable for m in mutations if "." in m.variable])
-            ),
-            "reachability": self.result.functions.get(
-                smell.name.split(": ")[-1], {}
-            ).reachability
-            if hasattr(
-                self.result.functions.get(smell.name.split(": ")[-1]), "reachability"
-            )
-            else "unknown",
+            "target_module": self._get_target_module(smell),
+            "foreign_mutations": ", ".join(foreign),
+            "foreign_mutations_context": f"This code mutates state in {', '.join(set(v.split('.')[0] for v in foreign if '.' in v))}",
+            "dependencies": ", ".join(set(m.variable for m in mutations if "." in m.variable)),
+            "reachability": self._get_reachability(target),
         }
-        return context
 
     def _get_source_context(
         self, file_path: str, start_line: int, max_lines: int = 50

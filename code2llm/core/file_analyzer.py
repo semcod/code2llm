@@ -233,6 +233,17 @@ class FileAnalyzer:
         result["module"].classes.append(qualified_name)
         self.stats["classes_found"] += 1
 
+    @staticmethod
+    def _extract_func_calls(node: ast.FunctionDef, get_call_name) -> list:
+        """Return list of called function names from an AST function node."""
+        calls = []
+        for child in ast.walk(node):
+            if isinstance(child, ast.Call):
+                name = get_call_name(child.func)
+                if name:
+                    calls.append(name)
+        return calls
+
     def _process_function(
         self,
         node: ast.FunctionDef,
@@ -243,22 +254,16 @@ class FileAnalyzer:
     ) -> None:
         """Process function definition with limited CFG depth."""
         func_name = node.name
-        if class_name:
-            qualified_name = f"{module_name}.{class_name}.{func_name}"
-        else:
-            qualified_name = f"{module_name}.{func_name}"
-
-        # Check filtering - use FastFileFilter for function-level filtering
+        qualified_name = (
+            f"{module_name}.{class_name}.{func_name}" if class_name else f"{module_name}.{func_name}"
+        )
         line_count = (node.end_lineno - node.lineno + 1) if node.end_lineno else 1
         is_private = func_name.startswith("_")
         is_property = any(
             isinstance(d, ast.Name) and d.id == "property" for d in node.decorator_list
         )
-
         if self._file_filter.should_skip_function(line_count, is_private, is_property):
             return
-
-        # Create function info
         func_info = FunctionInfo(
             name=func_name,
             qualified_name=qualified_name,
@@ -274,18 +279,9 @@ class FileAnalyzer:
             args=[arg.arg for arg in node.args.args],
             decorators=[self._get_decorator_name(d) for d in node.decorator_list],
         )
-
-        # Build simplified CFG with depth limit
         if not self.config.performance.skip_data_flow:
             self._build_cfg(node, qualified_name, func_info, result)
-
-        # Find calls
-        for child in ast.walk(node):
-            if isinstance(child, ast.Call):
-                called_name = self._get_call_name(child.func)
-                if called_name:
-                    func_info.calls.append(called_name)
-
+        func_info.calls.extend(self._extract_func_calls(node, self._get_call_name))
         result["functions"][qualified_name] = func_info
         result["module"].functions.append(qualified_name)
         self.stats["functions_found"] += 1
