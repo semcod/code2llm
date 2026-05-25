@@ -1,7 +1,7 @@
 <!-- code2docs:start --># code2llm
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.8-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-1233-green)
-> **1233** functions | **143** classes | **289** files | CC̄ = 3.9
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.8-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-1242-green)
+> **1242** functions | **143** classes | **297** files | CC̄ = 3.9
 
 > Auto-generated project documentation from source code analysis.
 
@@ -74,11 +74,14 @@ docs = generate_docs("./my-project", config=config)
 code2llm/
     ├── toon
 ├── redsl
+├── deps
 ├── orchestrator
 ├── goal
+├── regix
 ├── planfile
 ├── Makefile
     ├── toon
+├── wup
 ├── setup
 ├── validate_toon
 ├── pyqual
@@ -133,8 +136,6 @@ code2llm/
     ├── bump_version
     ├── server
             ├── toon
-            ├── toon
-            ├── toon
     ├── valid/
         ├── sample
     ├── cli
@@ -152,6 +153,7 @@ code2llm/
         ├── dfg
         ├── call_graph
         ├── pipeline_classifier
+        ├── _data_impl
         ├── coupling
         ├── cfg
         ├── side_effects
@@ -186,6 +188,8 @@ code2llm/
             ├── ruby
             ├── base
             ├── cpp
+            ├── _complexity
+            ├── _calls
         ├── lang/
             ├── ts_extractors
             ├── ts_parser
@@ -195,6 +199,7 @@ code2llm/
             ├── java
             ├── generic
             ├── typescript
+            ├── _c_parser
         ├── config
     ├── nlp/
         ├── intent_matching
@@ -232,13 +237,16 @@ code2llm/
         ├── readme/
             ├── insights
             ├── sections
+            ├── _render_section_helpers
             ├── helpers
             ├── metrics_duplicates
             ├── metrics
             ├── module_detail
             ├── metrics_health
+            ├── _render_coupling_helpers
             ├── metrics_core
             ├── renderer
+            ├── constants
             ├── evolution
         ├── project_yaml/
             ├── health
@@ -296,48 +304,48 @@ code2llm/
         ├── toon_parser
         ├── detector
         ├── sample
-├── prompt_sumd_sumr_feature
 ├── redsl_refactor_report
-├── redsl_refactor_plan
-├── REFACTORING_PLAN
-├── ROADMAP
-├── CHANGELOG
+├── prompt_sumd_sumr_feature
 ├── TODO
-        ├── context
-    ├── context
+├── ROADMAP
+├── redsl_refactor_plan
     ├── context
     ├── README
+    ├── context
         ├── context
+        ├── context
+├── CHANGELOG
+        ├── context
+        ├── context
+├── REFACTORING_PLAN
     ├── LLM_USAGE
+    ├── README
     ├── API
     ├── PROJECT_SUMMARY
+        ├── README
+    ├── METHODOLOGY
+        ├── README
+        ├── README
     ├── README
         ├── README
+    ├── README
+        ├── ANALYSIS
+        ├── SUMMARY
         ├── README
         ├── README
-        ├── context
-        ├── README
-        ├── README
-        ├── README
-        ├── DEPENDENCY_ANALYSIS
+    ├── README
+    ├── context
+    ├── context
     ├── COMPARISON_AND_OPTIMIZATION
         ├── context
-        ├── SUMMARY
-        ├── ANALYSIS
-    ├── context
-    ├── README
+        ├── context
         ├── context
     ├── context
-    ├── README
-        ├── context
+        ├── DEPENDENCY_ANALYSIS
         ├── extract_method
+        ├── context
         ├── move_method
-    ├── context
         ├── README
-        ├── context
-        ├── context
-    ├── METHODOLOGY
-    ├── README
 ```
 
 ## API Overview
@@ -479,7 +487,7 @@ code2llm/
 - **`IndexHTMLGenerator`** — Generate index.html for browsing all generated files.
 - **`FileScanner`** — Scan output directory and collect file metadata.
 - **`HTMLRenderer`** — Render the index.html page with CSS and JavaScript.
-- **`FuncSummary`** — —
+- **`FuncSummary`** — Immutable summary of a single function's decisions and outgoing calls.
 - **`PromptEngine`** — Generate refactoring prompts from analysis results and detected smells.
 - **`PatternDetector`** — Detect behavioral patterns in code.
 - **`User`** — —
@@ -507,7 +515,6 @@ code2llm/
 - `validate_toon_completeness(toon_data)` — Validate toon format structure.
 - `main()` — Main validation function.
 - `run_pipeline(project_dir, output_dir)` — Run unified pipeline in single process.
-- `print()` — —
 - `NewUserService()` — —
 - `AddUser()` — —
 - `GetUser()` — —
@@ -629,11 +636,11 @@ code2llm/
 - `clear_all(cache_root)` — Delete entire ~/.code2llm/ cache.
 - `analyze_rust(content, file_path, module_name, ext)` — Analyze Rust files using regex-based parsing.
 - `analyze_ruby(content, file_path, module_name, ext)` — Analyze Ruby files using shared extraction.
+- `analyze_c_family(content, file_path, module_name, stats)` — Shared analyzer for C-family languages (Java, C#, C++, etc.).
+- `analyze_cpp(content, file_path, module_name, ext)` — Analyze C++ files using shared C-family extraction.
 - `extract_function_body(content, start_line)` — Extract the body of a function between braces from a start line (1-indexed).
 - `calculate_complexity_regex(content, result, lang)` — Estimate cyclomatic complexity for every function using regex keyword counting.
 - `extract_calls_regex(content, module_name, result)` — Extract function calls from function bodies using regex.
-- `analyze_c_family(content, file_path, module_name, stats)` — Shared analyzer for C-family languages (Java, C#, C++, etc.).
-- `analyze_cpp(content, file_path, module_name, ext)` — Analyze C++ files using shared C-family extraction.
 - `register_language()` — Decorator to register a language parser.
 - `get_parser(extension)` — Get parser for a file extension.
 - `list_parsers()` — List all registered parsers.
@@ -641,7 +648,7 @@ code2llm/
 - `get_parser()` — Get global TreeSitterParser instance.
 - `parse_source(content, ext)` — Convenience function: parse string content for given extension.
 - `is_available()` — Check if tree-sitter is available.
-- `analyze_php(content, file_path, module_name, ext)` — —
+- `analyze_php(content, file_path, module_name, ext)` — Analyze a PHP source file and return declarations, complexity, and call info.
 - `analyze_csharp(content, file_path, module_name, ext)` — Analyze C# files using shared C-family extraction.
 - `analyze_go(content, file_path, module_name, ext)` — Analyze Go files. Uses tree-sitter when available, regex fallback.
 - `analyze_java(content, file_path, module_name, ext)` — Analyze Java files using shared C-family extraction.
@@ -663,6 +670,12 @@ code2llm/
 - `build_core_files_section(existing, insights)` — Build the Core Analysis Files section dynamically.
 - `build_llm_files_section(existing)` — Build the LLM-Ready Documentation section dynamically.
 - `build_viz_files_section(existing)` — Build the Visualizations section dynamically.
+- `render_health_section(ctx)` — Render health section.
+- `render_refactor_section(ctx)` — Generate numbered refactoring steps from health issues.
+- `render_hotspots_section(ctx)` — Render hotspots section.
+- `render_classes_section(ctx)` — Render CLASSES section with visual bar chart proportional to method count.
+- `render_external_section(_ctx)` — Render EXTERNAL section - cross-references to other tools.
+- `render_pipelines_section(ctx)` — Render PIPELINES section - data flow pipelines from entry points.
 - `build_evolution(health, total_lines, prev_evolution)` — Build append-only evolution history.
 - `load_previous_evolution(output_path)` — Load previous evolution entries from existing project.yaml.
 - `build_health(result, modules)` — Build health section with CC metrics, alerts, and issues.
@@ -727,16 +740,16 @@ code2llm/
 - `get_cc(fi)` — Extract cyclomatic complexity from FunctionInfo.
 - `export_flow_full(result, output_path, include_examples)` — Export full debug view with all nodes (original flow.mmd).
 - `dump_yaml(data)` — Shared YAML serialiser (sort_keys=False, unicode, width=100).
-- `normalize_llm_task(data)` — —
+- `normalize_llm_task(data)` — Normalise a raw LLM task dict into a canonical structure with all required keys.
 - `parse_llm_task_text(text)` — Parse LLM task text into structured data.
 - `load_input(path)` — Load input file with detailed YAML/JSON error reporting.
-- `create_parser()` — —
-- `main(argv)` — —
+- `create_parser()` — Build and return the CLI argument parser for the LLM task generator.
+- `main(argv)` — Entry point for the LLM task generator CLI.
 - `run_cli()` — Run the CLI interface for generating PNGs from Mermaid files.
-- `create_parser()` — —
-- `main(argv)` — —
-- `generate_llm_flow(analysis, max_functions, limit_decisions, limit_calls)` — —
-- `render_llm_flow_md(flow)` — —
+- `create_parser()` — Build and return the argument parser for the llm-flow-generator CLI.
+- `main(argv)` — Entry point: parse args, run flow generation, write output files.
+- `generate_llm_flow(analysis, max_functions, limit_decisions, limit_calls)` — Build a compact LLM-friendly flow dict from a code2llm analysis result.
+- `render_llm_flow_md(flow)` — Render a flow dict (from generate_llm_flow) as a Markdown summary string.
 - `validate_mermaid_file(mmd_path)` — Validate Mermaid file and return list of errors.
 - `generate_pngs(input_dir, output_dir, timeout, max_workers)` — Generate PNG files from all .mmd files in input_dir (parallel).
 - `generate_single_png(mmd_file, output_file, timeout)` — Generate PNG from single Mermaid file using available renderers.
@@ -755,7 +768,7 @@ code2llm/
 📄 `REFACTORING_PLAN`
 📄 `ROADMAP`
 📄 `TODO`
-📄 `Taskfile` (2 functions)
+📄 `Taskfile`
 📄 `badges.server` (3 functions)
 📄 `benchmarks.benchmark_constants`
 📄 `benchmarks.benchmark_evolution` (4 functions)
@@ -768,10 +781,11 @@ code2llm/
 📦 `code2llm` (1 functions)
 📄 `code2llm.__main__`
 📦 `code2llm.analysis` (1 functions)
+📄 `code2llm.analysis._data_impl` (14 functions)
 📄 `code2llm.analysis.call_graph` (12 functions, 1 classes)
 📄 `code2llm.analysis.cfg` (16 functions, 1 classes)
 📄 `code2llm.analysis.coupling` (5 functions, 1 classes)
-📄 `code2llm.analysis.data_analysis` (28 functions, 3 classes)
+📄 `code2llm.analysis.data_analysis` (14 functions, 3 classes)
 📄 `code2llm.analysis.dfg` (12 functions, 1 classes)
 📄 `code2llm.analysis.pipeline_classifier` (5 functions, 1 classes)
 📄 `code2llm.analysis.pipeline_detector` (9 functions, 3 classes)
@@ -788,7 +802,7 @@ code2llm/
 📦 `code2llm.cli_exports`
 📄 `code2llm.cli_exports.code2logic` (8 functions)
 📄 `code2llm.cli_exports.formats` (16 functions)
-📄 `code2llm.cli_exports.orchestrator` (15 functions)
+📄 `code2llm.cli_exports.orchestrator` (17 functions)
 📄 `code2llm.cli_exports.orchestrator_chunked` (3 functions)
 📄 `code2llm.cli_exports.orchestrator_constants`
 📄 `code2llm.cli_exports.orchestrator_handlers` (8 functions)
@@ -805,7 +819,10 @@ code2llm/
 📄 `code2llm.core.gitignore` (8 functions, 2 classes)
 📄 `code2llm.core.incremental` (10 functions, 1 classes)
 📦 `code2llm.core.lang` (5 functions, 1 classes)
-📄 `code2llm.core.lang.base` (14 functions)
+📄 `code2llm.core.lang._c_parser` (9 functions)
+📄 `code2llm.core.lang._calls` (2 functions)
+📄 `code2llm.core.lang._complexity` (2 functions)
+📄 `code2llm.core.lang.base` (1 functions)
 📄 `code2llm.core.lang.cpp` (1 functions)
 📄 `code2llm.core.lang.csharp` (1 functions)
 📄 `code2llm.core.lang.generic` (1 functions)
@@ -839,7 +856,7 @@ code2llm/
 📄 `code2llm.exporters.dashboard_data` (9 functions, 1 classes)
 📄 `code2llm.exporters.dashboard_renderer` (4 functions, 1 classes)
 📦 `code2llm.exporters.evolution`
-📄 `code2llm.exporters.evolution.computation` (8 functions)
+📄 `code2llm.exporters.evolution.computation` (10 functions)
 📄 `code2llm.exporters.evolution.constants`
 📄 `code2llm.exporters.evolution.exclusion` (1 functions)
 📄 `code2llm.exporters.evolution.render` (6 functions)
@@ -889,13 +906,16 @@ code2llm/
 📄 `code2llm.exporters.readme_exporter` (1 functions, 1 classes)
 📄 `code2llm.exporters.report_generators` (1 functions)
 📦 `code2llm.exporters.toon` (11 functions, 1 classes)
+📄 `code2llm.exporters.toon._render_coupling_helpers` (10 functions)
+📄 `code2llm.exporters.toon._render_section_helpers` (9 functions)
+📄 `code2llm.exporters.toon.constants`
 📄 `code2llm.exporters.toon.helpers` (9 functions)
 📄 `code2llm.exporters.toon.metrics` (4 functions, 1 classes)
 📄 `code2llm.exporters.toon.metrics_core` (13 functions, 1 classes)
 📄 `code2llm.exporters.toon.metrics_duplicates` (4 functions, 1 classes)
 📄 `code2llm.exporters.toon.metrics_health` (6 functions, 1 classes)
 📄 `code2llm.exporters.toon.module_detail` (9 functions, 1 classes)
-📄 `code2llm.exporters.toon.renderer` (26 functions, 1 classes)
+📄 `code2llm.exporters.toon.renderer` (13 functions, 1 classes)
 📄 `code2llm.exporters.toon_view` (8 functions, 1 classes)
 📄 `code2llm.exporters.validate_project` (3 functions)
 📄 `code2llm.exporters.yaml_exporter` (25 functions, 1 classes)
@@ -926,6 +946,7 @@ code2llm/
 📄 `code2llm.templates.extract_method`
 📄 `code2llm.templates.move_method`
 📄 `demo_langs.valid.sample` (7 functions, 2 classes)
+📄 `deps`
 📄 `docs.API`
 📄 `docs.COMPARISON_AND_OPTIMIZATION`
 📄 `docs.LLM_USAGE`
@@ -988,6 +1009,7 @@ code2llm/
 📄 `redsl_refactor_plan.toon`
 📄 `redsl_refactor_report`
 📄 `redsl_refactor_report.toon`
+📄 `regix`
 📄 `requirements`
 📄 `scripts.benchmark_badges` (9 functions)
 📄 `scripts.bump_version` (7 functions)
@@ -1012,10 +1034,9 @@ code2llm/
 📄 `test_prompt.root.context`
 📦 `test_python_only.valid`
 📄 `test_python_only.valid.sample` (5 functions, 2 classes)
-📄 `testql-scenarios.generated-api-smoke.testql.toon`
 📄 `testql-scenarios.generated-cli-tests.testql.toon`
-📄 `testql-scenarios.generated-from-pytests.testql.toon`
 📄 `validate_toon` (21 functions)
+📄 `wup`
 
 ## Requirements
 

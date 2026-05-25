@@ -1,23 +1,23 @@
-# redup/duplication | 9 groups | 197f 31455L | 2026-05-24
+# redup/duplication | 11 groups | 204f 31550L | 2026-05-25
 
 SUMMARY:
-  files_scanned: 197
-  total_lines:   31455
-  dup_groups:    9
-  dup_fragments: 23
-  saved_lines:   330
-  scan_ms:       2884
+  files_scanned: 204
+  total_lines:   31550
+  dup_groups:    11
+  dup_fragments: 27
+  saved_lines:   344
+  scan_ms:       3348
 
 HOTSPOTS[7] (files with most duplication):
   benchmarks/project_generator.py  dup=187L  groups=1  frags=4  (0.6%)
+  code2llm/exporters/toon/helpers.py  dup=23L  groups=2  frags=2  (0.1%)
   code2llm/exporters/mermaid/utils.py  dup=18L  groups=2  frags=3  (0.1%)
   code2llm/core/lang/cpp.py  dup=13L  groups=1  frags=1  (0.0%)
   code2llm/core/lang/csharp.py  dup=13L  groups=1  frags=1  (0.0%)
   code2llm/core/lang/java.py  dup=13L  groups=1  frags=1  (0.0%)
-  code2llm/exporters/toon/helpers.py  dup=12L  groups=1  frags=1  (0.0%)
   validate_toon.py  dup=12L  groups=1  frags=4  (0.0%)
 
-DUPLICATES[9] (ranked by impact):
+DUPLICATES[11] (ranked by impact):
   [362da81ebf98419f] !! STRU  create_core_py  L=88 N=4 saved=264 sim=1.00
       benchmarks/project_generator.py:11-98  (create_core_py)
       benchmarks/project_generator.py:101-130  (create_etl_py)
@@ -29,7 +29,10 @@ DUPLICATES[9] (ranked by impact):
       code2llm/core/lang/java.py:46-58  (analyze_java)
   [5411378d5b98038d]   STRU  module_of  L=12 N=2 saved=12 sim=1.00
       code2llm/exporters/mermaid/utils.py:32-43  (module_of)
-      code2llm/exporters/toon/helpers.py:39-50  (_package_of_module)
+      code2llm/exporters/toon/helpers.py:41-52  (_package_of_module)
+  [b0cdb0424ddb16d9]   STRU  rel_path  L=11 N=2 saved=11 sim=1.00
+      code2llm/exporters/map/utils.py:13-23  (rel_path)
+      code2llm/exporters/toon/helpers.py:19-29  (_rel_path)
   [95b3b58a4f01f4cc]   STRU  extract_functions_from_toon  L=3 N=4 saved=9 sim=1.00
       validate_toon.py:52-54  (extract_functions_from_toon)
       validate_toon.py:62-64  (extract_classes_from_yaml)
@@ -44,6 +47,9 @@ DUPLICATES[9] (ranked by impact):
   [c427db29782c2b80]   EXAC  visit_AsyncFunctionDef  L=3 N=2 saved=3 sim=1.00
       code2llm/analysis/call_graph.py:114-116  (visit_AsyncFunctionDef)
       code2llm/analysis/cfg.py:111-113  (visit_AsyncFunctionDef)
+  [0bd8f14213de3411]   EXAC  _strip_bom  L=3 N=2 saved=3 sim=1.00
+      code2llm/generators/llm_flow/utils.py:13-15  (_strip_bom)
+      code2llm/generators/llm_task.py:11-13  (_strip_bom)
   [f55844b1df4e27e0]   STRU  _export_calls  L=3 N=2 saved=3 sim=1.00
       code2llm/cli_exports/formats.py:274-276  (_export_calls)
       code2llm/cli_exports/formats.py:279-281  (_export_calls_toon)
@@ -51,7 +57,7 @@ DUPLICATES[9] (ranked by impact):
       code2llm/exporters/mermaid/utils.py:11-13  (readable_id)
       code2llm/exporters/mermaid/utils.py:16-18  (safe_module)
 
-REFACTOR[9] (ranked by priority):
+REFACTOR[11] (ranked by priority):
   [1] ○ extract_module     → benchmarks/utils/create_core_py.py
       WHY: 4 occurrences of 88-line block across 1 files — saves 264 lines
       FILES: benchmarks/project_generator.py
@@ -61,48 +67,58 @@ REFACTOR[9] (ranked by priority):
   [3] ○ extract_function   → code2llm/exporters/utils/module_of.py
       WHY: 2 occurrences of 12-line block across 2 files — saves 12 lines
       FILES: code2llm/exporters/mermaid/utils.py, code2llm/exporters/toon/helpers.py
-  [4] ○ extract_function   → utils/extract_functions_from_toon.py
+  [4] ○ extract_function   → code2llm/exporters/utils/rel_path.py
+      WHY: 2 occurrences of 11-line block across 2 files — saves 11 lines
+      FILES: code2llm/exporters/map/utils.py, code2llm/exporters/toon/helpers.py
+  [5] ○ extract_function   → utils/extract_functions_from_toon.py
       WHY: 4 occurrences of 3-line block across 1 files — saves 9 lines
       FILES: validate_toon.py
-  [5] ○ extract_function   → code2llm/exporters/utils/is_excluded.py
+  [6] ○ extract_function   → code2llm/exporters/utils/is_excluded.py
       WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
       FILES: code2llm/exporters/evolution/exclusion.py, code2llm/exporters/flow_constants.py
-  [6] ○ extract_function   → code2llm/exporters/map/utils/_render_alerts_line.py
+  [7] ○ extract_function   → code2llm/exporters/map/utils/_render_alerts_line.py
       WHY: 2 occurrences of 4-line block across 1 files — saves 4 lines
       FILES: code2llm/exporters/map/header.py
-  [7] ○ extract_function   → code2llm/analysis/utils/visit_AsyncFunctionDef.py
+  [8] ○ extract_function   → code2llm/analysis/utils/visit_AsyncFunctionDef.py
       WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
       FILES: code2llm/analysis/call_graph.py, code2llm/analysis/cfg.py
-  [8] ○ extract_function   → code2llm/cli_exports/utils/_export_calls.py
+  [9] ○ extract_function   → code2llm/generators/utils/_strip_bom.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: code2llm/generators/llm_flow/utils.py, code2llm/generators/llm_task.py
+  [10] ○ extract_function   → code2llm/cli_exports/utils/_export_calls.py
       WHY: 2 occurrences of 3-line block across 1 files — saves 3 lines
       FILES: code2llm/cli_exports/formats.py
-  [9] ○ extract_function   → code2llm/exporters/mermaid/utils/readable_id.py
+  [11] ○ extract_function   → code2llm/exporters/mermaid/utils/readable_id.py
       WHY: 2 occurrences of 3-line block across 1 files — saves 3 lines
       FILES: code2llm/exporters/mermaid/utils.py
 
-QUICK_WINS[5] (low risk, high savings — do first):
+QUICK_WINS[6] (low risk, high savings — do first):
   [1] extract_module     saved=264L  → benchmarks/utils/create_core_py.py
       FILES: project_generator.py
   [2] extract_function   saved=26L  → code2llm/core/lang/utils/analyze_cpp.py
       FILES: cpp.py, csharp.py, java.py
   [3] extract_function   saved=12L  → code2llm/exporters/utils/module_of.py
       FILES: utils.py, helpers.py
-  [4] extract_function   saved=9L  → utils/extract_functions_from_toon.py
+  [4] extract_function   saved=11L  → code2llm/exporters/utils/rel_path.py
+      FILES: utils.py, helpers.py
+  [5] extract_function   saved=9L  → utils/extract_functions_from_toon.py
       FILES: validate_toon.py
-  [5] extract_function   saved=6L  → code2llm/exporters/utils/is_excluded.py
+  [6] extract_function   saved=6L  → code2llm/exporters/utils/is_excluded.py
       FILES: exclusion.py, flow_constants.py
 
-EFFORT_ESTIMATE (total ≈ 15.4h):
+EFFORT_ESTIMATE (total ≈ 15.9h):
   hard   create_core_py                      saved=264L  ~792min
   medium analyze_cpp                         saved=26L  ~52min
   easy   module_of                           saved=12L  ~24min
+  easy   rel_path                            saved=11L  ~22min
   easy   extract_functions_from_toon         saved=9L  ~18min
   easy   is_excluded                         saved=6L  ~12min
   easy   _render_alerts_line                 saved=4L  ~8min
   easy   visit_AsyncFunctionDef              saved=3L  ~6min
+  easy   _strip_bom                          saved=3L  ~6min
   easy   _export_calls                       saved=3L  ~6min
-  easy   readable_id                         saved=3L  ~6min
+  ... +1 more (~6min)
 
 METRICS-TARGET:
-  dup_groups:  9 → 0
-  saved_lines: 330 lines recoverable
+  dup_groups:  11 → 0
+  saved_lines: 344 lines recoverable
