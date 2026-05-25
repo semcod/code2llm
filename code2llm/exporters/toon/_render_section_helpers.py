@@ -50,19 +50,24 @@ def render_health_section(ctx: Dict[str, Any]) -> List[str]:
     return lines
 
 
-def render_refactor_section(ctx: Dict[str, Any]) -> List[str]:
-    """Generate numbered refactoring steps from health issues."""
+def _build_refactor_steps(ctx: Dict[str, Any]) -> List[str]:
+    """Build list of refactoring step strings from health, duplicates, and cycles."""
     steps: List[str] = []
     if ctx["duplicates"]:
         steps.append(f"rm duplicates  (-{len(ctx['duplicates'])} dup classes)")
-    god_issues = [h for h in ctx["health"] if h["code"] == "GOD"]
-    for gi in god_issues:
+    for gi in [h for h in ctx["health"] if h["code"] == "GOD"]:
         steps.append(f"split {gi['message'].split('=')[0].strip()}  (god module)")
     cc_issues = [h for h in ctx["health"] if h["code"] == "CC"]
     if cc_issues:
         steps.append(f"split {len(cc_issues)} high-CC methods  (CC>{CC_WARNING})")
     if ctx["cycles"]:
         steps.append(f"break {len(ctx['cycles'])} circular dependencies")
+    return steps
+
+
+def render_refactor_section(ctx: Dict[str, Any]) -> List[str]:
+    """Generate numbered refactoring steps from health issues."""
+    steps = _build_refactor_steps(ctx)
     if not steps:
         return ["REFACTOR[0]: none needed"]
     lines = [f"REFACTOR[{len(steps)}]:"]

@@ -52,28 +52,36 @@ def _run_standard_analysis(args, source_path: Path, output_dir: Path):
         sys.exit(1)
 
 
+def _apply_exclude_patterns(filter_config, args) -> None:
+    """Merge CLI --exclude globs into filter_config.exclude_patterns."""
+    if not (hasattr(args, "exclude") and args.exclude):
+        return
+    custom = [
+        f"*{p}*" if not p.startswith("*") and not p.endswith("*") else p
+        for p in args.exclude
+    ]
+    filter_config.exclude_patterns = list(set(filter_config.exclude_patterns + custom))
+
+
+def _apply_strategy_config(config, args) -> None:
+    """Apply --fast flag and --strategy overrides to config.performance."""
+    if getattr(args, "fast", False):
+        config.performance.fast_mode = True
+        config.performance.apply_fast_mode()
+    if getattr(args, "strategy", "standard") == "quick":
+        config.performance.skip_data_flow = True
+        config.performance.skip_dead_code_detection = True
+        config.performance.skip_centrality = True
+        config.performance.skip_community_detection = True
+
+
 def _build_config(args, output_dir: Path):
     """Build analysis Config from CLI args."""
     from .core.config import Config, FilterConfig
-
-    # Start with default filter config
     filter_config = FilterConfig()
-
-    # Apply custom exclude patterns if provided
-    if hasattr(args, "exclude") and args.exclude:
-        default_patterns = filter_config.exclude_patterns
-        custom_patterns = [
-            f"*{pattern}*"
-            if not pattern.startswith("*") and not pattern.endswith("*")
-            else pattern
-            for pattern in args.exclude
-        ]
-        filter_config.exclude_patterns = list(set(default_patterns + custom_patterns))
-
-    # Apply gitignore setting
+    _apply_exclude_patterns(filter_config, args)
     if hasattr(args, "no_gitignore") and args.no_gitignore:
         filter_config.gitignore_enabled = False
-
     config = Config(
         mode=args.mode,
         max_depth_enumeration=args.max_depth,
@@ -82,27 +90,10 @@ def _build_config(args, output_dir: Path):
         output_dir=str(output_dir),
         filters=filter_config,
     )
-    # Persistent cache flags (read via getattr with defaults in analyzer.py)
-    no_cache = getattr(args, "no_cache", False) or getattr(args, "force", False)
-    config.no_cache = no_cache
-    # Watch mode for auto-detecting changed files
+    config.no_cache = getattr(args, "no_cache", False) or getattr(args, "force", False)
     config.watch = getattr(args, "watch", False)
-    # Dry-run mode (handled in orchestrator, but stored for reference)
     config.dry_run = getattr(args, "dry_run", False)
-
-    # --fast: skip expensive analyses (vulture, centrality, DFG, communities)
-    if getattr(args, "fast", False):
-        config.performance.fast_mode = True
-        config.performance.apply_fast_mode()
-
-    # Strategy-based performance tuning
-    strategy = getattr(args, "strategy", "standard")
-    if strategy == "quick":
-        config.performance.skip_data_flow = True
-        config.performance.skip_dead_code_detection = True
-        config.performance.skip_centrality = True
-        config.performance.skip_community_detection = True
-
+    _apply_strategy_config(config, args)
     return config
 
 

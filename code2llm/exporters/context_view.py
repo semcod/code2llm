@@ -83,22 +83,23 @@ class ContextViewGenerator(ViewGeneratorMixin):
         return lines
 
     @staticmethod
+    def _render_class_export_entry(exp: Dict, lines: list) -> None:
+        """Append class export lines (with flagged methods) to lines list."""
+        methods = exp.get("methods", [])
+        flagged = [me for me in methods if me.get("flag")]
+        if flagged or exp.get("cc_avg", 0) >= 5:
+            lines.append(f"- **{exp['name']}** (class, CC̄={exp.get('cc_avg', 0)})")
+            for me in flagged:
+                lines.append(f"  - `{me['name']}` CC={me.get('cc', 0)} ⚠ {me.get('flag', '')}")
+
+    @staticmethod
     def _render_exports(modules: List[Dict]) -> List[str]:
         """Render the Key Exports section (flagged classes and functions)."""
         lines = ["## Key Exports", ""]
         for m in modules:
             for exp in m.get("exports", []):
                 if exp.get("type") == "class":
-                    methods = exp.get("methods", [])
-                    flagged = [me for me in methods if me.get("flag")]
-                    if flagged or exp.get("cc_avg", 0) >= 5:
-                        lines.append(
-                            f"- **{exp['name']}** (class, CC̄={exp.get('cc_avg', 0)})"
-                        )
-                        for me in flagged:
-                            lines.append(
-                                f"  - `{me['name']}` CC={me.get('cc', 0)} ⚠ {me.get('flag', '')}"
-                            )
+                    ContextViewGenerator._render_class_export_entry(exp, lines)
                 elif exp.get("type") == "function" and exp.get("flag"):
                     lines.append(
                         f"- **{exp['name']}** (function, CC={exp.get('cc', 0)}) ⚠ {exp.get('flag', '')}"
