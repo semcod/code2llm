@@ -93,6 +93,21 @@ def _pick_relevant_functions(
     return picked
 
 
+def _classify_node_into(
+    n: Dict, fn: str,
+    decisions_by_func: dict, calls_by_func: dict
+) -> None:
+    """Append node data to decisions or calls dicts based on node type."""
+    ntype = n.get("type")
+    label = str(n.get("label") or "")
+    if ntype == "IF":
+        decisions_by_func[fn].append(_shorten(label, 120))
+    elif ntype == "CALL":
+        callee = _parse_call_label(label)
+        if callee:
+            calls_by_func[fn].append(callee)
+
+
 def _collect_node_data(
     nodes: Dict[int, Dict[str, Any]]
 ) -> Tuple[Dict, Dict, Dict]:
@@ -109,14 +124,7 @@ def _collect_node_data(
                 n.get("file") if isinstance(n.get("file"), str) else None,
                 n.get("line") if isinstance(n.get("line"), int) else None,
             )
-        ntype = n.get("type")
-        label = str(n.get("label") or "")
-        if ntype == "IF":
-            decisions_by_func[fn].append(_shorten(label, 120))
-        elif ntype == "CALL":
-            callee = _parse_call_label(label)
-            if callee:
-                calls_by_func[fn].append(callee)
+        _classify_node_into(n, fn, decisions_by_func, calls_by_func)
     return decisions_by_func, calls_by_func, loc_by_func
 
 

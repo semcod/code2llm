@@ -14,18 +14,8 @@ def _is_ruby_end(line: str) -> bool:
     return line.startswith("end") and (len(line) == 3 or line.startswith("end "))
 
 
-def _extract_ruby_body(content: str, start_line: int) -> str:
-    """Extract Ruby function body from def to corresponding end."""
-    lines = content.split("\n")
-    if start_line < 1 or start_line > len(lines):
-        return ""
-    def_line_idx = start_line - 1
-    while def_line_idx < len(lines):
-        if re.match(r"^\s*def\s+", lines[def_line_idx]):
-            break
-        def_line_idx += 1
-    if def_line_idx >= len(lines):
-        return ""
+def _scan_ruby_body_lines(lines: list, def_line_idx: int) -> list:
+    """Scan lines after def_line_idx collecting body until matching end."""
     body_lines = []
     nested_depth = 1
     i = def_line_idx + 1
@@ -39,7 +29,22 @@ def _extract_ruby_body(content: str, start_line: int) -> str:
             nested_depth += 1
         body_lines.append(line)
         i += 1
-    return "\n".join(body_lines)
+    return body_lines
+
+
+def _extract_ruby_body(content: str, start_line: int) -> str:
+    """Extract Ruby function body from def to corresponding end."""
+    lines = content.split("\n")
+    if start_line < 1 or start_line > len(lines):
+        return ""
+    def_line_idx = start_line - 1
+    while def_line_idx < len(lines):
+        if re.match(r"^\s*def\s+", lines[def_line_idx]):
+            break
+        def_line_idx += 1
+    if def_line_idx >= len(lines):
+        return ""
+    return "\n".join(_scan_ruby_body_lines(lines, def_line_idx))
 
 
 _RUBY_CC_PATTERN = re.compile(
