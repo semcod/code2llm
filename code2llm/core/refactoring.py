@@ -11,6 +11,7 @@ class RefactoringAnalyzer:
     """Performs refactoring analysis on code."""
 
     def __init__(self, config: Config, file_filter: FastFileFilter):
+        """Initialise with project config and file filter."""
         self.config = config
         self.file_filter = file_filter
 

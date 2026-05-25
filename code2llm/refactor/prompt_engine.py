@@ -13,6 +13,7 @@ class PromptEngine:
     """Generate refactoring prompts from analysis results and detected smells."""
 
     def __init__(self, result: AnalysisResult, template_dir: Optional[str] = None):
+        """Initialise the prompt engine with analysis result and optional template directory."""
         if template_dir is None:
             # Default to templates directory relative to this file
             template_dir = os.path.join(

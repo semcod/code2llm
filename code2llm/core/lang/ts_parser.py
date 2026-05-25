@@ -117,10 +117,12 @@ class TreeSitterParser:
     """
 
     def __init__(self):
+        """Initialise the parser pool, loading tree-sitter language modules."""
         self._initialized = _init_tree_sitter()
 
     @property
     def available(self) -> bool:
+        """Return True when tree-sitter is available for parsing."""
         return self._initialized
 
     def parse(self, source: bytes, ext: str) -> Optional[Any]:

@@ -14,6 +14,7 @@ class DuplicatesMetricsComputer:
     """Detects duplicate classes in the codebase."""
 
     def __init__(self, project_path: str):
+        """Initialise with the project root path for duplicate detection."""
         self.project_path = project_path
 
     def detect_duplicates(self, result: AnalysisResult) -> List[Dict[str, Any]]:

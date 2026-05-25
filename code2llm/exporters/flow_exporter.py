@@ -42,6 +42,7 @@ class FlowExporter(BaseExporter):
     """
 
     def __init__(self):
+        """Initialise the flow exporter with a fresh type inference engine."""
         self._type_engine = TypeInferenceEngine()
         self._side_effect_detector = SideEffectDetector()
         self._pipeline_detector = PipelineDetector(

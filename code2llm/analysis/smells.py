@@ -9,6 +9,7 @@ class SmellDetector:
     """Detect code smells from analysis results."""
 
     def __init__(self, result: AnalysisResult):
+        """Initialise with the analysis result to detect code smells."""
         self.result = result
         # Pre-index mutations by scope — avoids O(n×m) full scans
         self._mutations_by_scope: Dict[str, list] = defaultdict(list)

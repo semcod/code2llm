@@ -51,6 +51,7 @@ class ToonExporter(BaseExporter):
     """Export to toon v2 plain-text format — scannable, sorted by severity."""
 
     def __init__(self):
+        """Initialise the TOON exporter with metrics computer and renderer."""
         self.metrics_computer = MetricsComputer()
         self.renderer = ToonRenderer()
 

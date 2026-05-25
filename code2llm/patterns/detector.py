@@ -10,6 +10,7 @@ class PatternDetector:
     """Detect behavioral patterns in code."""
 
     def __init__(self, config: Config):
+        """Initialise the pattern detector with project config."""
         self.config = config
 
     def detect_patterns(self, result: AnalysisResult) -> List[Dict]:

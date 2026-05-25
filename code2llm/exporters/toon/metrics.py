@@ -24,6 +24,7 @@ class MetricsComputer:
     """
 
     def __init__(self):
+        """Initialise the metrics computer with sub-computers for each domain."""
         self.result = None
         self.project_path = None
         self.line_counts = {}

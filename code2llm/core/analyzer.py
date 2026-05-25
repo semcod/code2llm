@@ -40,6 +40,7 @@ class ProjectAnalyzer:
     def __init__(
         self, config: Optional[Config] = None, project_path: Optional[Path] = None
     ):
+        """Initialise the analyser with optional config and project path."""
         self.config = config or FAST_CONFIG
         self.project_path = project_path
         self.cache = (

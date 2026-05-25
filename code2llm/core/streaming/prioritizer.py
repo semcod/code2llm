@@ -30,6 +30,7 @@ class SmartPrioritizer:
     """Smart file prioritization for optimal analysis order."""
 
     def __init__(self, strategy: ScanStrategy):
+        """Initialise the file prioritiser with a scan strategy."""
         self.strategy = strategy
 
     def prioritize_files(

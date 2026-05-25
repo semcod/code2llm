@@ -13,6 +13,7 @@ class StreamingIncrementalAnalyzer:
     """Incremental analysis with change detection for streaming analyzer."""
 
     def __init__(self, config: Optional[Config] = None):
+        """Initialise incremental analyser with optional config."""
         self.config = config or FAST_CONFIG
         self.state_file = Path(".code2llm_state.json")
         self.previous_state: Dict[str, str] = {}

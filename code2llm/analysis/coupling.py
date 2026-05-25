@@ -8,6 +8,7 @@ class CouplingAnalyzer:
     """Analyze coupling between modules."""
 
     def __init__(self, result: AnalysisResult):
+        """Initialise with the analysis result to analyse for coupling."""
         self.result = result
 
     def analyze(self) -> Dict[str, Any]:

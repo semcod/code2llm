@@ -29,6 +29,7 @@ class FileAnalyzer:
     """Analyzes a single file."""
 
     def __init__(self, config: Config, cache=None):
+        """Initialise with project config and optional file cache."""
         self.config = config
         self.cache = cache
         self._file_filter = FastFileFilter(config.filters)

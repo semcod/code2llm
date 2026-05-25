@@ -12,6 +12,7 @@ class HealthMetricsComputer:
     """Computes health issues and quality alerts."""
 
     def __init__(self):
+        """Initialise the health metrics computer."""
         pass
 
     def compute_health(self, ctx: Dict[str, Any]) -> List[Dict[str, Any]]:
