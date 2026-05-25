@@ -1,7 +1,7 @@
 """Module metrics builder for project.yaml."""
 
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from code2llm.core.models import AnalysisResult, ClassInfo, FunctionInfo
 from code2llm.exporters.toon.helpers import _is_excluded, _rel_path
@@ -99,32 +99,27 @@ def build_exports(
     return exports
 
 
+def _build_notable_method_entry(mf) -> Optional[Dict[str, Any]]:
+    """Return a notable method dict if cc/fan_out exceeds thresholds, else None."""
+    cc = mf.complexity.get("cyclomatic_complexity", 0)
+    fan_out = len(set(mf.calls))
+    if cc < CC_CRITICAL and fan_out < FAN_OUT_THRESHOLD:
+        return None
+    entry: Dict[str, Any] = {"name": mf.name, "cc": cc}
+    if cc >= CC_WARNING:
+        entry["flag"] = "split"
+    if fan_out >= FAN_OUT_THRESHOLD:
+        entry["fan_out"] = fan_out
+    return entry
+
+
 def build_class_export(ci: ClassInfo, result: AnalysisResult) -> Dict[str, Any]:
     """Build export entry for a single class."""
-    class_funcs = [
-        result.functions.get(m) for m in ci.methods if result.functions.get(m)
-    ]
+    class_funcs = [result.functions.get(m) for m in ci.methods if result.functions.get(m)]
     method_ccs = [f.complexity.get("cyclomatic_complexity", 0) for f in class_funcs]
     avg_cc = round(sum(method_ccs) / len(method_ccs), 1) if method_ccs else 0.0
-
-    cls_export: Dict[str, Any] = {
-        "name": ci.name,
-        "type": "class",
-        "cc_avg": avg_cc,
-    }
-
-    notable = []
-    for mf in class_funcs:
-        cc = mf.complexity.get("cyclomatic_complexity", 0)
-        fan_out = len(set(mf.calls))
-        if cc >= CC_CRITICAL or fan_out >= FAN_OUT_THRESHOLD:
-            m_entry: Dict[str, Any] = {"name": mf.name, "cc": cc}
-            if cc >= CC_WARNING:
-                m_entry["flag"] = "split"
-            if fan_out >= FAN_OUT_THRESHOLD:
-                m_entry["fan_out"] = fan_out
-            notable.append(m_entry)
-
+    cls_export: Dict[str, Any] = {"name": ci.name, "type": "class", "cc_avg": avg_cc}
+    notable = [e for e in (_build_notable_method_entry(mf) for mf in class_funcs) if e]
     if notable:
         cls_export["methods"] = notable
     return cls_export

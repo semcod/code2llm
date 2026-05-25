@@ -9,76 +9,50 @@ from .constants import CC_SPLIT_THRESHOLD
 from .computation import build_context
 
 
-def export_to_yaml(result: AnalysisResult, output_path: str) -> None:
-    """Generate evolution.toon.yaml (structured YAML)."""
-    ctx = build_context(result)
-
-    # Build refactoring actions
+def _build_refactoring_actions(ctx: dict) -> list:
+    """Build sorted list of refactoring action dicts from context."""
     actions = []
     for gm in ctx["god_modules"][:3]:
-        actions.append(
-            {
-                "priority": "high",
-                "action": "SPLIT",
-                "target": gm["file"],
-                "reason": f"{gm['lines']}L, {gm['classes']} classes, max CC={gm['max_cc']}",
-                "effort": "~4h",
-            }
-        )
-
+        actions.append({"priority": "high", "action": "SPLIT", "target": gm["file"],
+                        "reason": f"{gm['lines']}L, {gm['classes']} classes, max CC={gm['max_cc']}",
+                        "effort": "~4h"})
     for f in ctx["funcs"][:20]:
         if f["cc"] >= CC_SPLIT_THRESHOLD:
-            actions.append(
-                {
-                    "priority": "critical" if f["cc"] >= 25 else "high",
-                    "action": "SPLIT-FUNC",
-                    "target": f"{f['class_name']}.{f['name']}"
-                    if f["class_name"]
-                    else f["name"],
-                    "cc": f["cc"],
-                    "fan_out": f["fan_out"],
-                    "reason": f"CC={f['cc']} exceeds {CC_SPLIT_THRESHOLD}",
-                    "effort": "~1h",
-                }
-            )
-
+            target = f"{f['class_name']}.{f['name']}" if f["class_name"] else f["name"]
+            actions.append({"priority": "critical" if f["cc"] >= 25 else "high",
+                            "action": "SPLIT-FUNC", "target": target,
+                            "cc": f["cc"], "fan_out": f["fan_out"],
+                            "reason": f"CC={f['cc']} exceeds {CC_SPLIT_THRESHOLD}",
+                            "effort": "~1h"})
     for ht in ctx["hub_types"][:3]:
         if ht["consumers"] >= 20:
-            actions.append(
-                {
-                    "priority": "medium",
-                    "action": "INTERFACE-SPLIT",
-                    "target": ht["type"],
-                    "consumers": ht["consumers"],
-                    "reason": f"Hub type with {ht['consumers']} consumers",
-                    "effort": "~6h",
-                }
-            )
-
+            actions.append({"priority": "medium", "action": "INTERFACE-SPLIT",
+                            "target": ht["type"], "consumers": ht["consumers"],
+                            "reason": f"Hub type with {ht['consumers']} consumers",
+                            "effort": "~6h"})
     actions.sort(key=lambda x: x.get("priority", "") == "critical", reverse=True)
+    return actions
 
-    # Build risks
+
+def _build_risks(ctx: dict) -> list:
+    """Build list of risk dicts from god modules and hub types."""
     risks = []
     for gm in ctx["god_modules"][:3]:
-        risks.append(
-            {
-                "type": "breaking_imports",
-                "target": gm["file"],
-                "impact": f"may break {gm['funcs']} import paths",
-            }
-        )
+        risks.append({"type": "breaking_imports", "target": gm["file"],
+                      "impact": f"may break {gm['funcs']} import paths"})
     for ht in ctx["hub_types"][:2]:
         if ht["consumers"] >= 20:
-            risks.append(
-                {
-                    "type": "api_change",
-                    "target": ht["type"],
-                    "impact": f"changes API for {ht['consumers']} consumers",
-                }
-            )
+            risks.append({"type": "api_change", "target": ht["type"],
+                          "impact": f"changes API for {ht['consumers']} consumers"})
+    return risks
 
+
+def export_to_yaml(result: AnalysisResult, output_path: str) -> None:
+    """Generate evolution.toon.yaml (structured YAML)."""
     from datetime import datetime
-
+    ctx = build_context(result)
+    actions = _build_refactoring_actions(ctx)
+    risks = _build_risks(ctx)
     data = {
         "format": "evolution-toon-yaml",
         "timestamp": datetime.now().strftime("%Y-%m-%d"),

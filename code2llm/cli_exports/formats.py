@@ -219,6 +219,23 @@ def _export_project_yaml_bundle(args, result, output_dir: Path) -> None:
             print(f"    - {issue}", file=sys.stderr)
 
 
+def _try_subprocess_png_fallback(output_dir: Path, verbose: bool) -> None:
+    """Attempt PNG generation via subprocess mermaid_to_png.py script."""
+    try:
+        import subprocess
+        script_path = Path(__file__).parent.parent.parent / "mermaid_to_png.py"
+        if script_path.exists():
+            png_result = subprocess.run(
+                ["python", str(script_path), "--batch", str(output_dir), str(output_dir)],
+                capture_output=True, text=True, timeout=60,
+            )
+            if png_result.returncode == 0 and verbose:
+                print(f"  - PNG: {output_dir / '*.png'}")
+    except Exception:
+        if verbose:
+            print("  - PNG: Skipped (install with: make install-mermaid)")
+
+
 def _export_mermaid_pngs(args, output_dir: Path) -> None:
     """Attempt PNG generation from .mmd files, with graceful fallback."""
     if args.no_png:
@@ -227,33 +244,11 @@ def _export_mermaid_pngs(args, output_dir: Path) -> None:
         return
     try:
         from ..generators.mermaid import generate_pngs
-
         png_count = generate_pngs(output_dir, output_dir)
         if args.verbose and png_count > 0:
             print(f"  - PNG: {png_count} files generated")
     except ImportError:
-        try:
-            import subprocess
-
-            script_path = Path(__file__).parent.parent.parent / "mermaid_to_png.py"
-            if script_path.exists():
-                png_result = subprocess.run(
-                    [
-                        "python",
-                        str(script_path),
-                        "--batch",
-                        str(output_dir),
-                        str(output_dir),
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=60,
-                )
-                if png_result.returncode == 0 and args.verbose:
-                    print(f"  - PNG: {output_dir / '*.png'}")
-        except Exception:
-            if args.verbose:
-                print("  - PNG: Skipped (install with: make install-mermaid)")
+        _try_subprocess_png_fallback(output_dir, args.verbose)
 
 
 def _export_calls_format(args, result, output_dir: Path, toon: bool = False) -> None:

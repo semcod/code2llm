@@ -122,21 +122,32 @@ class FlowRenderer:
                 lines.append("      - (analyze consumers to suggest sub-interfaces)")
 
     @staticmethod
+    def _count_type_sources(type_info: dict) -> tuple:
+        """Return (n_annotated, n_inferred) counts from type_info values."""
+        n_annotated = sum(1 for ti in type_info.values() if ti.get("source") == "annotation")
+        n_inferred = sum(1 for ti in type_info.values() if ti.get("source") == "inferred")
+        return n_annotated, n_inferred
+
+    @staticmethod
+    def _render_type_rows(types: list, lines: list) -> None:
+        """Append one line per type entry to lines."""
+        for t in types:
+            label = f"  {t['label']}" if t["label"] else ""
+            lines.append(f"  {t['type']:<20s} consumed:{t['consumed']:<3} produced:{t['produced']:<3}{label}")
+
+    @staticmethod
     def render_data_types(ctx: Dict[str, Any]) -> List[str]:
         """Renderuj sekcję DATA_TYPES."""
         types = ctx["type_usage"]
         if not types:
             return ["DATA_TYPES: no type information available"]
         type_info = ctx.get("type_info", {})
-        n_annotated = sum(1 for ti in type_info.values() if ti.get("source") == "annotation")
-        n_inferred = sum(1 for ti in type_info.values() if ti.get("source") == "inferred")
+        n_annotated, n_inferred = FlowRenderer._count_type_sources(type_info)
         lines = [
             f"DATA_TYPES (by cross-function usage)"
             f" [{n_annotated} annotated, {n_inferred} inferred / {len(type_info)} functions]:"
         ]
-        for t in types:
-            label = f"  {t['label']}" if t["label"] else ""
-            lines.append(f"  {t['type']:<20s} consumed:{t['consumed']:<3} produced:{t['produced']:<3}{label}")
+        FlowRenderer._render_type_rows(types, lines)
         hubs = [t for t in types if t["consumed"] >= HUB_TYPE_THRESHOLD]
         if hubs:
             FlowRenderer._render_hub_types(hubs, lines)
