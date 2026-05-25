@@ -1,5 +1,5 @@
-# code2llm | 169f 26899L | python:164,md:2,yaml:1 | 2026-05-25
-# generated in 0.07s
+# code2llm | 169f 26986L | python:164,md:2,yaml:1 | 2026-05-25
+# generated in 0.06s
 # CC̅=4.0 | critical:0/1067 | dups:0 | cycles:0
 
 HEALTH[0]: ok
@@ -110,9 +110,9 @@ PIPELINES[588]:
 
 LAYERS:
   cli_exports/                    CC̄=4.6    ←in:4  →out:11  !! split
-  │ !! prompt                     590L  0C   19m  CC=9      ←2
+  │ !! prompt                     629L  0C   19m  CC=9      ←2
   │ orchestrator               404L  0C   19m  CC=10     ←4
-  │ formats                    374L  0C   18m  CC=8      ←4
+  │ formats                    375L  0C   18m  CC=8      ←4
   │ orchestrator_handlers      184L  0C    8m  CC=6      ←0
   │ code2logic                 142L  0C    8m  CC=6      ←2
   │ orchestrator_chunked        94L  0C    3m  CC=9      ←0
@@ -167,7 +167,7 @@ LAYERS:
   │ modules                    152L  0C    8m  CC=9      ←1
   │ scanner                    133L  1C    7m  CC=5      ←0
   │ metrics_health             123L  1C    6m  CC=7      ←0
-  │ yaml_export                118L  0C    5m  CC=8      ←0
+  │ yaml_export                121L  0C    5m  CC=8      ←0
   │ validate_project           114L  0C    4m  CC=9      ←1
   │ core                       113L  1C    4m  CC=9      ←0
   │ hotspots                   112L  0C    7m  CC=7      ←2
@@ -222,15 +222,15 @@ LAYERS:
   │ __main__                     6L  0C    0m  CC=0.0    ←0
   │
   analysis/                       CC̄=3.9    ←in:2  →out:7
-  │ _data_impl                 392L  0C   21m  CC=9      ←1
+  │ _data_impl                 396L  0C   21m  CC=9      ←1
   │ side_effects               365L  2C   17m  CC=8      ←0
   │ pipeline_detector          355L  3C   10m  CC=8      ←0
   │ type_inference             304L  1C   17m  CC=9      ←0
   │ cfg                        285L  1C   16m  CC=5      ←0
+  │ smells                     250L  1C    9m  CC=7      ←0
   │ dfg                        242L  1C   12m  CC=7      ←0
-  │ smells                     225L  1C    9m  CC=7      ←0
   │ call_graph                 208L  1C   12m  CC=9      ←0
-  │ data_analysis              177L  3C   14m  CC=8      ←0
+  │ data_analysis              176L  3C   14m  CC=8      ←0
   │ pipeline_classifier        132L  1C    5m  CC=8      ←0
   │ pipeline_resolver           92L  1C    5m  CC=10     ←1
   │ ast_helpers                 87L  0C    5m  CC=8      ←5
@@ -239,13 +239,13 @@ LAYERS:
   │ __init__                    17L  0C    0m  CC=0.0    ←0
   │
   core/                           CC̄=3.9    ←in:9  →out:9  !! split
-  │ !! analyzer                   594L  1C   25m  CC=10     ←0
+  │ !! analyzer                   593L  1C   25m  CC=10     ←0
   │ !! large_repo                 552L  2C   20m  CC=9      ←1
   │ !! file_analyzer              532L  1C   21m  CC=10     ←0
   │ persistent_cache           462L  1C   22m  CC=10     ←1
+  │ _c_parser                  416L  0C   10m  CC=10     ←4
   │ config                     398L  6C    3m  CC=3      ←0
-  │ _c_parser                  396L  0C   10m  CC=10     ←4
-  │ toon_size_manager          278L  0C    8m  CC=10     ←1
+  │ toon_size_manager          280L  0C    8m  CC=10     ←1
   │ source_classifier          250L  0C    7m  CC=9      ←5
   │ refactoring                233L  1C   11m  CC=9      ←0
   │ repo_files                 215L  0C    8m  CC=8      ←1
@@ -254,7 +254,7 @@ LAYERS:
   │ scanner                    207L  1C    8m  CC=10     ←0
   │ file_filter                187L  1C    9m  CC=9      ←0
   │ __init__                   171L  1C    5m  CC=1      ←0
-  │ streaming_analyzer         165L  1C    8m  CC=8      ←0
+  │ streaming_analyzer         163L  1C    8m  CC=8      ←0
   │ ts_parser                  163L  1C    9m  CC=7      ←2
   │ export_pipeline            162L  2C    5m  CC=4      ←0
   │ ruby                       153L  1C    8m  CC=9      ←1
@@ -273,7 +273,7 @@ LAYERS:
   │ typescript                  71L  0C    3m  CC=1      ←1
   │ strategies                  69L  1C    0m  CC=0.0    ←0
   │ __init__                    65L  0C    1m  CC=6      ←0
-  │ base                        62L  0C    1m  CC=5      ←3
+  │ base                        60L  0C    1m  CC=5      ←3
   │ java                        58L  0C    1m  CC=1      ←1
   │ csharp                      57L  0C    1m  CC=1      ←1
   │ cache                       52L  1C    5m  CC=4      ←0
@@ -284,7 +284,7 @@ LAYERS:
   │ toon_parser                147L  0C   10m  CC=8      ←0
   │
   refactor/                       CC̄=3.5    ←in:0  →out:0
-  │ prompt_engine              185L  1C   11m  CC=5      ←0
+  │ prompt_engine              184L  1C   11m  CC=5      ←0
   │ __init__                     0L  0C    0m  CC=0.0    ←0
   │
   nlp/                            CC̄=2.7    ←in:0  →out:0
@@ -323,22 +323,22 @@ COUPLING:
         exporters.readme                      ←6                                                                                                                                                                                                                                                                                                                      ──                          hub
             cli_analysis                                                                                                                       1                       2                                                                                                                      ←1                                                                                              ──
   CYCLES: none
+  HUB: exporters.readme/ (fan-in=6)
   HUB: core.lang/ (fan-in=9)
-  HUB: cli_commands/ (fan-in=5)
+  HUB: exporters/ (fan-in=63)
   HUB: exporters.mermaid/ (fan-in=15)
   HUB: analysis.utils/ (fan-in=7)
-  HUB: core/ (fan-in=9)
+  HUB: cli_commands/ (fan-in=5)
   HUB: exporters.evolution/ (fan-in=7)
-  HUB: exporters.readme/ (fan-in=6)
-  HUB: exporters/ (fan-in=63)
-  SMELL: exporters.mermaid/ fan-out=15 → split needed
-  SMELL: cli_exports/ fan-out=11 → split needed
+  HUB: core/ (fan-in=9)
   SMELL: cli/ fan-out=8 → split needed
   SMELL: exporters.toon/ fan-out=17 → split needed
-  SMELL: core/ fan-out=9 → split needed
+  SMELL: cli_exports/ fan-out=11 → split needed
   SMELL: exporters/ fan-out=32 → split needed
-  SMELL: exporters.map/ fan-out=11 → split needed
+  SMELL: exporters.mermaid/ fan-out=15 → split needed
+  SMELL: core/ fan-out=9 → split needed
   SMELL: exporters.project_yaml/ fan-out=17 → split needed
+  SMELL: exporters.map/ fan-out=11 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

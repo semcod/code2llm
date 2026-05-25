@@ -1,22 +1,22 @@
-# code2llm | 427f 53933L | yaml:12,json:1,shell:4,md:44,python:348,txt:2,toml:2,yml:3,php:2,typescript:1,conf:1,java:2,go:1,rust:1,javascript:1,ruby:1 | 2026-05-25
-# generated in 0.04s
+# code2llm | 427f 54060L | yaml:12,json:1,shell:4,md:44,python:348,txt:2,toml:2,yml:3,php:2,typescript:1,conf:1,java:2,go:1,rust:1,javascript:1,ruby:1 | 2026-05-25
+# generated in 0.03s
 # stats: 1312 func | 0 cls | 427 mod | CC̄=3.7 | critical:0 | cycles:0
 # alerts[5]: fan-out analyze_rust=24; fan-out _analyze_go_regex=20; fan-out run_benchmark=18; fan-out NLPPipeline.process=17; fan-out _export_mermaid=17
 # hotspots[5]: analyze_rust fan=24; _analyze_go_regex fan=20; run_benchmark fan=18; NLPPipeline.process fan=17; _export_mermaid fan=17
-# evolution: CC̄ 4.2→3.7 (improved -0.5)
+# evolution: CC̄ 3.9→3.7 (improved -0.2)
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
 M[427]:
-  code2llm/analysis/_data_impl.py,392
+  code2llm/analysis/_data_impl.py,396
   code2llm/analysis/call_graph.py,208
   code2llm/analysis/cfg.py,285
   code2llm/analysis/coupling.py,79
-  code2llm/analysis/data_analysis.py,177
+  code2llm/analysis/data_analysis.py,176
   code2llm/analysis/dfg.py,242
   code2llm/analysis/pipeline_classifier.py,132
   code2llm/analysis/pipeline_detector.py,355
   code2llm/analysis/pipeline_resolver.py,92
   code2llm/analysis/side_effects.py,365
-  code2llm/analysis/smells.py,225
+  code2llm/analysis/smells.py,250
   code2llm/analysis/type_inference.py,304
   code2llm/analysis/utils/__init__.py,17
   code2llm/analysis/utils/ast_helpers.py,87
@@ -30,25 +30,25 @@ M[427]:
   benchmarks/project_generator.py,235
   benchmarks/reporting.py,191
   code2llm/cli_exports/code2logic.py,142
-  code2llm/cli_exports/formats.py,374
+  code2llm/cli_exports/formats.py,375
   code2llm/cli_exports/orchestrator.py,404
   code2llm/cli_exports/orchestrator_chunked.py,94
   code2llm/cli_exports/orchestrator_constants.py,55
   code2llm/cli_exports/orchestrator_handlers.py,184
-  code2llm/cli_exports/prompt.py,590
+  code2llm/cli_exports/prompt.py,629
   code2llm/__main__.py,6
   code2llm/analysis/__init__.py,38
-  code2llm/analysis/_data_impl.py,392
+  code2llm/analysis/_data_impl.py,396
   code2llm/analysis/call_graph.py,208
   code2llm/analysis/cfg.py,285
   code2llm/analysis/coupling.py,79
-  code2llm/analysis/data_analysis.py,177
+  code2llm/analysis/data_analysis.py,176
   code2llm/analysis/dfg.py,242
   code2llm/analysis/pipeline_classifier.py,132
   code2llm/analysis/pipeline_detector.py,355
   code2llm/analysis/pipeline_resolver.py,92
   code2llm/analysis/side_effects.py,365
-  code2llm/analysis/smells.py,225
+  code2llm/analysis/smells.py,250
   code2llm/analysis/type_inference.py,304
   code2llm/analysis/utils/__init__.py,17
   code2llm/analysis/utils/ast_helpers.py,87
@@ -58,15 +58,15 @@ M[427]:
   code2llm/cli_commands.py,335
   code2llm/cli_exports/__init__.py,54
   code2llm/cli_exports/code2logic.py,142
-  code2llm/cli_exports/formats.py,374
+  code2llm/cli_exports/formats.py,375
   code2llm/cli_exports/orchestrator.py,404
   code2llm/cli_exports/orchestrator_chunked.py,94
   code2llm/cli_exports/orchestrator_constants.py,55
   code2llm/cli_exports/orchestrator_handlers.py,184
-  code2llm/cli_exports/prompt.py,590
+  code2llm/cli_exports/prompt.py,629
   code2llm/cli_parser.py,354
   code2llm/core/__init__.py,65
-  code2llm/core/analyzer.py,594
+  code2llm/core/analyzer.py,593
   code2llm/core/ast_registry.py,102
   code2llm/core/config.py,398
   code2llm/core/export_pipeline.py,162
@@ -76,10 +76,10 @@ M[427]:
   code2llm/core/gitignore.py,147
   code2llm/core/incremental.py,150
   code2llm/core/lang/__init__.py,171
-  code2llm/core/lang/_c_parser.py,396
+  code2llm/core/lang/_c_parser.py,416
   code2llm/core/lang/_calls.py,96
   code2llm/core/lang/_complexity.py,73
-  code2llm/core/lang/base.py,62
+  code2llm/core/lang/base.py,60
   code2llm/core/lang/cpp.py,41
   code2llm/core/lang/csharp.py,57
   code2llm/core/lang/generic.py,71
@@ -103,8 +103,8 @@ M[427]:
   code2llm/core/streaming/prioritizer.py,133
   code2llm/core/streaming/scanner.py,207
   code2llm/core/streaming/strategies.py,69
-  code2llm/core/streaming_analyzer.py,165
-  code2llm/core/toon_size_manager.py,278
+  code2llm/core/streaming_analyzer.py,163
+  code2llm/core/toon_size_manager.py,280
   code2llm/exporters/__init__.py,86
   code2llm/exporters/article_view.py,176
   code2llm/exporters/base.py,174
@@ -134,7 +134,7 @@ M[427]:
   code2llm/exporters/map/header.py,81
   code2llm/exporters/map/module_list.py,26
   code2llm/exporters/map/utils.py,74
-  code2llm/exporters/map/yaml_export.py,118
+  code2llm/exporters/map/yaml_export.py,121
   code2llm/exporters/map_exporter.py,53
   code2llm/exporters/mermaid/__init__.py,66
   code2llm/exporters/mermaid/calls.py,70
@@ -199,10 +199,10 @@ M[427]:
   code2llm/parsers/toon_parser.py,147
   code2llm/patterns/detector.py,187
   code2llm/refactor/__init__.py,0
-  code2llm/refactor/prompt_engine.py,185
+  code2llm/refactor/prompt_engine.py,184
   code2llm/templates/extract_method.md,22
   code2llm/templates/move_method.md,19
-  code2llm/core/analyzer.py,594
+  code2llm/core/analyzer.py,593
   code2llm/core/ast_registry.py,102
   code2llm/core/config.py,398
   code2llm/core/export_pipeline.py,162
@@ -212,10 +212,10 @@ M[427]:
   code2llm/core/gitignore.py,147
   code2llm/core/incremental.py,150
   code2llm/core/lang/__init__.py,171
-  code2llm/core/lang/_c_parser.py,396
+  code2llm/core/lang/_c_parser.py,416
   code2llm/core/lang/_calls.py,96
   code2llm/core/lang/_complexity.py,73
-  code2llm/core/lang/base.py,62
+  code2llm/core/lang/base.py,60
   code2llm/core/lang/cpp.py,41
   code2llm/core/lang/csharp.py,57
   code2llm/core/lang/generic.py,71
@@ -239,8 +239,8 @@ M[427]:
   code2llm/core/streaming/prioritizer.py,133
   code2llm/core/streaming/scanner.py,207
   code2llm/core/streaming/strategies.py,69
-  code2llm/core/streaming_analyzer.py,165
-  code2llm/core/toon_size_manager.py,278
+  code2llm/core/streaming_analyzer.py,163
+  code2llm/core/toon_size_manager.py,280
   demo_langs/valid/sample.java,47
   docs/API.md,396
   docs/COMPARISON_AND_OPTIMIZATION.md,478
@@ -316,7 +316,7 @@ M[427]:
   code2llm/exporters/map/header.py,81
   code2llm/exporters/map/module_list.py,26
   code2llm/exporters/map/utils.py,74
-  code2llm/exporters/map/yaml_export.py,118
+  code2llm/exporters/map/yaml_export.py,121
   code2llm/exporters/map_exporter.py,53
   code2llm/exporters/mermaid/__init__.py,66
   code2llm/exporters/mermaid/calls.py,70
@@ -381,8 +381,8 @@ M[427]:
   project_calls_test/context.md,51
   redsl_refactor_plan.toon.yaml,18
   redsl_refactor_report.toon.yaml,21
-  code2llm/refactor/prompt_engine.py,185
-  CHANGELOG.md,3155
+  code2llm/refactor/prompt_engine.py,184
+  CHANGELOG.md,3195
   Makefile,252
   REFACTORING_PLAN.md,225
   ROADMAP.md,332
