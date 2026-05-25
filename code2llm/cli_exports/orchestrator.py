@@ -354,6 +354,26 @@ def _export_chunked(
     _chunked_impl(args, result, output_dir, source_path, formats, requested_formats)
 
 
+# Maps suffix(es) → (prefix, suffix_str) for inserting after line 1.
+# None = skip (no comment possible). "html" handled separately.
+_COMMENT_PREFIXES = {
+    ".mmd": ("%%", ""),
+    ".export": ("%%", ""),
+    ".yaml": ("#", ""),
+    ".yml": ("#", ""),
+    ".txt": ("#", ""),
+    ".md": ("<!--", " -->"),
+}
+_SKIP_SUFFIXES = {".json"}
+
+
+def _insert_after_first_line(content: str, tag: str, pre: str, suf: str) -> str:
+    """Return content with a comment line inserted after the first newline."""
+    parts = content.split("\n", 1)
+    rest = parts[1] if len(parts) == 2 else ""
+    return f"{parts[0]}\n{pre} {tag}{suf}\n{rest}"
+
+
 def _inject_generation_time(filepath: Path, elapsed: float) -> None:
     """Inject generation time comment into the second line of an exported file."""
     try:
@@ -361,58 +381,22 @@ def _inject_generation_time(filepath: Path, elapsed: float) -> None:
         if not path.exists():
             return
         suffix = path.suffix.lower()
-        name = path.name.lower()
-
-        # Only inject into text-based files
-        if suffix not in (
-            ".yaml",
-            ".yml",
-            ".md",
-            ".txt",
-            ".mmd",
-            ".html",
-            ".json",
-            ".export",
-        ):
-            return
-
-        content = path.read_text(encoding="utf-8")
-        if not content:
-            return
-
         tag = f"generated in {elapsed:.2f}s"
 
-        if suffix in (".mmd", ".export"):
-            # Mermaid uses %% for comments
-            lines = content.split("\n", 1)
-            if len(lines) == 2:
-                content = f"{lines[0]}\n%% {tag}\n{lines[1]}"
-            else:
-                content = f"{lines[0]}\n%% {tag}\n"
-        elif suffix in (".yaml", ".yml", ".txt") or name.endswith(".toon.yaml"):
-            # YAML/text: insert '# generated in X.XXs' after first line
-            lines = content.split("\n", 1)
-            if len(lines) == 2:
-                content = f"{lines[0]}\n# {tag}\n{lines[1]}"
-            else:
-                content = f"{lines[0]}\n# {tag}\n"
-        elif suffix == ".md":
-            # Markdown: insert HTML comment after first line
-            lines = content.split("\n", 1)
-            if len(lines) == 2:
-                content = f"{lines[0]}\n<!-- {tag} -->\n{lines[1]}"
-            else:
-                content = f"{lines[0]}\n<!-- {tag} -->\n"
-        elif suffix == ".html":
-            # HTML: insert comment after <!DOCTYPE or <html>
-            content = content.replace("\n", f"\n<!-- {tag} -->\n", 1)
-        elif suffix == ".json":
-            # JSON doesn't support comments — skip
+        if suffix in _SKIP_SUFFIXES:
             return
-        else:
+        if suffix == ".html":
+            path.write_text(
+                path.read_text(encoding="utf-8").replace("\n", f"\n<!-- {tag} -->\n", 1),
+                encoding="utf-8",
+            )
             return
-
-        path.write_text(content, encoding="utf-8")
+        pre, suf_str = _COMMENT_PREFIXES.get(suffix, (None, None))
+        if pre is None:
+            return
+        content = path.read_text(encoding="utf-8")
+        if content:
+            path.write_text(_insert_after_first_line(content, tag, pre, suf_str), encoding="utf-8")
     except Exception:
         pass  # Never fail the export pipeline for a comment
 

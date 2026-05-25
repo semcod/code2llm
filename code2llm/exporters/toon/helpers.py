@@ -93,78 +93,58 @@ def _hotspot_description(fi: FunctionInfo, fan_out: int) -> str:
     return f"calls {fan_out} functions"
 
 
+_WALK_EXCLUDE = {"venv", ".venv", "node_modules", "__pycache__", ".git", "dist", "build", ".tox", ".mypy_cache", "egg-info"}
+
+
+def _fast_line_counts(pp: Path, result) -> Dict[str, int]:
+    """Derive line counts from already-parsed AnalysisResult modules."""
+    counts: Dict[str, int] = {}
+    for _mname, mi in getattr(result, "modules", {}).items():
+        if not mi.file:
+            continue
+        try:
+            lc = len(Path(mi.file).read_text(encoding="utf-8", errors="ignore").splitlines())
+            counts[mi.file] = lc
+            counts[str(Path(mi.file).relative_to(pp))] = lc
+        except Exception:
+            pass
+    return counts
+
+
+def _slow_line_counts(pp: Path) -> Dict[str, int]:
+    """Scan disk for line counts when AnalysisResult is unavailable."""
+    from ...core.config import ALL_EXTENSIONS
+    ext_set = set(ALL_EXTENSIONS)
+    counts: Dict[str, int] = {}
+    for root, dirs, files in (pp.walk() if hasattr(pp, "walk") else _walk_compat(pp)):
+        dirs[:] = [d for d in dirs if d not in _WALK_EXCLUDE]
+        for fname in files:
+            if Path(fname).suffix not in ext_set:
+                continue
+            src = root / fname
+            try:
+                lc = len(src.read_text(encoding="utf-8", errors="ignore").splitlines())
+                counts[str(src)] = lc
+                counts[str(src.relative_to(pp))] = lc
+            except Exception:
+                pass
+    return counts
+
+
 def _scan_line_counts(project_path, result=None) -> Dict[str, int]:
     """Get line counts for project files.
 
     Fast path: derive from AnalysisResult modules (already parsed, no extra I/O).
     Slow fallback: single os.walk pass reading files from disk.
     """
-    line_counts: Dict[str, int] = {}
     if not project_path:
-        return line_counts
+        return {}
     pp = Path(project_path)
     if not pp.is_dir():
-        return line_counts
-
-    # Fast path: use already-analyzed file data when available
+        return {}
     if result is not None:
-        for mname, mi in getattr(result, "modules", {}).items():
-            fpath = mi.file
-            if not fpath:
-                continue
-            try:
-                lc = len(
-                    Path(fpath)
-                    .read_text(encoding="utf-8", errors="ignore")
-                    .splitlines()
-                )
-                rel = str(Path(fpath).relative_to(pp))
-                line_counts[str(fpath)] = lc
-                line_counts[rel] = lc
-            except Exception:
-                pass
-        return line_counts
-
-    # Slow fallback: single walk instead of 73 rglob calls
-    from ...core.config import ALL_EXTENSIONS
-
-    ext_set = set(ALL_EXTENSIONS)
-    for root, dirs, files in (
-        Path(project_path).walk() if hasattr(Path, "walk") else _walk_compat(pp)
-    ):
-        # Prune excluded directories
-        dirs[:] = [
-            d
-            for d in dirs
-            if d
-            not in {
-                "venv",
-                ".venv",
-                "node_modules",
-                "__pycache__",
-                ".git",
-                "dist",
-                "build",
-                ".tox",
-                ".mypy_cache",
-                "egg-info",
-            }
-        ]
-        for fname in files:
-            ext = Path(fname).suffix
-            if ext not in ext_set:
-                continue
-            src_file = root / fname
-            try:
-                lc = len(
-                    src_file.read_text(encoding="utf-8", errors="ignore").splitlines()
-                )
-                rel = str(src_file.relative_to(pp))
-                line_counts[str(src_file)] = lc
-                line_counts[rel] = lc
-            except Exception:
-                pass
-    return line_counts
+        return _fast_line_counts(pp, result)
+    return _slow_line_counts(pp)
 
 
 def _walk_compat(path):

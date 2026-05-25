@@ -47,57 +47,49 @@ def build_health(result: AnalysisResult, modules: List[Dict]) -> Dict[str, Any]:
     }
 
 
+def _severity_for(value: int, severe: int, error: int) -> str:
+    """Return 'critical', 'error', or 'warning' based on thresholds."""
+    if value >= severe:
+        return "critical"
+    if value >= error:
+        return "error"
+    return "warning"
+
+
+def _display_name(fi) -> str:
+    """Return qualified display name for a function."""
+    return f"{fi.class_name}.{fi.name}" if fi.class_name else fi.name
+
+
 def build_alerts(result: AnalysisResult) -> List[Dict[str, Any]]:
     """Build list of health alerts for high CC and high fan-out."""
     alerts = []
-    for qname, fi in result.functions.items():
+    for _qname, fi in result.functions.items():
         if _is_excluded(fi.file):
             continue
         cc = fi.complexity.get("cyclomatic_complexity", 0)
         if cc >= CC_WARNING:
-            display = fi.name
-            if fi.class_name:
-                display = f"{fi.class_name}.{fi.name}"
-            if cc >= CC_SEVERE:
-                severity = "critical"
-            elif cc >= CC_ERROR:
-                severity = "error"
-            else:
-                severity = "warning"
-            alerts.append(
-                {
-                    "type": "cc_exceeded",
-                    "target": display,
-                    "value": cc,
-                    "limit": CC_WARNING,
-                    "severity": severity,
-                }
-            )
+            alerts.append({
+                "type": "cc_exceeded",
+                "target": _display_name(fi),
+                "value": cc,
+                "limit": CC_WARNING,
+                "severity": _severity_for(cc, CC_SEVERE, CC_ERROR),
+            })
 
     fan_alerts = []
-    for qname, fi in result.functions.items():
+    for _qname, fi in result.functions.items():
         if _is_excluded(fi.file):
             continue
         fan_out = len(set(fi.calls))
         if fan_out >= FAN_OUT_THRESHOLD:
-            display = fi.name
-            if fi.class_name:
-                display = f"{fi.class_name}.{fi.name}"
-            if fan_out >= FAN_OUT_SEVERE:
-                severity = "critical"
-            elif fan_out >= FAN_OUT_ERROR:
-                severity = "error"
-            else:
-                severity = "warning"
-            fan_alerts.append(
-                {
-                    "type": "high_fan_out",
-                    "target": display,
-                    "value": fan_out,
-                    "limit": FAN_OUT_THRESHOLD,
-                    "severity": severity,
-                }
-            )
+            fan_alerts.append({
+                "type": "high_fan_out",
+                "target": _display_name(fi),
+                "value": fan_out,
+                "limit": FAN_OUT_THRESHOLD,
+                "severity": _severity_for(fan_out, FAN_OUT_SEVERE, FAN_OUT_ERROR),
+            })
 
     # Sort alerts by severity (critical first), then by value desc
     sev_order = {"critical": 0, "error": 1, "warning": 2, "info": 3}

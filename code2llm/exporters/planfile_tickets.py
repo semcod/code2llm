@@ -336,12 +336,23 @@ def _default_runner(
     )
 
 
+def _parse_ticket_title(entry: object) -> str | None:
+    """Return the title of an open ticket entry, or None to skip."""
+    if not isinstance(entry, dict):
+        return None
+    if str(entry.get("status") or "").lower() in _TERMINAL_STATUSES:
+        return None
+    title = entry.get("name") or entry.get("title")
+    return title if isinstance(title, str) and title else None
+
+
 def _existing_planfile_titles(
     project_root: Path,
     *,
     source: str,
     runner: Runner,
 ) -> set[str]:
+    """Return titles of non-terminal tickets from the planfile CLI."""
     try:
         result = runner(
             ["planfile", "ticket", "list", "--source", source, "--format", "json"],
@@ -357,14 +368,4 @@ def _existing_planfile_titles(
         return set()
     if not isinstance(payload, list):
         return set()
-    titles: set[str] = set()
-    for entry in payload:
-        if not isinstance(entry, dict):
-            continue
-        status = str(entry.get("status") or "").lower()
-        if status in _TERMINAL_STATUSES:
-            continue
-        title = entry.get("name") or entry.get("title")
-        if isinstance(title, str) and title:
-            titles.add(title)
-    return titles
+    return {t for entry in payload if (t := _parse_ticket_title(entry))}

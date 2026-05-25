@@ -33,42 +33,34 @@ def _rank_modules(result: AnalysisResult, is_excluded_path):
     return mod_items
 
 
+def _collect_module_exports(result, mi) -> List[str]:
+    """Return sorted list of exported class/function names for a module."""
+    exports = [result.classes[cq].name for cq in mi.classes if cq in result.classes]
+    exports += [
+        result.functions[fq].name
+        for fq in mi.functions
+        if fq in result.functions and not result.functions[fq].class_name
+    ]
+    return exports
+
+
 def _render_map_module(result, mi, lines, is_excluded_path):
     """Render a single module's detail: imports, exports, classes, funcs."""
     rel = rel_path(mi.file, result.project_path)
     lines.append(f"  {rel}:")
-
-    # imports
     if mi.imports:
-        imp_str = ",".join(sorted(mi.imports))
-        lines.append(f"    i: {imp_str}")
-
-    # exports
-    exports = []
+        lines.append(f"    i: {','.join(sorted(mi.imports))}")
+    exports = _collect_module_exports(result, mi)
+    if exports:
+        lines.append(f"    e: {','.join(exports)}")
     for cq in mi.classes:
         ci = result.classes.get(cq)
         if ci:
-            exports.append(ci.name)
+            _render_map_class(result, ci, lines)
     for fq in mi.functions:
         fi = result.functions.get(fq)
         if fi and not fi.class_name:
-            exports.append(fi.name)
-    if exports:
-        lines.append(f"    e: {','.join(exports)}")
-
-    # classes with method signatures
-    for cq in mi.classes:
-        ci = result.classes.get(cq)
-        if not ci:
-            continue
-        _render_map_class(result, ci, lines)
-
-    # standalone functions
-    for fq in mi.functions:
-        fi = result.functions.get(fq)
-        if fi and not fi.class_name:
-            sig = _function_signature(fi)
-            lines.append(f"    {sig}")
+            lines.append(f"    {_function_signature(fi)}")
 
 
 def _render_map_class(result, ci, lines):

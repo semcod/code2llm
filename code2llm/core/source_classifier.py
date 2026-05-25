@@ -194,6 +194,17 @@ def _has_code2llm_output_manifest(path: Path) -> bool:
     )
 
 
+def _is_generated_by_name(name: str, p: Path) -> bool:
+    """Return True when the file name alone marks it as a generated artefact."""
+    if name in GENERATED_EXACT_FILENAMES:
+        return True
+    if any(name.startswith(prefix) for prefix in GENERATED_PREFIXES):
+        return True
+    if name in GENERATED_SNIFF_FILENAMES and _looks_like_generated_content(p):
+        return True
+    return False
+
+
 def is_generated_artifact(
     path: str | Path, project_root: Optional[Path] = None
 ) -> bool:
@@ -204,29 +215,14 @@ def is_generated_artifact(
         return True
 
     if project_root:
-        rel_parts = parts[:-1]
-        for idx, part in enumerate(rel_parts):
-            if part != "project":
-                continue
-            candidate = Path(project_root).joinpath(*parts[: idx + 1])
-            if _has_code2llm_output_manifest(candidate):
+        for idx, part in enumerate(parts[:-1]):
+            if part == "project" and _has_code2llm_output_manifest(
+                Path(project_root).joinpath(*parts[: idx + 1])
+            ):
                 return True
 
     name = p.name.lower()
-    if name in GENERATED_EXACT_FILENAMES:
-        return True
-    if any(name.startswith(prefix) for prefix in GENERATED_PREFIXES):
-        return True
-    if name in GENERATED_SNIFF_FILENAMES and _looks_like_generated_content(p):
-        return True
-
-    # The default code2llm output folder is commonly named "project". Avoid
-    # treating arbitrary project/ directories as generated unless the filename
-    # itself is a known code2llm artefact.
-    if "project" in parts[:-1] and name in GENERATED_EXACT_FILENAMES:
-        return True
-
-    return False
+    return _is_generated_by_name(name, p)
 
 
 def classify_source_path(path: str | Path, project_root: Optional[Path] = None) -> str:

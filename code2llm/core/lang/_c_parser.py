@@ -149,23 +149,20 @@ def _process_standalone_function(
 def _match_method_name(arrow_prop_re, method_re, func_re, line, reserved):
     """Return matched method name from any of the three patterns, or None."""
     if arrow_prop_re:
-        apm = arrow_prop_re.match(line)
-        if apm:
-            mname = apm.group(1)
-            if mname not in reserved and mname != "constructor":
-                return mname
-    if method_re:
-        mm = method_re.match(line)
-        if mm:
-            mname = mm.group(1)
-            if mname not in reserved:
-                return mname
-    if func_re:
-        fm = func_re.match(line)
-        if fm:
-            fn = fm.group(1) or (fm.group(2) if len(fm.groups()) > 1 else None)
-            if fn and fn not in reserved:
-                return fn
+        m = arrow_prop_re.match(line)
+        if m:
+            name = m.group(1)
+            if name not in reserved and name != "constructor":
+                return name
+    for regex in (method_re, func_re):
+        if not regex:
+            continue
+        m = regex.match(line)
+        if not m:
+            continue
+        name = m.group(1) or (m.group(2) if len(m.groups()) > 1 else None)
+        if name and name not in reserved:
+            return name
     return None
 
 

@@ -323,54 +323,31 @@ class SideEffectDetector:
         else:
             info.classification = "pure"
 
+    # word-sets and their target attribute names, in priority order
+    _HEURISTIC_CATEGORIES: List[tuple] = [
+        (
+            "IO",
+            {"write", "read", "open", "save", "load", "export", "dump", "print", "mkdir", "rmdir", "remove"},
+            "io_operations",
+        ),
+        ("cache", {"cache", "memoize", "lru_cache", "store", "fetch"}, "cache_operations"),
+        ("mutation", {"set_", "update", "modify", "mutate", "append", "insert", "delete", "fix", "patch"}, "mutations"),
+    ]
+
     def _heuristic_classify(self, fi: FunctionInfo, info: SideEffectInfo) -> None:
         """Classify based on function name and calls (fallback)."""
         name_lower = fi.name.lower()
         calls_lower = {c.lower() for c in fi.calls}
-
-        io_words = {
-            "write",
-            "read",
-            "open",
-            "save",
-            "load",
-            "export",
-            "dump",
-            "print",
-            "mkdir",
-            "rmdir",
-            "remove",
-        }
-        cache_words = {"cache", "memoize", "lru_cache", "store", "fetch"}
-        mutation_words = {
-            "set_",
-            "update",
-            "modify",
-            "mutate",
-            "append",
-            "insert",
-            "delete",
-            "fix",
-            "patch",
-        }
-
-        if any(w in name_lower for w in io_words):
-            info.classification = "IO"
-            info.io_operations.append(f"name:{fi.name}")
-        elif any(any(w in c for w in io_words) for c in calls_lower):
-            info.classification = "IO"
-            info.io_operations.append("calls:IO")
-        elif any(w in name_lower for w in cache_words):
-            info.classification = "cache"
-            info.cache_operations.append(f"name:{fi.name}")
-        elif any(any(w in c for w in cache_words) for c in calls_lower):
-            info.classification = "cache"
-            info.cache_operations.append("calls:cache")
-        elif any(w in name_lower for w in mutation_words):
-            info.classification = "mutation"
-            info.mutations.append(f"name:{fi.name}")
-        else:
-            info.classification = "pure"
+        for classification, words, attr in self._HEURISTIC_CATEGORIES:
+            if any(w in name_lower for w in words):
+                info.classification = classification
+                getattr(info, attr).append(f"name:{fi.name}")
+                return
+            if any(any(w in c for w in words) for c in calls_lower):
+                info.classification = classification
+                getattr(info, attr).append(f"calls:{classification}")
+                return
+        info.classification = "pure"
 
     # ------------------------------------------------------------------
     # AST helpers
