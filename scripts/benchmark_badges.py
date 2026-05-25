@@ -24,37 +24,29 @@ def get_shield_url(label: str, message: str, color: str = "blue") -> str:
     return SHIELDS_URL.format(label=label, message=message, color=color)
 
 
+_EVOLUTION_METRIC_PREFIXES = [
+    ("CC̄:", "cc_avg", r"([\d.]+)\s*→"),
+    ("max-CC:", "max_cc", r"(\d+)\s*→"),
+    ("god-modules:", "god_modules", r"(\d+)\s*→"),
+    ("high-CC", "high_cc", r"(\d+)\s*→"),
+    ("hub-types:", "hub_types", r"(\d+)\s*→"),
+]
+
+
 def parse_evolution_metrics(toon_content: str) -> Dict[str, str]:
     """Extract metrics from evolution.toon content."""
     metrics = {}
     for line in toon_content.splitlines():
         line = line.strip()
-        if line.startswith("CC̄:"):
-            m = re.search(r"([\d.]+)\s*→", line)
-            if m:
-                metrics["cc_avg"] = m.group(1)
-        elif line.startswith("max-CC:"):
-            m = re.search(r"(\d+)\s*→", line)
-            if m:
-                metrics["max_cc"] = m.group(1)
-        elif line.startswith("god-modules:"):
-            m = re.search(r"(\d+)\s*→", line)
-            if m:
-                metrics["god_modules"] = m.group(1)
-        elif line.startswith("high-CC"):
-            m = re.search(r"(\d+)\s*→", line)
-            if m:
-                metrics["high_cc"] = m.group(1)
-        elif line.startswith("hub-types:"):
-            m = re.search(r"(\d+)\s*→", line)
-            if m:
-                metrics["hub_types"] = m.group(1)
-
-    # Also extract func count from header
+        for prefix, key, pattern in _EVOLUTION_METRIC_PREFIXES:
+            if line.startswith(prefix):
+                m = re.search(pattern, line)
+                if m:
+                    metrics[key] = m.group(1)
+                break
     m = re.search(r"\| (\d+) func \|", toon_content)
     if m:
         metrics["total_funcs"] = m.group(1)
-
     return metrics
 
 
