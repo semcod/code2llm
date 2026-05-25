@@ -125,7 +125,6 @@ class CFGExtractor(ast.NodeVisitor):
         # Visit then branch
         then_last = []
         for stmt in node.body:
-            prev = self.current_node
             self.current_node = branch_entry
             self.visit(stmt)
             then_last.append(self.current_node)
@@ -136,7 +135,6 @@ class CFGExtractor(ast.NodeVisitor):
         if node.orelse:
             branch_entry = cond_node
             for stmt in node.orelse:
-                prev = self.current_node
                 self.current_node = branch_entry
                 self.visit(stmt)
                 else_last.append(self.current_node)
@@ -270,7 +268,7 @@ class CFGExtractor(ast.NodeVisitor):
         """Extract condition as string."""
         try:
             return ast.unparse(node) if hasattr(ast, "unparse") else str(node)[:50]
-        except:
+        except Exception:
             return str(node)[:50]
 
     def _expr_to_str(self, node: ast.AST) -> str:

@@ -31,6 +31,11 @@ import yaml
 
 from ._utils import dump_yaml
 
+_SEC_RULES_MUST = "RULES (MUST)"
+_SEC_RULES_MUST_NOT = "RULES (MUST NOT)"
+_SEC_EDGE_CASES = "EDGE CASES"
+_SEC_ACCEPTANCE_TESTS = "ACCEPTANCE TESTS"
+
 
 def _strip_bom(text: str) -> str:
     """Strip UTF-8 BOM from the start of text if present."""
@@ -154,10 +159,10 @@ def _parse_sections(lines: List[str]) -> Dict[str, List[str]]:
         "DESIRED",
         "INPUTS",
         "OUTPUTS",
-        "RULES (MUST)",
-        "RULES (MUST NOT)",
-        "EDGE CASES",
-        "ACCEPTANCE TESTS",
+        _SEC_RULES_MUST,
+        _SEC_RULES_MUST_NOT,
+        _SEC_EDGE_CASES,
+        _SEC_ACCEPTANCE_TESTS,
         "DELIVERABLES",
     }
 
@@ -234,20 +239,20 @@ def _apply_bullet_sections(
         data["interfaces"]["inputs"] = _parse_bullets(sections["INPUTS"])
     if sections.get("OUTPUTS"):
         data["interfaces"]["outputs"] = _parse_bullets(sections["OUTPUTS"])
-    if sections.get("RULES (MUST)"):
-        data["rules"]["must"] = _parse_bullets(sections["RULES (MUST)"])
-    if sections.get("RULES (MUST NOT)"):
-        data["rules"]["must_not"] = _parse_bullets(sections["RULES (MUST NOT)"])
-    if sections.get("EDGE CASES"):
-        data["rules"]["edge_cases"] = _parse_bullets(sections["EDGE CASES"])
+    if sections.get(_SEC_RULES_MUST):
+        data["rules"]["must"] = _parse_bullets(sections[_SEC_RULES_MUST])
+    if sections.get(_SEC_RULES_MUST_NOT):
+        data["rules"]["must_not"] = _parse_bullets(sections[_SEC_RULES_MUST_NOT])
+    if sections.get(_SEC_EDGE_CASES):
+        data["rules"]["edge_cases"] = _parse_bullets(sections[_SEC_EDGE_CASES])
 
 
 def _parse_acceptance_tests(sections: Dict[str, List[str]]) -> List[Dict[str, str]]:
     """Parse acceptance tests section into structured format."""
-    if not sections.get("ACCEPTANCE TESTS"):
+    if not sections.get(_SEC_ACCEPTANCE_TESTS):
         return []
     tests: List[Dict[str, str]] = []
-    raw_items = _parse_bullets(sections["ACCEPTANCE TESTS"])
+    raw_items = _parse_bullets(sections[_SEC_ACCEPTANCE_TESTS])
     for idx, item in enumerate(raw_items, 1):
         tests.append({"name": f"test_{idx}", "given": "", "when": "", "then": item})
     return tests
@@ -305,8 +310,8 @@ def _load_yaml(raw: str, path: Path) -> Dict[str, Any]:
     return loaded
 
 
-def _load_json(raw: str, path: Path) -> Dict[str, Any]:
-    """Parse *raw* as JSON with validation tied to *path*."""
+def _load_json(raw: str, _path: Path) -> Dict[str, Any]:
+    """Parse *raw* as JSON; _path is accepted for API consistency but not used directly."""
     import json
 
     loaded = json.loads(raw)

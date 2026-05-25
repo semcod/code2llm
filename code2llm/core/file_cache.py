@@ -39,8 +39,8 @@ class FileCache:
         """Get cache file path."""
         return self.cache_dir / f"{cache_key}.pkl"
 
-    def get(self, file_path: str, content: str) -> Optional[Tuple[ast.AST, str]]:
-        """Get cached AST if available and not expired."""
+    def get(self, file_path: str, _content: str) -> Optional[Tuple[ast.AST, str]]:
+        """Get cached AST if available and not expired; _content accepted for API compat."""
         cache_key = self._get_cache_key_stat(file_path)
         cache_path = self._get_cache_path(cache_key)
 
@@ -59,8 +59,8 @@ class FileCache:
         except Exception:
             return None
 
-    def put(self, file_path: str, content: str, data: Tuple[ast.AST, str]) -> None:
-        """Store AST in cache."""
+    def put(self, file_path: str, _content: str, data: Tuple[ast.AST, str]) -> None:
+        """Store AST in cache; _content accepted for API compatibility."""
         cache_key = self._get_cache_key_stat(file_path)
         cache_path = self._get_cache_path(cache_key)
 
