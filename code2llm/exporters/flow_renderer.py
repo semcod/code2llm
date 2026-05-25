@@ -108,52 +108,38 @@ class FlowRenderer:
         return lines
 
     @staticmethod
+    def _render_hub_types(hubs: list, lines: List[str]) -> None:
+        """Append HUB TYPES split recommendations to lines in-place."""
+        lines.append("")
+        lines.append("  HUB TYPES (consumed ≥10):")
+        for h in hubs:
+            lines.append(f"    {h['type']} → {h['consumed']} consumers → split into:")
+            recs = HUB_SPLIT_RECOMMENDATIONS.get(h["type"], [])
+            if recs:
+                for rec in recs:
+                    lines.append(f"      - {rec}")
+            else:
+                lines.append("      - (analyze consumers to suggest sub-interfaces)")
+
+    @staticmethod
     def render_data_types(ctx: Dict[str, Any]) -> List[str]:
         """Renderuj sekcję DATA_TYPES."""
         types = ctx["type_usage"]
         if not types:
             return ["DATA_TYPES: no type information available"]
-
-        # Count type sources
         type_info = ctx.get("type_info", {})
-        n_annotated = sum(
-            1 for ti in type_info.values() if ti.get("source") == "annotation"
-        )
-        n_inferred = sum(
-            1 for ti in type_info.values() if ti.get("source") == "inferred"
-        )
-        n_total = len(type_info)
-
+        n_annotated = sum(1 for ti in type_info.values() if ti.get("source") == "annotation")
+        n_inferred = sum(1 for ti in type_info.values() if ti.get("source") == "inferred")
         lines = [
             f"DATA_TYPES (by cross-function usage)"
-            f" [{n_annotated} annotated, {n_inferred} inferred"
-            f" / {n_total} functions]:"
+            f" [{n_annotated} annotated, {n_inferred} inferred / {len(type_info)} functions]:"
         ]
         for t in types:
             label = f"  {t['label']}" if t["label"] else ""
-            lines.append(
-                f"  {t['type']:<20s} consumed:{t['consumed']:<3}"
-                f" produced:{t['produced']:<3}{label}"
-            )
-
-        # Hub types summary with split recommendations
+            lines.append(f"  {t['type']:<20s} consumed:{t['consumed']:<3} produced:{t['produced']:<3}{label}")
         hubs = [t for t in types if t["consumed"] >= HUB_TYPE_THRESHOLD]
         if hubs:
-            lines.append("")
-            lines.append("  HUB TYPES (consumed ≥10):")
-            for h in hubs:
-                lines.append(
-                    f"    {h['type']} → {h['consumed']} consumers → split into:"
-                )
-                recs = HUB_SPLIT_RECOMMENDATIONS.get(h["type"], [])
-                if recs:
-                    for rec in recs:
-                        lines.append(f"      - {rec}")
-                else:
-                    lines.append(
-                        "      - (analyze consumers to suggest sub-interfaces)"
-                    )
-
+            FlowRenderer._render_hub_types(hubs, lines)
         return lines
 
     @staticmethod

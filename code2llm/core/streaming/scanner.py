@@ -21,32 +21,65 @@ class StreamingScanner:
         self.strategy = strategy
         self.cache = cache
 
+    def _parse_tree(
+        self, file_path: str, content: str
+    ) -> Optional[ast.AST]:
+        """Return a parsed AST, using cache when available, or None on SyntaxError."""
+        if self.cache:
+            cached = self.cache.get(file_path, content)
+            if cached:
+                return cached[0]
+            try:
+                tree = ast.parse(content)
+                self.cache.put(file_path, content, (tree, content))
+                return tree
+            except SyntaxError:
+                return None
+        try:
+            return ast.parse(content)
+        except SyntaxError:
+            return None
+
+    def _scan_ast_nodes(self, tree: ast.AST, result: Dict, priority: FilePriority) -> None:
+        """Walk AST tree and populate result with classes and functions."""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                cls_info = ClassInfo(
+                    name=node.name,
+                    qualified_name=f"{priority.module_name}.{node.name}",
+                    file=priority.file_path,
+                    line=node.lineno,
+                    module=priority.module_name,
+                )
+                result["classes"][cls_info.qualified_name] = cls_info
+                result["module"].classes.append(cls_info.qualified_name)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if self.strategy.skip_private_functions and node.name.startswith("_"):
+                    continue
+                func_info = FunctionInfo(
+                    name=node.name,
+                    qualified_name=f"{priority.module_name}.{node.name}",
+                    file=priority.file_path,
+                    line=node.lineno,
+                    module=priority.module_name,
+                )
+                func_info.calls.extend(
+                    child.func.id
+                    for child in ast.walk(node)
+                    if isinstance(child, ast.Call) and isinstance(child.func, ast.Name)
+                )
+                result["functions"][func_info.qualified_name] = func_info
+                result["module"].functions.append(func_info.qualified_name)
+
     def quick_scan_file(self, priority: FilePriority) -> Optional[Dict]:
         """Quick scan - extract functions and classes only (no CFG)."""
         try:
-            content = Path(priority.file_path).read_text(
-                encoding="utf-8", errors="ignore"
-            )
+            content = Path(priority.file_path).read_text(encoding="utf-8", errors="ignore")
         except Exception:
             return None
-
-        # Try cache
-        if self.cache:
-            cached = self.cache.get(priority.file_path, content)
-            if cached:
-                tree, _ = cached
-            else:
-                try:
-                    tree = ast.parse(content)
-                    self.cache.put(priority.file_path, content, (tree, content))
-                except SyntaxError:
-                    return None
-        else:
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
-                return None
-
+        tree = self._parse_tree(priority.file_path, content)
+        if tree is None:
+            return None
         result = {
             "module": ModuleInfo(
                 name=priority.module_name,
@@ -59,41 +92,7 @@ class StreamingScanner:
             "nodes": {},
             "edges": [],
         }
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                cls_info = ClassInfo(
-                    name=node.name,
-                    qualified_name=f"{priority.module_name}.{node.name}",
-                    file=priority.file_path,
-                    line=node.lineno,
-                    module=priority.module_name,
-                )
-                result["classes"][cls_info.qualified_name] = cls_info
-                result["module"].classes.append(cls_info.qualified_name)
-
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                # Skip private if configured
-                if self.strategy.skip_private_functions and node.name.startswith("_"):
-                    continue
-
-                func_info = FunctionInfo(
-                    name=node.name,
-                    qualified_name=f"{priority.module_name}.{node.name}",
-                    file=priority.file_path,
-                    line=node.lineno,
-                    module=priority.module_name,
-                )
-
-                # Extract calls (lightweight)
-                for child in ast.walk(node):
-                    if isinstance(child, ast.Call):
-                        if isinstance(child.func, ast.Name):
-                            func_info.calls.append(child.func.id)
-
-                result["functions"][func_info.qualified_name] = func_info
-                result["module"].functions.append(func_info.qualified_name)
-
+        self._scan_ast_nodes(tree, result, priority)
         return result
 
     def deep_analyze_file(self, priority: FilePriority) -> Optional[Dict]:
