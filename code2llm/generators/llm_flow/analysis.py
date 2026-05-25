@@ -93,57 +93,45 @@ def _pick_relevant_functions(
     return picked
 
 
-def _summarize_functions(
-    nodes: Dict[int, Dict[str, Any]], limit_decisions: int, limit_calls: int
-) -> Dict[str, FuncSummary]:
-    """Summarize functions with their decisions, calls, and location info."""
+def _collect_node_data(
+    nodes: Dict[int, Dict[str, Any]]
+) -> Tuple[Dict, Dict, Dict]:
+    """Collect decisions, calls, and location info keyed by function name."""
     decisions_by_func: Dict[str, List[str]] = defaultdict(list)
     calls_by_func: Dict[str, List[str]] = defaultdict(list)
     loc_by_func: Dict[str, Tuple[Optional[str], Optional[int]]] = {}
-
     for n in nodes.values():
         fn = n.get("function")
         if not isinstance(fn, str) or not fn:
             continue
-
         if fn not in loc_by_func:
             loc_by_func[fn] = (
                 n.get("file") if isinstance(n.get("file"), str) else None,
                 n.get("line") if isinstance(n.get("line"), int) else None,
             )
-
         ntype = n.get("type")
         label = str(n.get("label") or "")
-
         if ntype == "IF":
             decisions_by_func[fn].append(_shorten(label, 120))
         elif ntype == "CALL":
             callee = _parse_call_label(label)
             if callee:
                 calls_by_func[fn].append(callee)
+    return decisions_by_func, calls_by_func, loc_by_func
 
+
+def _summarize_functions(
+    nodes: Dict[int, Dict[str, Any]], limit_decisions: int, limit_calls: int
+) -> Dict[str, FuncSummary]:
+    """Summarize functions with their decisions, calls, and location info."""
+    decisions_by_func, calls_by_func, loc_by_func = _collect_node_data(nodes)
+    all_fns = set(decisions_by_func) | set(calls_by_func) | set(loc_by_func)
     summaries: Dict[str, FuncSummary] = {}
-    for fn in set(
-        list(decisions_by_func.keys())
-        + list(calls_by_func.keys())
-        + list(loc_by_func.keys())
-    ):
+    for fn in all_fns:
         file, line = loc_by_func.get(fn, (None, None))
-
-        decision_counts = Counter(decisions_by_func.get(fn, []))
-        call_counts = Counter(calls_by_func.get(fn, []))
-
-        decisions = tuple([d for d, _ in decision_counts.most_common(limit_decisions)])
-        calls = tuple([c for c, _ in call_counts.most_common(limit_calls)])
-
-        summaries[fn] = FuncSummary(
-            name=fn,
-            file=file,
-            line=line,
-            decisions=decisions,
-            calls=calls,
-        )
-
+        decisions = tuple(d for d, _ in Counter(decisions_by_func.get(fn, [])).most_common(limit_decisions))
+        calls = tuple(c for c, _ in Counter(calls_by_func.get(fn, [])).most_common(limit_calls))
+        summaries[fn] = FuncSummary(name=fn, file=file, line=line, decisions=decisions, calls=calls)
     return summaries
 
 

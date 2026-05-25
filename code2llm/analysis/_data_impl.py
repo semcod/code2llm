@@ -95,33 +95,43 @@ def _find_data_dependencies(result: AnalysisResult) -> list:
     return deps[:15]
 
 
+_EVENT_INDICATORS = ["event", "emit", "trigger", "notify", "callback", "handler", "listen", "subscribe"]
+_HOOK_INDICATORS = ["hook", "on_", "before_", "after_", "pre_", "post_"]
+_EVENT_HANDLER_WORDS = _EVENT_INDICATORS + ["handle", "process"]
+
+
+def _is_event_func(name_lower: str) -> bool:
+    """Return True if the function name suggests event handling or emission."""
+    return any(ind in name_lower for ind in _EVENT_INDICATORS) or any(
+        name_lower.startswith(ind) for ind in _HOOK_INDICATORS
+    )
+
+
+def _event_handlers(func, functions: dict) -> list:
+    """Return list of called functions that look like event handlers."""
+    result = []
+    for called in list(func.calls)[:10]:
+        cf = functions.get(called)
+        if cf and any(ind in cf.name.lower() for ind in _EVENT_HANDLER_WORDS):
+            result.append(called)
+    return result
+
+
 def _find_event_flows(result: AnalysisResult) -> list:
     """Find event-driven patterns."""
     flows: list = []
-    event_indicators = ["event", "emit", "trigger", "notify", "callback", "handler", "listen", "subscribe"]
-    hook_indicators = ["hook", "on_", "before_", "after_", "pre_", "post_"]
     for func_name, func in result.functions.items():
         name_lower = func.name.lower()
-        if any(ind in name_lower for ind in event_indicators) or any(
-            name_lower.startswith(ind) for ind in hook_indicators
-        ):
-            handlers = []
-            for called in list(func.calls)[:10]:
-                called_func = result.functions.get(called)
-                if called_func and any(
-                    ind in called_func.name.lower() for ind in event_indicators + ["handle", "process"]
-                ):
-                    handlers.append(called)
-            flows.append(
-                {
-                    "event_source": func_name,
-                    "type": "emitter" if "emit" in name_lower or "trigger" in name_lower else "handler",
-                    "handlers": handlers[:5],
-                    "description": func.docstring[:150] if func.docstring else "N/A",
-                }
-            )
-            if len(flows) >= 20:
-                break
+        if not _is_event_func(name_lower):
+            continue
+        flows.append({
+            "event_source": func_name,
+            "type": "emitter" if ("emit" in name_lower or "trigger" in name_lower) else "handler",
+            "handlers": _event_handlers(func, result.functions)[:5],
+            "description": func.docstring[:150] if func.docstring else "N/A",
+        })
+        if len(flows) >= 20:
+            break
     return flows
 
 
