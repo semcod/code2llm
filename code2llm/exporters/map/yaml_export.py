@@ -2,7 +2,10 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
+
+if TYPE_CHECKING:
+    from code2llm.core.models import ModuleInfo
 
 import yaml
 

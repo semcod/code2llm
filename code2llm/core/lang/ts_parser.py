@@ -43,7 +43,7 @@ def _init_tree_sitter() -> bool:
     """Initialize tree-sitter. Returns True if available."""
     global _TS_AVAILABLE
     try:
-        import tree_sitter
+        import tree_sitter  # noqa: F401
 
         _TS_AVAILABLE = True
         return True

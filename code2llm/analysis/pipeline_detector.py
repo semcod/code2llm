@@ -13,7 +13,7 @@ Refactored v0.5.x: Extracted resolver and classifier into separate modules.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import networkx as nx
 

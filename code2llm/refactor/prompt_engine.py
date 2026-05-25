@@ -155,8 +155,7 @@ class PromptEngine:
 
             # If tree-sitter is available, use it to accurately find function boundaries
             if self.parser and "method" not in file_path:  # simplified check
-                tree = self.parser.parse(bytes(content, "utf8"))
-                root_node = tree.root_node
+                self.parser.parse(bytes(content, "utf8"))
 
                 # Simple function extraction using tree-sitter
                 # (Ideally we'd search for the function node at start_line)
