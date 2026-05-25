@@ -24,6 +24,48 @@ def handle_special_commands() -> Optional[int]:
     return None
 
 
+def _handle_cache_status(get_all_projects, _DEFAULT_ROOT) -> int:
+    """Print cache status summary."""
+    import time
+    projects = get_all_projects()
+    total_mb = sum(p.get("cache_size_bytes", 0) for p in projects) / (KB * KB)
+    print(f"Cache: {_DEFAULT_ROOT}")
+    print(f"  Projects: {len(projects)}   Total: {total_mb:.1f} MB")
+    for p in projects:
+        size_mb = p.get("cache_size_bytes", 0) / (KB * KB)
+        updated = p.get("updated_at", 0)
+        age_min = int((time.time() - updated) / 60) if updated else 0
+        age_str = f"{age_min}m ago" if age_min < 120 else f"{age_min // 60}h ago"
+        print(f"\n  {p.get('project', '?')}")
+        print(f"    Files: {p.get('files_cached', 0)}   Exports: {p.get('exports', 0)}   "
+              f"Size: {size_mb:.1f} MB   Last: {age_str}")
+    return 0
+
+
+def _handle_cache_clear(all_projects: bool, PersistentCache, clear_all) -> int:
+    """Clear cache for current project or all projects."""
+    import os
+    if all_projects:
+        clear_all()
+        print("Cleared entire cache.")
+    else:
+        project_dir = os.path.realpath(".")
+        PersistentCache(project_dir).clear()
+        print(f"Cleared cache for {project_dir}")
+    return 0
+
+
+def _handle_cache_gc(max_age: int, get_all_projects, PersistentCache) -> int:
+    """Run garbage collection on all cached projects."""
+    total_removed = 0
+    for p in get_all_projects():
+        project_dir = p.get("project")
+        if project_dir and Path(project_dir).exists():
+            total_removed += PersistentCache(project_dir).gc(max_age_days=max_age)
+    print(f"GC complete: {total_removed} stale entries removed.")
+    return 0
+
+
 def handle_cache_command(args_list) -> int:
     """Manage persistent cache (~/.code2llm/).
 
@@ -33,76 +75,20 @@ def handle_cache_command(args_list) -> int:
         code2llm cache clear --all     # clear entire ~/.code2llm/
         code2llm cache gc              # manual garbage collection
     """
-    import os
-    import time
-    from .core.persistent_cache import (
-        PersistentCache,
-        get_all_projects,
-        clear_all,
-        _DEFAULT_ROOT,
-    )
-
+    from .core.persistent_cache import PersistentCache, get_all_projects, clear_all, _DEFAULT_ROOT
     parser = argparse.ArgumentParser(prog="code2llm cache")
-    parser.add_argument(
-        "action", choices=["status", "clear", "gc"], help="Cache action"
-    )
-    parser.add_argument(
-        "--all",
-        action="store_true",
-        dest="all_projects",
-        help="Apply to all cached projects (clear only)",
-    )
-    parser.add_argument(
-        "--max-age",
-        type=int,
-        default=DEFAULT_CACHE_MAX_AGE_DAYS,
-        metavar="DAYS",
-        help=f"Max age in days for gc (default: {DEFAULT_CACHE_MAX_AGE_DAYS})",
-    )
+    parser.add_argument("action", choices=["status", "clear", "gc"], help="Cache action")
+    parser.add_argument("--all", action="store_true", dest="all_projects",
+                        help="Apply to all cached projects (clear only)")
+    parser.add_argument("--max-age", type=int, default=DEFAULT_CACHE_MAX_AGE_DAYS,
+                        metavar="DAYS", help=f"Max age in days for gc (default: {DEFAULT_CACHE_MAX_AGE_DAYS})")
     args = parser.parse_args(args_list)
-
     if args.action == "status":
-        projects = get_all_projects()
-        root = _DEFAULT_ROOT
-        total_mb = sum(p.get("cache_size_bytes", 0) for p in projects) / (KB * KB)
-        print(f"Cache: {root}")
-        print(f"  Projects: {len(projects)}   Total: {total_mb:.1f} MB")
-        for p in projects:
-            size_mb = p.get("cache_size_bytes", 0) / (KB * KB)
-            updated = p.get("updated_at", 0)
-            age_min = int((time.time() - updated) / 60) if updated else 0
-            age_str = f"{age_min}m ago" if age_min < 120 else f"{age_min // 60}h ago"
-            exports = p.get("exports", 0)
-            files = p.get("files_cached", 0)
-            print(f"\n  {p.get('project', '?')}")
-            print(
-                f"    Files: {files}   Exports: {exports}   Size: {size_mb:.1f} MB   Last: {age_str}"
-            )
-        return 0
-
+        return _handle_cache_status(get_all_projects, _DEFAULT_ROOT)
     if args.action == "clear":
-        if args.all_projects:
-            clear_all()
-            print("Cleared entire cache.")
-        else:
-            project_dir = os.path.realpath(".")
-            c = PersistentCache(project_dir)
-            c.clear()
-            print(f"Cleared cache for {project_dir}")
-        return 0
-
+        return _handle_cache_clear(args.all_projects, PersistentCache, clear_all)
     if args.action == "gc":
-        projects = get_all_projects()
-        total_removed = 0
-        for p in projects:
-            project_dir = p.get("project")
-            if project_dir and Path(project_dir).exists():
-                c = PersistentCache(project_dir)
-                removed = c.gc(max_age_days=args.max_age)
-                total_removed += removed
-        print(f"GC complete: {total_removed} stale entries removed.")
-        return 0
-
+        return _handle_cache_gc(args.max_age, get_all_projects, PersistentCache)
     return 0
 
 

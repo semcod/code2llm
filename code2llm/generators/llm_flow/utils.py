@@ -15,23 +15,25 @@ def _strip_bom(text: str) -> str:
     return text[1:] if text.startswith("\ufeff") else text
 
 
-def _safe_read_yaml(path: Path) -> Dict[str, Any]:
-    """Read YAML file safely, handling BOM and type validation with detailed errors."""
-    from yaml.scanner import ScannerError
-    from yaml.parser import ParserError
-
+def _read_yaml_raw(path: Path) -> str:
+    """Read file content, strip BOM, or raise ValueError."""
     try:
         raw = _strip_bom(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         raise ValueError(f"File not found: {path}")
     except Exception as e:
         raise ValueError(f"Cannot read file {path}: {e}")
-
     if not raw.strip():
         raise ValueError(f"File is empty: {path}")
+    return raw
 
+
+def _parse_yaml_safe(raw: str, path: Path) -> Any:
+    """Parse YAML or raise descriptive ValueError."""
+    from yaml.scanner import ScannerError
+    from yaml.parser import ParserError
     try:
-        loaded = yaml.safe_load(raw)
+        return yaml.safe_load(raw)
     except ScannerError as e:
         line = e.problem_mark.line + 1 if e.problem_mark else "?"
         col = e.problem_mark.column if e.problem_mark else "?"
@@ -48,6 +50,9 @@ def _safe_read_yaml(path: Path) -> Dict[str, Any]:
     except Exception as e:
         raise ValueError(f"YAML error in {path}: {e}")
 
+
+def _validate_yaml_mapping(loaded: Any, path: Path) -> None:
+    """Raise ValueError if loaded is not a non-None dict."""
     if loaded is None:
         raise ValueError(f"File is null/empty YAML: {path}")
     if not isinstance(loaded, dict):
@@ -55,6 +60,13 @@ def _safe_read_yaml(path: Path) -> Dict[str, Any]:
             f"Expected YAML mapping (dict), got {type(loaded).__name__} in {path}\n"
             f"Hint: File must start with 'key: value' pairs, not a list"
         )
+
+
+def _safe_read_yaml(path: Path) -> Dict[str, Any]:
+    """Read YAML file safely, handling BOM and type validation with detailed errors."""
+    raw = _read_yaml_raw(path)
+    loaded = _parse_yaml_safe(raw, path)
+    _validate_yaml_mapping(loaded, path)
     return loaded
 
 
