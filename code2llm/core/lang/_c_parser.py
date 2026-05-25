@@ -1,6 +1,26 @@
 """C-family declaration parser helpers (classes, functions, methods, decorators)."""
 
 # Brace tracking, decorator detection, class/function extraction for C/Java/Go/Rust/TS/C++.
+#
+# ── Brace-tracking helpers ────────────────────────────────────────────────────
+# _update_brace_tracking()  : increment/decrement brace depth; detect class-end.
+# _extract_class_info()     : parse class keyword, name, bases, and brace depth.
+#
+# ── Function/method extraction ────────────────────────────────────────────────
+# _process_classes()        : scan lines for class blocks; collect methods inside.
+# _process_standalone_function(): collect top-level functions outside any class.
+# _extract_declarations()   : entry point; calls both above; returns classes+funcs.
+#
+# ── Decorator helpers ─────────────────────────────────────────────────────────
+# _collect_decorators()     : accumulate @decorator lines preceding a definition.
+# _should_skip_line()       : filter comments, blank lines, and string literals.
+#
+# ── Signature/name helpers ────────────────────────────────────────────────────
+# _extract_function_name()  : strip parameter list, return type, and whitespace.
+# _build_qualified_name()   : prepend class name for qualified method name.
+# _parse_base_classes()     : extract comma-separated base class names.
+#
+# Language coverage: C (.c/.h), C++ (.cpp/.hpp), Java, Go, Rust, TypeScript, C#.
 
 from typing import Dict
 

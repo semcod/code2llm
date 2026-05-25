@@ -16,6 +16,17 @@
 # ── Utilities ─────────────────────────────────────────────────────────────────
 # _format_size()               : human-readable byte count (B/KB/MB).
 # _get_missing_files()         : list expected output files not yet generated.
+#
+# ── Output layout ─────────────────────────────────────────────────────────────
+# prompt.txt structure (single-file mode):
+#   [HEADER]            project path, date, token estimate.
+#   [MAIN FILES]        analysis.toon.yaml, context.md (full embed).
+#   [OPTIONAL FILES]    calls.yaml, flow.toon.yaml, map.toon.yaml (if present).
+#   [SUBPROJECTS]       per-subproject mini-prompt blocks (if multi-project).
+#   [MISSING FILES]     list of expected-but-absent output files.
+#
+# prompt_NNN.txt structure (chunked mode):
+#   Each chunk = header + slice of main/optional content ≤ chunk_size bytes.
 
 import time
 from pathlib import Path
