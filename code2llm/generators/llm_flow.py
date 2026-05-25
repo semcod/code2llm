@@ -83,6 +83,4 @@ __all__ = [
 
 
 if __name__ == "__main__":
-    from .llm_flow import main
-
     raise SystemExit(main())
