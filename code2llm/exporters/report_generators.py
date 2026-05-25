@@ -16,11 +16,8 @@ from .article_view import ArticleViewGenerator
 from .html_dashboard import HTMLDashboardGenerator
 
 
-def load_project_yaml(path: str) -> Dict[str, Any]:
-    """Load and validate project.yaml with detailed error reporting."""
-    from yaml.scanner import ScannerError
-    from yaml.parser import ParserError
-
+def _read_yaml_content(path: str) -> str:
+    """Read raw file content or raise ValueError."""
     try:
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -28,14 +25,17 @@ def load_project_yaml(path: str) -> Dict[str, Any]:
         raise ValueError(f"project.yaml not found: {path}")
     except Exception as e:
         raise ValueError(f"Cannot read project.yaml ({path}): {e}")
-
-    # Check for empty file
     if not content.strip():
         raise ValueError(f"project.yaml is empty: {path}")
+    return content
 
-    # Try to parse YAML with detailed error reporting
+
+def _parse_yaml_content(content: str, path: str) -> Any:
+    """Parse YAML string or raise descriptive ValueError."""
+    from yaml.scanner import ScannerError
+    from yaml.parser import ParserError
     try:
-        data = yaml.safe_load(content)
+        return yaml.safe_load(content)
     except ScannerError as e:
         line = e.problem_mark.line + 1 if e.problem_mark else "?"
         col = e.problem_mark.column if e.problem_mark else "?"
@@ -52,7 +52,9 @@ def load_project_yaml(path: str) -> Dict[str, Any]:
     except Exception as e:
         raise ValueError(f"YAML error in {path}: {e}")
 
-    # Validate structure
+
+def _validate_yaml_data(data: Any, path: str) -> None:
+    """Raise ValueError if data fails structural validation."""
     if data is None:
         raise ValueError(f"project.yaml is null/empty: {path}")
     if not isinstance(data, dict):
@@ -67,6 +69,12 @@ def load_project_yaml(path: str) -> Dict[str, Any]:
             f"Found keys: {list(data.keys())[:10]}"
         )
 
+
+def load_project_yaml(path: str) -> Dict[str, Any]:
+    """Load and validate project.yaml with detailed error reporting."""
+    content = _read_yaml_content(path)
+    data = _parse_yaml_content(content, path)
+    _validate_yaml_data(data, path)
     return data
 
 

@@ -146,22 +146,28 @@ def _process_standalone_function(
     return False, pending_decorators
 
 
+def _try_match_named_pattern(regex, line: str, reserved: set, extra_exclude: set = frozenset()) -> str | None:
+    """Match regex against line and return name if valid, else None."""
+    if not regex:
+        return None
+    m = regex.match(line)
+    if not m:
+        return None
+    groups = m.groups()
+    name = groups[0] or (groups[1] if len(groups) > 1 else None)
+    if name and name not in reserved and name not in extra_exclude:
+        return name
+    return None
+
+
 def _match_method_name(arrow_prop_re, method_re, func_re, line, reserved):
     """Return matched method name from any of the three patterns, or None."""
-    if arrow_prop_re:
-        m = arrow_prop_re.match(line)
-        if m:
-            name = m.group(1)
-            if name not in reserved and name != "constructor":
-                return name
+    name = _try_match_named_pattern(arrow_prop_re, line, reserved, {"constructor"})
+    if name:
+        return name
     for regex in (method_re, func_re):
-        if not regex:
-            continue
-        m = regex.match(line)
-        if not m:
-            continue
-        name = m.group(1) or (m.group(2) if len(m.groups()) > 1 else None)
-        if name and name not in reserved:
+        name = _try_match_named_pattern(regex, line, reserved)
+        if name:
             return name
     return None
 
