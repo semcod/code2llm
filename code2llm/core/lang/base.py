@@ -13,8 +13,6 @@ from code2llm.core.lang._c_parser import _extract_declarations
 from code2llm.core.lang._complexity import calculate_complexity_regex
 
 
-
-
 def analyze_c_family(
     content: str,
     file_path: str,

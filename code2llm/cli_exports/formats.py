@@ -15,10 +15,6 @@ and legacy project-yaml/flow exports."""
 #   _export_evolution()     : evolution.yaml        (EvolutionExporter)
 #   _export_project_yaml()  : project.yaml bundle   (ProjectYAMLExporter)
 
-_CONTEXT_MD = "context.md"
-_PROJECT_TOON_YAML = "project.toon.yaml"
-_CALLS_YAML = "calls.yaml"
-
 import sys
 import time
 from pathlib import Path
@@ -42,6 +38,10 @@ from code2llm.exporters import (
     IndexHTMLGenerator,
 )
 from .orchestrator import _inject_generation_time as _inject_time
+
+_CONTEXT_MD = "context.md"
+_PROJECT_TOON_YAML = "project.toon.yaml"
+_CALLS_YAML = "calls.yaml"
 
 
 def _export_evolution(args, result, output_dir: Path):

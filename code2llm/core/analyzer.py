@@ -51,8 +51,6 @@ try:
 except ImportError:
     _HAS_TQDM = False
 
-logger = logging.getLogger(__name__)
-
 from .config import (
     Config,
     FAST_CONFIG,
@@ -62,12 +60,13 @@ from .config import (
     DEFAULT_PROGRESS_BAR_THRESHOLD,
 )
 from .models import AnalysisResult, Pattern
-
 from .file_cache import FileCache
 from .file_filter import FastFileFilter
 from .file_analyzer import FileAnalyzer, _analyze_single_file
 from .persistent_cache import PersistentCache
 from .refactoring import RefactoringAnalyzer
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectAnalyzer:

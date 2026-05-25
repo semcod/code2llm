@@ -261,13 +261,13 @@ def _analyze_data_types(result: AnalysisResult) -> list:
 _NAME_TYPE_KEYWORDS: List[tuple] = [
     ("list", ("list", "items")),
     ("dict", ("dict", "map")),
-    ("str",  ("text", "string")),
-    ("int",  ("count", "index")),
+    ("str", ("text", "string")),
+    ("int", ("count", "index")),
 ]
 _DOC_TYPE_KEYWORDS: List[tuple] = [
     ("list", ("list",)),
     ("dict", ("dict",)),
-    ("str",  ("string", "text")),
+    ("str", ("string", "text")),
 ]
 
 
@@ -353,8 +353,12 @@ def _type_consolidations(data_types: list) -> list:
         if len(sims) > 1:
             usage = sum(s["usage_count"] for s in sims)
             if usage > 10:
-                result.append({"type_signature": sig, "similar_types": [s["type_name"] for s in sims],
-                                "total_usage": usage, "potential_reduction": len(sims) - 1})
+                result.append({
+                    "type_signature": sig,
+                    "similar_types": [s["type_name"] for s in sims],
+                    "total_usage": usage,
+                    "potential_reduction": len(sims) - 1,
+                })
     return result
 
 
