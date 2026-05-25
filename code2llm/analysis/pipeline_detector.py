@@ -191,6 +191,22 @@ class PipelineDetector:
     # ------------------------------------------------------------------
     # path finding
     # ------------------------------------------------------------------
+    def _process_components(
+        self, graph: nx.DiGraph, paths: List[List[str]], used_nodes: Set[str]
+    ) -> None:
+        """Extend paths with longest paths from each weakly connected component."""
+        for component in nx.weakly_connected_components(graph):
+            if len(component) < MIN_PIPELINE_LENGTH:
+                continue
+            if len(component & used_nodes) > len(component) * 0.5:
+                continue
+            path = self._longest_path_in_dag(graph.subgraph(component))
+            if len(path) >= MIN_PIPELINE_LENGTH:
+                new_overlap = sum(1 for n in path if n in used_nodes)
+                if new_overlap <= len(path) * 0.5:
+                    paths.append(path)
+                    used_nodes.update(path)
+
     def _find_pipeline_paths(self, graph: nx.DiGraph) -> List[List[str]]:
         """Find longest paths in the call graph as pipeline candidates.
 
@@ -200,41 +216,17 @@ class PipelineDetector:
         3. For each source, find longest simple path to any sink
         4. Also consider longest paths in each weakly connected component
         """
-        paths: List[List[str]] = []
-
-        # Get source nodes (in-degree 0) as potential pipeline entry points
         sources = [n for n in graph.nodes() if graph.in_degree(n) == 0]
-
-        # If no natural sources, use nodes with low in-degree
         if not sources:
             sources = sorted(graph.nodes(), key=lambda n: graph.in_degree(n))[:5]
-
-        # Try to find longest paths from each source
+        paths: List[List[str]] = []
         used_nodes: Set[str] = set()
         for source in sources:
             best_path = self._longest_path_from(graph, source, used_nodes)
             if len(best_path) >= MIN_PIPELINE_LENGTH:
                 paths.append(best_path)
                 used_nodes.update(best_path)
-
-        # Also try: for each weakly connected component, find the longest path
-        for component in nx.weakly_connected_components(graph):
-            if len(component) < MIN_PIPELINE_LENGTH:
-                continue
-            # Skip if heavily overlapping with existing paths
-            overlap = len(component & used_nodes)
-            if overlap > len(component) * 0.5:
-                continue
-
-            subgraph = graph.subgraph(component)
-            path = self._longest_path_in_dag(subgraph)
-            if len(path) >= MIN_PIPELINE_LENGTH:
-                # Check overlap with existing paths
-                new_overlap = sum(1 for n in path if n in used_nodes)
-                if new_overlap <= len(path) * 0.5:
-                    paths.append(path)
-                    used_nodes.update(path)
-
+        self._process_components(graph, paths, used_nodes)
         return paths
 
     def _longest_path_from(

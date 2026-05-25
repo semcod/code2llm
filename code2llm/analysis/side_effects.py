@@ -241,36 +241,37 @@ class SideEffectDetector:
             self._check_yield(node, info)
             self._check_delete(node, info)
 
-    def _check_calls(self, node: ast.AST, info: SideEffectInfo) -> None:
-        """Detect IO and cache calls."""
-        if not isinstance(node, ast.Call):
-            return
-
-        call_name = self._get_call_name(node.func)
-        if not call_name:
-            return
-
-        parts = call_name.split(".")
-        base_name = parts[-1]
-
-        # IO detection
+    @staticmethod
+    def _check_io_call(
+        base_name: str, parts: list, call_name: str, info: "SideEffectInfo"
+    ) -> None:
+        """Classify call as IO if it matches known IO patterns."""
         if base_name in IO_CALLS:
             info.io_operations.append(base_name)
-        elif base_name in HTTP_METHODS and len(parts) >= 2:
-            # Only classify as IO if caller looks like HTTP client
-            caller = parts[-2].lower()
-            if caller in HTTP_CALLERS:
-                info.io_operations.append(call_name)
+        elif base_name in HTTP_METHODS and len(parts) >= 2 and parts[-2].lower() in HTTP_CALLERS:
+            info.io_operations.append(call_name)
         elif base_name in IO_ATTRIBUTES:
             info.io_operations.append(call_name)
 
-        # Cache detection
+    @staticmethod
+    def _check_cache_call(base_name: str, call_name: str, info: "SideEffectInfo") -> None:
+        """Classify call as cache operation if it matches known cache patterns."""
         if base_name in CACHE_CALLS:
             info.cache_operations.append(base_name)
         elif any(ci in call_name for ci in CACHE_INDICATORS):
             info.cache_operations.append(call_name)
 
-        # Mutation via method calls (e.g., list.append)
+    def _check_calls(self, node: ast.AST, info: SideEffectInfo) -> None:
+        """Detect IO and cache calls."""
+        if not isinstance(node, ast.Call):
+            return
+        call_name = self._get_call_name(node.func)
+        if not call_name:
+            return
+        parts = call_name.split(".")
+        base_name = parts[-1]
+        self._check_io_call(base_name, parts, call_name, info)
+        self._check_cache_call(base_name, call_name, info)
         if base_name in MUTATION_CALLS and len(parts) >= 2:
             info.mutations.append(call_name)
 
