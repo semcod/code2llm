@@ -99,6 +99,20 @@ class ProjectAnalyzer:
             self.file_filter = FastFileFilter(self.config.filters, p)
         return p
 
+    def _log_cache_stats(
+        self, cached_results: list, files_to_analyze: list, removed: list
+    ) -> None:
+        """Print persistent cache hit/miss stats when verbose mode is on."""
+        if not self.config.verbose:
+            return
+        print(f"  - Persistent cache: {len(cached_results)} hits, {len(files_to_analyze)} to analyze")
+        if removed:
+            print(f"  - Persistent cache: {len(removed)} stale entries pruned (deleted files)")
+            for rel in removed[:10]:
+                print(f"     \u2022 {rel}")
+            if len(removed) > 10:
+                print(f"     ... and {len(removed) - 10} more")
+
     def _load_from_persistent_cache(
         self, files: List[Tuple[str, str]], project_path: Path
     ) -> Tuple[Optional["PersistentCache"], List[Dict], List[Tuple[str, str]]]:
@@ -123,18 +137,7 @@ class ProjectAnalyzer:
                 else:
                     changed_paths.append(fp)
             files_to_analyze = [(fp, path_to_module[fp]) for fp in changed_paths]
-            if self.config.verbose:
-                print(
-                    f"  - Persistent cache: {len(cached_results)} hits, {len(files_to_analyze)} to analyze"
-                )
-                if removed:
-                    print(
-                        f"  - Persistent cache: {len(removed)} stale entries pruned (deleted files)"
-                    )
-                    for rel in removed[:10]:
-                        print(f"     • {rel}")
-                    if len(removed) > 10:
-                        print(f"     ... and {len(removed) - 10} more")
+            self._log_cache_stats(cached_results, files_to_analyze, removed)
             return pcache, cached_results, files_to_analyze
         except Exception as exc:
             logger.debug("PersistentCache init failed, falling back: %s", exc)
@@ -304,6 +307,18 @@ class ProjectAnalyzer:
 
         return files
 
+    def _wrap_tqdm(self, iterator, total: int, desc: str = "Analyzing"):
+        """Wrap iterator with tqdm when verbose=False and tqdm is available."""
+        if not self.config.verbose and total > DEFAULT_PROGRESS_BAR_THRESHOLD and _HAS_TQDM:
+            return tqdm(iterator, total=total, desc=desc)
+        return iterator
+
+    def _log_verbose_progress(self, completed: int, total: int) -> None:
+        """Print progress line when verbose and at 10-file interval or at end."""
+        if self.config.verbose and (completed % 10 == 0 or completed == total):
+            print(f"  - Progress: {completed}/{total} files analyzed ({completed * 100 // total}%)",
+                  flush=True)
+
     def _analyze_parallel(self, files: List[Tuple[str, str]]) -> List[Dict]:
         """Analyze files in parallel."""
         results = []
@@ -329,14 +344,7 @@ class ProjectAnalyzer:
 
             # Collect results as they complete (with optional progress bar)
             completed = 0
-            iterator = as_completed(future_to_file)
-            if (
-                not self.config.verbose
-                and len(files) > DEFAULT_PROGRESS_BAR_THRESHOLD
-                and _HAS_TQDM
-            ):
-                iterator = tqdm(iterator, total=len(files), desc="Analyzing")
-
+            iterator = self._wrap_tqdm(as_completed(future_to_file), total=len(files))
             for future in iterator:
                 file_path, module_name = future_to_file[future]
                 try:
@@ -347,11 +355,7 @@ class ProjectAnalyzer:
                     if self.config.verbose:
                         print(f"Error analyzing {file_path}: {e}")
                 completed += 1
-                if self.config.verbose and completed % 10 == 0:
-                    print(
-                        f"  - Progress: {completed}/{len(files)} files analyzed ({completed * 100 // len(files)}%)",
-                        flush=True,
-                    )
+                self._log_verbose_progress(completed, len(files))
 
         return results
 
@@ -361,15 +365,7 @@ class ProjectAnalyzer:
         analyzer = FileAnalyzer(self.config, self.cache)
         total = len(files)
 
-        # Use tqdm for large projects in non-verbose mode
-        file_iterator = enumerate(files, 1)
-        if (
-            not self.config.verbose
-            and total > DEFAULT_PROGRESS_BAR_THRESHOLD
-            and _HAS_TQDM
-        ):
-            file_iterator = tqdm(list(file_iterator), desc="Analyzing", total=total)
-
+        file_iterator = self._wrap_tqdm(list(enumerate(files, 1)), total=total)
         for i, (file_path, module_name) in file_iterator:
             try:
                 result = analyzer.analyze_file(file_path, module_name)
@@ -378,11 +374,7 @@ class ProjectAnalyzer:
             except Exception as e:
                 if self.config.verbose:
                     print(f"Error analyzing {file_path}: {e}")
-            if self.config.verbose and (i % 10 == 0 or i == total):
-                print(
-                    f"  - Progress: {i}/{total} files analyzed ({i * 100 // total}%)",
-                    flush=True,
-                )
+            self._log_verbose_progress(i, total)
 
         return results
 
