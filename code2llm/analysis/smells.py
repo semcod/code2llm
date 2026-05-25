@@ -56,7 +56,11 @@ class SmellDetector:
                         file=func_info.file,
                         line=func_info.line,
                         severity=severity,
-                        description=f"Function '{func_info.name}' is oversized: CC={complexity}, fan-out={fan_out}, mutations={mutation_count}.",
+                        description=(
+                            f"Function '{func_info.name}' is oversized:"
+                            f" CC={complexity}, fan-out={fan_out},"
+                            f" mutations={mutation_count}."
+                        ),
                         context={
                             "fan_out": fan_out,
                             "mutations": mutation_count,
@@ -85,7 +89,11 @@ class SmellDetector:
                         file=mod.file,
                         line=1,
                         severity=severity,
-                        description=f"Module '{mod_name}' is too large ({f_count} functions, {c_count} classes). Consider splitting into sub-modules.",
+                        description=(
+                            f"Module '{mod_name}' is too large"
+                            f" ({f_count} functions, {c_count} classes)."
+                            " Consider splitting into sub-modules."
+                        ),
                         context={"functions": f_count, "classes": c_count},
                     )
                 )
@@ -113,7 +121,10 @@ class SmellDetector:
                         file=func_info.file,
                         line=func_info.line,
                         severity=0.7,
-                        description=f"Function '{func_info.name}' mutates multiple variables in other modules: {', '.join(set(foreign_mutations))}.",
+                        description=(
+                            f"Function '{func_info.name}' mutates multiple variables"
+                            f" in other modules: {', '.join(set(foreign_mutations))}."
+                        ),
                         context={"foreign_mutations": list(set(foreign_mutations))},
                     )
                 )
@@ -142,7 +153,10 @@ class SmellDetector:
                             file=func_info.file,
                             line=func_info.line,
                             severity=0.6,
-                            description=f"Arguments ({', '.join(args)}) are used together in multiple functions: {', '.join(funcs)}.",
+                            description=(
+                                f"Arguments ({', '.join(args)}) are used together"
+                                f" in multiple functions: {', '.join(funcs)}."
+                            ),
                             context={"clump": list(args), "related_functions": funcs},
                         )
                     )
@@ -173,7 +187,10 @@ class SmellDetector:
                         file=func_info.file,
                         line=func_info.line,
                         severity=0.8,
-                        description=f"Mutation of variable '{var}' spans {len(funcs)} functions. Changing this logic requires work in many places.",
+                        description=(
+                            f"Mutation of variable '{var}' spans {len(funcs)} functions."
+                            " Changing this logic requires work in many places."
+                        ),
                         context={"variable": var, "affected_functions": list(funcs)},
                     )
                 )
@@ -192,7 +209,11 @@ class SmellDetector:
                         file=func_info.file,
                         line=func_info.line,
                         severity=min(1.0, func_info.centrality * 5),
-                        description=f"Function '{func_info.name}' is a structural bottleneck (centrality={round(func_info.centrality, 3)}). Significant logic flows through this function.",
+                        description=(
+                            f"Function '{func_info.name}' is a structural bottleneck"
+                            f" (centrality={round(func_info.centrality, 3)})."
+                            " Significant logic flows through this function."
+                        ),
                         context={"centrality": func_info.centrality},
                     )
                 )
@@ -218,7 +239,11 @@ class SmellDetector:
                         file=func_info.file,
                         line=func_info.line,
                         severity=0.8,
-                        description=f"Circular dependency detected: {' -> '.join(cycle)}. This indicates high coupling and may lead to infinite recursion or initialization issues.",
+                        description=(
+                            f"Circular dependency detected: {' -> '.join(cycle)}."
+                            " This indicates high coupling and may lead to"
+                            " infinite recursion or initialization issues."
+                        ),
                         context={"cycle": cycle},
                     )
                 )

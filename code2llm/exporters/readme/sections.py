@@ -13,15 +13,15 @@ def build_core_files_section(
 
     if existing.get("analysis.toon"):
         lines.append(
-            f"| `analysis.toon` | **TOON** | **🔥 Health diagnostics** - Health, LAYERS, COUPLING | {insights['critical_functions']} critical functions, {insights['god_modules']} god modules |"
+            f"| `analysis.toon` | **TOON** | **🔥 Health diagnostics** - Health, LAYERS, COUPLING | {insights['critical_functions']} critical functions, {insights['god_modules']} god modules |"  # noqa: E501
         )
     if existing.get("evolution.toon.yaml"):
         lines.append(
-            f"| `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | {insights['refactoring_actions']} refactoring actions needed |"
+            f"| `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | {insights['refactoring_actions']} refactoring actions needed |"  # noqa: E501
         )
     if existing.get("map.toon.yaml"):
         lines.append(
-            "| `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |"
+            "| `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |"  # noqa: E501
         )
 
     lines.append("")
@@ -36,15 +36,15 @@ def build_llm_files_section(existing: Dict[str, bool]) -> str:
 
     if existing.get("prompt.txt"):
         lines.append(
-            "| `prompt.txt` | **Text** | **📝 Ready-to-send prompt** - Lists all files with instructions | Attach to LLM conversation as context guide |"
+            "| `prompt.txt` | **Text** | **📝 Ready-to-send prompt** - Lists all files with instructions | Attach to LLM conversation as context guide |"  # noqa: E501
         )
     if existing.get("context.md"):
         lines.append(
-            "| `context.md` | **Markdown** | **📖 LLM narrative** - Architecture summary | Paste into ChatGPT/Claude for code analysis |"
+            "| `context.md` | **Markdown** | **📖 LLM narrative** - Architecture summary | Paste into ChatGPT/Claude for code analysis |"  # noqa: E501
         )
     if existing.get("analysis.yaml"):
         lines.append(
-            "| `analysis.yaml` | **YAML** | **📊 Structured data** - Machine-readable | For scripts and automated processing |"
+            "| `analysis.yaml` | **YAML** | **📊 Structured data** - Machine-readable | For scripts and automated processing |"  # noqa: E501
         )
     if existing.get("analysis.json"):
         lines.append(

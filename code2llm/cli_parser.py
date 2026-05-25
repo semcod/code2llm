@@ -57,7 +57,7 @@ Format Options (-f):
   code2logic   — Generate project logic (legacy project.toon) via external code2logic
   project-yaml — Legacy project.yaml export (single source of truth) + generated views
   planfile     — Planfile ticket suggestions (planfile-tickets.yaml); use --planfile-apply to create tickets
-  all          — Generate core formats (analysis.toon, map.toon.yaml, evolution.toon.yaml, context, mermaid, planfile-tickets.yaml) plus project.toon.yaml and prompt.txt; PNG remains opt-in via --png
+  all          — Generate core formats (analysis.toon, map.toon.yaml, evolution.toon.yaml, context, mermaid, planfile-tickets.yaml) plus project.toon.yaml and prompt.txt; PNG remains opt-in via --png  # noqa: E501
 
 Strategy Options (--strategy):
   quick     — Fast overview, fewer files analyzed

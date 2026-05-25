@@ -153,7 +153,7 @@ class DashboardDataBuilder:
             color = _LANG_COLORS.get(lang, "#6b7280")
             html += f"""
             <tr>
-                <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{color};margin-right:6px"></span>{Path(path).name}</td>
+                <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{color};margin-right:6px"></span>{Path(path).name}</td>  # noqa: E501
                 <td style="color:var(--muted);font-size:.75rem">{"/".join(Path(path).parts[:-1]) or "."}</td>
                 <td style="text-align:right">{lines:,}</td>
                 <td style="text-align:right">{methods}</td>

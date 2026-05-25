@@ -62,7 +62,7 @@ class HealthMetricsComputer:
                     {
                         "severity": "red",
                         "code": "GOD",
-                        "message": f"{fm['rel']} = {fm['lines']}L, {fm['class_count']} classes, {fm['methods']}m, max CC={fm['max_cc']}",
+                        "message": f"{fm['rel']} = {fm['lines']}L, {fm['class_count']} classes, {fm['methods']}m, max CC={fm['max_cc']}",  # noqa: E501
                         "impact": "split needed",
                     }
                 )

@@ -256,7 +256,9 @@ def manage_toon_size(
                 print(f"  - {prefix}.toon: {size_kb:.1f}KB (within {max_kb}KB limit)")
             else:
                 print(
-                    f"  - {prefix}.toon: {size_kb:.1f}KB (margin: {size_kb - max_kb:.1f}KB < {margin_kb:.0f}KB, keeping single file)"
+                    f"  - {prefix}.toon: {size_kb:.1f}KB"
+                    f" (margin: {size_kb - max_kb:.1f}KB < {margin_kb:.0f}KB,"
+                    " keeping single file)"
                 )
         return [source_file]
 

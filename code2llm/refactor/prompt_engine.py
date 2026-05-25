@@ -137,7 +137,7 @@ class PromptEngine:
             "source_module": smell.file.split("/")[-1].replace(".py", ""),
             "target_module": self._get_target_module(smell),
             "foreign_mutations": ", ".join(foreign),
-            "foreign_mutations_context": f"This code mutates state in {', '.join(set(v.split('.')[0] for v in foreign if '.' in v))}",
+            "foreign_mutations_context": f"This code mutates state in {', '.join(set(v.split('.')[0] for v in foreign if '.' in v))}",  # noqa: E501
             "dependencies": ", ".join(set(m.variable for m in mutations if "." in m.variable)),
             "reachability": self._get_reachability(target),
         }
@@ -175,11 +175,11 @@ class PromptEngine:
     def _get_instruction_for_smell(self, smell: CodeSmell) -> str:
         """Generate specific instruction based on smell type."""
         if smell.type == "god_function":
-            return f"Wyekstrahuj mniejsze, spójne metody z funkcji {smell.name.split(': ')[-1]}. Skup się na wydzieleniu operacji o największej liczbie mutacji."
+            return f"Wyekstrahuj mniejsze, spójne metody z funkcji {smell.name.split(': ')[-1]}. Skup się na wydzieleniu operacji o największej liczbie mutacji."  # noqa: E501
         elif smell.type == "feature_envy":
-            return f"Przenieś metodę {smell.name.split(': ')[-1]} do modułu, który posiada większość używanych w niej danych. Zmniejsz coupling między modułami."
+            return f"Przenieś metodę {smell.name.split(': ')[-1]} do modułu, który posiada większość używanych w niej danych. Zmniejsz coupling między modułami."  # noqa: E501
         elif smell.type == "bottleneck":
-            return f"Funkcja {smell.name.split(': ')[-1]} jest wąskim gardłem strukturalnym. Wyekstrahuj z niej niezależne części pomocnicze, aby ułatwić zrozumienie przepływu."
+            return f"Funkcja {smell.name.split(': ')[-1]} jest wąskim gardłem strukturalnym. Wyekstrahuj z niej niezależne części pomocnicze, aby ułatwić zrozumienie przepływu."  # noqa: E501
         elif smell.type == "circular_dependency":
-            return "Wykryto cykl zależności. Przenieś część logiki do nowego modułu lub użyj interfejsu, aby przerwać cykl."
+            return "Wykryto cykl zależności. Przenieś część logiki do nowego modułu lub użyj interfejsu, aby przerwać cykl."  # noqa: E501
         return "Zrefaktoryzuj ten fragment kodu, aby poprawić jego strukturę i zmniejszyć złożoność."

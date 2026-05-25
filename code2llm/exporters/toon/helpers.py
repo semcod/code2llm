@@ -93,7 +93,7 @@ def _hotspot_description(fi: FunctionInfo, fan_out: int) -> str:
     return f"calls {fan_out} functions"
 
 
-_WALK_EXCLUDE = {"venv", ".venv", "node_modules", "__pycache__", ".git", "dist", "build", ".tox", ".mypy_cache", "egg-info"}
+_WALK_EXCLUDE = {"venv", ".venv", "node_modules", "__pycache__", ".git", "dist", "build", ".tox", ".mypy_cache", "egg-info"}  # noqa: E501
 
 
 def _fast_line_counts(pp: Path, result) -> Dict[str, int]:

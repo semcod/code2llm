@@ -13,20 +13,20 @@ def get_typescript_patterns() -> Dict[str, re.Pattern]:
         "import": re.compile(r"^\s*import\s+.*?\s+from\s+['\"]([^'\"]+)['\"]"),
         "decorator": re.compile(r"^\s*@(\w+(?:\.\w+)?)(?:\([^)]*\))?"),
         "class": re.compile(
-            r"^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+(\w+)\s*(?:<[^>]+>)?(?:\s+extends\s+(\w+))?(?:\s+implements\s+([^{]+))?"
+            r"^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+(\w+)\s*(?:<[^>]+>)?(?:\s+extends\s+(\w+))?(?:\s+implements\s+([^{]+))?"  # noqa: E501
         ),
         "interface": re.compile(r"^\s*(?:export\s+)?interface\s+(\w+)(?:<[^>]+>)?"),
         "function": re.compile(
             r"^\s*(?:export\s+)?(?:async\s+)?(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?[\(\w])"
         ),
         "arrow_func": re.compile(
-            r"^\s*(?:export\s+)?\s*(?:const|let|var)\s+(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:<[^>]+>\s*)?(?:async\s+)?\([^)]*\)\s*(?::\s*[^=]+)?\s*=>"
+            r"^\s*(?:export\s+)?\s*(?:const|let|var)\s+(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:<[^>]+>\s*)?(?:async\s+)?\([^)]*\)\s*(?::\s*[^=]+)?\s*=>"  # noqa: E501
         ),
         "method": re.compile(
-            r"^\s*(?:(?:public|private|protected|static|readonly|abstract|async|override)\s+)*(?:get\s+|set\s+)?(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)"
+            r"^\s*(?:(?:public|private|protected|static|readonly|abstract|async|override)\s+)*(?:get\s+|set\s+)?(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)"  # noqa: E501
         ),
         "arrow_prop": re.compile(
-            r"^\s*(?:(?:public|private|protected|static|readonly)\s+)*(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:<[^>]+>\s*)?(?:async\s+)?(?:\([^)]*\)|[a-zA-Z_]\w*)\s*=>"
+            r"^\s*(?:(?:public|private|protected|static|readonly)\s+)*(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:<[^>]+>\s*)?(?:async\s+)?(?:\([^)]*\)|[a-zA-Z_]\w*)\s*=>"  # noqa: E501
         ),
     }
 

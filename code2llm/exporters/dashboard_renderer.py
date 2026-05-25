@@ -104,15 +104,15 @@ class DashboardRenderer:
   * {{ margin:0; padding:0; box-sizing:border-box; }}
   body {{ font-family: 'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); padding:2rem; }}
   h1 {{ font-size:1.5rem; margin-bottom:.5rem; }}
-  h2 {{ font-size:1.1rem; color:var(--muted); margin:1.5rem 0 .75rem; border-bottom:1px solid var(--border); padding-bottom:.25rem; }}
+  h2 {{ font-size:1.1rem; color:var(--muted); margin:1.5rem 0 .75rem; border-bottom:1px solid var(--border); padding-bottom:.25rem; }}  # noqa: E501
   .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin:1rem 0; }}
   .card {{ background:var(--surface); border:1px solid var(--border); border-radius:.5rem; padding:1rem; }}
   .card .value {{ font-size:1.8rem; font-weight:700; }}
   .card .label {{ color:var(--muted); font-size:.8rem; text-transform:uppercase; }}
-  .chart-container {{ background:var(--surface); border:1px solid var(--border); border-radius:.5rem; padding:1rem; margin:1rem 0; }}
+  .chart-container {{ background:var(--surface); border:1px solid var(--border); border-radius:.5rem; padding:1rem; margin:1rem 0; }}  # noqa: E501
   .table-wrap {{ overflow-x:auto; }}
   table {{ width:100%; border-collapse:collapse; font-size:.85rem; }}
-  th {{ text-align:left; color:var(--muted); padding:.5rem; border-bottom:1px solid var(--border); white-space:nowrap; }}
+  th {{ text-align:left; color:var(--muted); padding:.5rem; border-bottom:1px solid var(--border); white-space:nowrap; }}  # noqa: E501
   td {{ padding:.5rem; border-bottom:1px solid var(--border); }}
   .badge {{ padding:.15rem .5rem; border-radius:.25rem; font-size:.75rem; font-weight:600; }}
   .badge.critical {{ background:var(--red); color:#fff; }}
@@ -130,7 +130,7 @@ class DashboardRenderer:
   .evo-cards {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:.75rem; }}
   .evo-cards .card {{ text-align:center; }}
   .trend {{ font-size:.75rem; color:var(--muted); }}
-  .lang-tag {{ display:inline-block; padding:.1rem .4rem; border-radius:.2rem; font-size:.7rem; font-weight:600; margin-right:.25rem; color:#fff; }}
+  .lang-tag {{ display:inline-block; padding:.1rem .4rem; border-radius:.2rem; font-size:.7rem; font-weight:600; margin-right:.25rem; color:#fff; }}  # noqa: E501
   @media (max-width:768px) {{ .two-col,.three-col {{ grid-template-columns:1fr; }} }}
   footer {{ margin-top:2rem; color:var(--muted); font-size:.75rem; text-align:center; }}
 </style>
@@ -153,7 +153,7 @@ class DashboardRenderer:
   <div class="card"><div class="value">{stats.get("lines", 0):,}</div><div class="label">Lines</div></div>
   <div class="card"><div class="value">{len(lang["names"])}</div><div class="label">Languages</div></div>
   <div class="card"><div class="value">{cc_avg}</div><div class="label">Avg CC</div></div>
-  <div class="card"><div class="value">{health.get("critical_count", 0)}</div><div class="label">Critical (CC≥{health.get("critical_limit", 10)})</div></div>
+  <div class="card"><div class="value">{health.get("critical_count", 0)}</div><div class="label">Critical (CC≥{health.get("critical_limit", 10)})</div></div>  # noqa: E501
   <div class="card"><div class="value">{health.get("duplicates", 0)}</div><div class="label">Duplicates</div></div>
   <div class="card"><div class="value">{health.get("cycles", 0)}</div><div class="label">Cycles</div></div>
 </div>
@@ -179,8 +179,8 @@ class DashboardRenderer:
     <h2>Top Modules ({len(modules)})</h2>
     <div class="card"><div class="table-wrap">
     <table>
-      <thead><tr><th>Module</th><th>Path</th><th style="text-align:right">Lines</th><th style="text-align:right">Funcs</th><th style="text-align:right">Classes</th><th style="text-align:right">CC max</th></tr></thead>
-      <tbody>{top_modules_html if top_modules_html else '<tr><td colspan="6" style="color:var(--muted)">No modules</td></tr>'}</tbody>
+      <thead><tr><th>Module</th><th>Path</th><th style="text-align:right">Lines</th><th style="text-align:right">Funcs</th><th style="text-align:right">Classes</th><th style="text-align:right">CC max</th></tr></thead>  # noqa: E501
+      <tbody>{top_modules_html if top_modules_html else '<tr><td colspan="6" style="color:var(--muted)">No modules</td></tr>'}</tbody>  # noqa: E501
     </table>
     </div></div>
   </div>
@@ -200,7 +200,7 @@ class DashboardRenderer:
 <div class="card"><div class="table-wrap">
 <table>
   <thead><tr><th>Function</th><th>Fan-out</th><th>Note</th></tr></thead>
-  <tbody>{hotspots_html if hotspots_html else '<tr><td colspan="3" style="color:var(--muted)">No hotspots</td></tr>'}</tbody>
+  <tbody>{hotspots_html if hotspots_html else '<tr><td colspan="3" style="color:var(--muted)">No hotspots</td></tr>'}</tbody>  # noqa: E501
 </table>
 </div></div>
 </div>
@@ -210,7 +210,7 @@ class DashboardRenderer:
 <div class="card"><div class="table-wrap">
 <table>
   <thead><tr><th>#</th><th>Action</th><th>Impact</th><th>Effort</th></tr></thead>
-  <tbody>{refactor_html if refactor_html else '<tr><td colspan="4" style="color:var(--muted)">No refactoring needed</td></tr>'}</tbody>
+  <tbody>{refactor_html if refactor_html else '<tr><td colspan="4" style="color:var(--muted)">No refactoring needed</td></tr>'}</tbody>  # noqa: E501
 </table>
 </div></div>
 </div>
@@ -326,7 +326,7 @@ new Chart(modFuncsCtx, {{
       <div class="card"><div class="value">{crit}</div><div class="label">Critical {crit_trend}</div></div>
       <div class="card"><div class="value">{lines}</div><div class="label">Lines</div></div>
     </div>
-    <p class="trend" style="margin-top:.5rem;">Run analysis multiple times to build a trend chart (≥3 data points needed).</p>
+    <p class="trend" style="margin-top:.5rem;">Run analysis multiple times to build a trend chart (≥3 data points needed).</p>  # noqa: E501
   </div>"""
 
     @staticmethod

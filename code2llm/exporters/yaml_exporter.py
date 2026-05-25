@@ -431,7 +431,8 @@ class YAMLExporter(BaseExporter):
             total_calls = data["calls_in"] + data["calls_out"]
             lines.append(f"  {name}")
             lines.append(
-                f"    CC={data['cyclomatic_complexity']}  in:{data['calls_in']}  out:{data['calls_out']}  total:{total_calls}"
+                f"    CC={data['cyclomatic_complexity']}"
+                f"  in:{data['calls_in']}  out:{data['calls_out']}  total:{total_calls}"
             )
         return lines
 

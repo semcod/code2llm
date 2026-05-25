@@ -37,8 +37,8 @@ def render_header(
     )
 
     lines = [
-        f"# {project_name} | {stats_line['files']}f {stats_line['lines']}L | {lang_str} | {datetime.now().strftime('%Y-%m-%d')}",
-        f"# stats: {stats_line['funcs']} func | {stats_line['classes']} cls | {stats_line['files']} mod | CC̄={stats_line['avg_cc']} | critical:{stats_line['critical']} | cycles:{stats_line['cycles']}",
+        f"# {project_name} | {stats_line['files']}f {stats_line['lines']}L | {lang_str} | {datetime.now().strftime('%Y-%m-%d')}",  # noqa: E501
+        f"# stats: {stats_line['funcs']} func | {stats_line['classes']} cls | {stats_line['files']} mod | CC̄={stats_line['avg_cc']} | critical:{stats_line['critical']} | cycles:{stats_line['cycles']}",  # noqa: E501
         alerts_line,
         hotspots_line,
         f"# evolution: {trend}",

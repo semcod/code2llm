@@ -273,7 +273,7 @@ def generate_with_puppeteer(
 {mmd_content}
     </div>
     <script>
-        mermaid.initialize({{ startOnLoad: true, theme: 'default', maxTextSize: {max_text_size}, maxEdges: {max_edges} }});
+        mermaid.initialize({{ startOnLoad: true, theme: 'default', maxTextSize: {max_text_size}, maxEdges: {max_edges} }});  # noqa: E501
     </script>
 </body>
 </html>

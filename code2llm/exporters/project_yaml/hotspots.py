@@ -67,7 +67,7 @@ def _cycle_priorities(result: AnalysisResult) -> List[Dict]:
     """Return break-cycle actions for the first 3 circular dependencies."""
     cycles = result.metrics.get("project", {}).get("circular_dependencies", [])
     return [
-        {"action": f"Break circular dependency: {' → '.join(str(c) for c in cycle) if isinstance(cycle, list) else str(cycle)}",
+        {"action": f"Break circular dependency: {' → '.join(str(c) for c in cycle) if isinstance(cycle, list) else str(cycle)}",  # noqa: E501
          "impact": "medium", "effort": "low"}
         for cycle in cycles[:3]
     ]
