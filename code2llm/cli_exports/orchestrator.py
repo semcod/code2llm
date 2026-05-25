@@ -127,6 +127,23 @@ def _save_to_export_cache(args, formats: list, output_dir: Path, source_path: Pa
         print(f"  Export cached at: {export_cache_dir}")
 
 
+def _run_core_exports(
+    args, result, output_dir: Path, source_path, formats, requested_formats,
+    is_chunked: bool, skip_cache: bool
+) -> None:
+    """Dispatch to chunked or single export and optionally save to cache."""
+    try:
+        if is_chunked and source_path:
+            _export_chunked(args, result, output_dir, source_path, formats, requested_formats)
+        else:
+            _export_single(args, result, output_dir, formats, requested_formats, source_path)
+        if not skip_cache and source_path:
+            _save_to_export_cache(args, formats, output_dir, source_path)
+    except Exception as e:
+        print(f"Error during export: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = None):
     """Export analysis results in requested formats.
 
@@ -139,35 +156,16 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     if getattr(args, "planfile_apply", False) and "planfile" not in formats:
         formats.append("planfile")
     is_chunked = getattr(args, "chunk", False)
-
     if getattr(args, "dry_run", False):
         _show_dry_run_plan(formats, output_dir, is_chunked, result)
         return
-
     # Skip cache for chunked runs or explicit cache bypass flags. --force is
     # documented as a --no-cache alias, so it must bypass export cache too.
     skip_cache = _should_skip_export_cache(args, is_chunked)
-
     if not skip_cache and source_path:
         if _try_serve_from_cache(args, formats, output_dir, source_path):
             return
-
-    try:
-        if is_chunked and source_path:
-            _export_chunked(
-                args, result, output_dir, source_path, formats, requested_formats
-            )
-        else:
-            _export_single(
-                args, result, output_dir, formats, requested_formats, source_path
-            )
-
-        if not skip_cache and source_path:
-            _save_to_export_cache(args, formats, output_dir, source_path)
-
-    except Exception as e:
-        print(f"Error during export: {e}", file=sys.stderr)
-        sys.exit(1)
+    _run_core_exports(args, result, output_dir, source_path, formats, requested_formats, is_chunked, skip_cache)
 
 
 def _copy_cached_export(

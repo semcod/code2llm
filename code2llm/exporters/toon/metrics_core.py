@@ -19,55 +19,40 @@ class CoreMetricsComputer:
         self.line_counts = line_counts
         self.project_path = project_path
 
+    def _ensure_file_record(self, files: dict, fpath: str, project_path: str) -> None:
+        """Add a fresh file record to files dict if fpath not already present."""
+        if fpath not in files:
+            rel = _rel_path(fpath, project_path)
+            lc = self.line_counts.get(fpath, self.line_counts.get(rel, 0))
+            files[fpath] = self._new_file_record(rel, lc)
+
     def compute_file_metrics(self, result: AnalysisResult) -> Dict[str, Dict[str, Any]]:
         """Per-file metrics derived from AnalysisResult."""
         files: Dict[str, Dict[str, Any]] = {}
         project_path = result.project_path
-
-        # aggregate from functions (skip excluded paths)
         for qname, fi in result.functions.items():
-            fpath = fi.file
-            if _is_excluded(fpath):
+            if _is_excluded(fi.file):
                 continue
-            if fpath not in files:
-                rel = _rel_path(fpath, project_path)
-                lc = self.line_counts.get(fpath, self.line_counts.get(rel, 0))
-                files[fpath] = self._new_file_record(rel, lc)
+            self._ensure_file_record(files, fi.file, project_path)
             cc = fi.complexity.get("cyclomatic_complexity", 0)
-            files[fpath]["cc_scores"].append(cc)
-            files[fpath]["max_cc"] = max(files[fpath]["max_cc"], cc)
-            files[fpath]["methods"] += 1
+            files[fi.file]["cc_scores"].append(cc)
+            files[fi.file]["max_cc"] = max(files[fi.file]["max_cc"], cc)
+            files[fi.file]["methods"] += 1
             if fi.class_name:
-                files[fpath]["classes"].add(fi.class_name)
-
-        # aggregate from classes without functions (skip excluded)
+                files[fi.file]["classes"].add(fi.class_name)
         for qname, ci in result.classes.items():
-            fpath = ci.file
-            if _is_excluded(fpath):
+            if _is_excluded(ci.file):
                 continue
-            if fpath not in files:
-                rel = _rel_path(fpath, project_path)
-                lc = self.line_counts.get(fpath, self.line_counts.get(rel, 0))
-                files[fpath] = self._new_file_record(rel, lc)
-            files[fpath]["classes"].add(ci.name)
-
-        # modules with no functions/classes (skip excluded)
+            self._ensure_file_record(files, ci.file, project_path)
+            files[ci.file]["classes"].add(ci.name)
         for mname, mi in result.modules.items():
-            fpath = mi.file
-            if _is_excluded(fpath):
+            if _is_excluded(mi.file):
                 continue
-            if fpath not in files:
-                rel = _rel_path(fpath, project_path)
-                lc = self.line_counts.get(fpath, self.line_counts.get(rel, 0))
-                files[fpath] = self._new_file_record(rel, lc)
-
-        # fan-in + finalize
+            self._ensure_file_record(files, mi.file, project_path)
         self._compute_fan_in(files, result)
-
         for fpath in files:
             files[fpath]["class_count"] = len(files[fpath]["classes"])
             del files[fpath]["classes"]
-
         return files
 
     @staticmethod
