@@ -67,42 +67,43 @@ class FileAnalyzer:
             return analyze_ruby(content, file_path, module_name, ext, self.stats)
         return analyze_generic(content, file_path, module_name, ext, self.stats)
 
+    def _cache_get(self, file_path: str) -> Optional[Dict]:
+        """Return cached result if caching is enabled and a hit exists."""
+        if not (self.cache and self.config.performance.enable_cache):
+            return None
+        cached = self.cache.get_fast(file_path)
+        if not cached:
+            return None
+        self.stats["cache_hits"] += 1
+        if "file" not in cached:
+            cached["file"] = file_path
+        return cached
+
+    def _cache_put(self, file_path: str, result: Dict) -> None:
+        """Store result in cache if caching is enabled."""
+        if self.cache and self.config.performance.enable_cache and result:
+            self.cache.put_fast(file_path, result)
+
     def analyze_file(self, file_path: str, module_name: str) -> Dict:
         """Analyze a single source file based on its language."""
         path = Path(file_path)
         if not path.exists():
             return {}
-
-        if self.cache and self.config.performance.enable_cache:
-            cached = self.cache.get_fast(file_path)
-            if cached:
-                self.stats["cache_hits"] += 1
-                if "file" not in cached:
-                    cached["file"] = file_path
-                return cached
-
+        cached = self._cache_get(file_path)
+        if cached is not None:
+            return cached
         ext = path.suffix.lower()
         try:
             content = path.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             return {}
-
         result = self._route_to_language_analyzer(content, file_path, module_name, ext)
         if result and result.get("module"):
             result["module"].line_count = len(content.splitlines())
             result["module"].source_kind = classify_source_path(file_path)
-
-        # Tag result with its source file so downstream callers
-        # (e.g. PersistentCache in ProjectAnalyzer._store_to_persistent_cache)
-        # can match results back to file paths. Without this, the persistent
-        # manifest never gets populated and the export-level cache key
-        # collapses to md5("{}")[:12], causing stale exports to be reused.
         if result:
             result["file"] = file_path
-
-        if self.cache and self.config.performance.enable_cache and result:
-            self.cache.put_fast(file_path, result)
-
+        self._cache_put(file_path, result)
         return result
 
     def _analyze_python(self, content: str, file_path: str, module_name: str) -> Dict:

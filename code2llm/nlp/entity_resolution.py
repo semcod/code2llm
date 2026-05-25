@@ -61,6 +61,16 @@ class EntityResolver:
         # Initialize with empty dict, populate from codebase analysis
         self.codebase_entities = codebase_entities or {}
 
+    def _apply_resolution_steps(self, matches: list, context: Optional[str]) -> list:
+        """Apply steps 3c-3e: disambiguation, hierarchical, and alias resolution."""
+        if context and self.config.context_disambiguation:
+            matches = self._disambiguate(matches, context)
+        if self.config.hierarchical_resolution:
+            matches = self._resolve_hierarchical(matches)
+        if self.config.alias_resolution:
+            matches = self._resolve_aliases(matches)
+        return matches
+
     def resolve(
         self,
         query: str,
@@ -69,45 +79,21 @@ class EntityResolver:
     ) -> EntityResolutionResult:
         """Resolve entities from query (steps 3a-3e)."""
         result = EntityResolutionResult(query=query)
-
-        # Determine expected entity types
-        if expected_types is None:
-            expected_types = self.config.entity_types
-
-        # 3a. Extract candidate entities by type
-        candidates = []
-        for entity_type in expected_types:
-            type_candidates = self._extract_candidates(query, entity_type)
-            candidates.extend(type_candidates)
-
-        # 3b. Match with threshold
-        threshold = self.config.name_match_threshold
-        matches = [c for c in candidates if c.confidence >= threshold]
-
-        # 3c. Context-aware disambiguation
-        if context and self.config.context_disambiguation:
-            matches = self._disambiguate(matches, context)
-
-        # 3d. Hierarchical resolution
-        if self.config.hierarchical_resolution:
-            matches = self._resolve_hierarchical(matches)
-
-        # 3e. Alias resolution
-        if self.config.alias_resolution:
-            matches = self._resolve_aliases(matches)
-
+        types = expected_types if expected_types is not None else self.config.entity_types
+        candidates: list = []
+        for entity_type in types:
+            candidates.extend(self._extract_candidates(query, entity_type))
+        matches = self._apply_resolution_steps(
+            [c for c in candidates if c.confidence >= self.config.name_match_threshold],
+            context,
+        )
         result.entities = matches
-
-        # Determine if disambiguation needed
         if len(matches) > 1:
-            top_confidences = [m.confidence for m in matches[:2]]
-            if abs(top_confidences[0] - top_confidences[1]) < 0.1:
+            top = [m.confidence for m in matches[:2]]
+            if abs(top[0] - top[1]) < 0.1:
                 result.disambiguation_needed = True
-
-        # Set primary entity
         if matches:
             result.primary_entity = matches[0]
-
         return result
 
     def _extract_candidates(self, query: str, entity_type: str) -> List[Entity]:
