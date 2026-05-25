@@ -31,37 +31,42 @@ def _deep_get(d: Dict[str, Any], path: Tuple[str, ...]) -> Any:
     return cur
 
 
+def _sec(data: Dict[str, Any], key: str) -> Dict[str, Any]:
+    """Return data[key] as a dict, falling back to empty dict."""
+    v = data.get(key)
+    return v if isinstance(v, dict) else {}
+
+
+def _sget(d: Dict[str, Any], key: str, default: str = "") -> str:
+    """Return d[key] as a non-empty string, falling back to default."""
+    v = d.get(key)
+    return v if isinstance(v, str) and v else default
+
+
 def normalize_llm_task(data: Dict[str, Any]) -> Dict[str, Any]:
     """Normalise a raw LLM task dict into a canonical structure with all required keys."""
-    task = data.get("task") or {}
-    context = data.get("context") or {}
-    deliverables = data.get("deliverables") or {}
-    interfaces = data.get("interfaces") or {}
-    rules = data.get("rules") or {}
-    acceptance = data.get("acceptance") or {}
-    examples = data.get("examples")
-    notes = data.get("notes_for_llm") or {}
-
-    normalized: Dict[str, Any] = {
-        "task": {
-            "title": task.get("title") or "",
-            "one_line_goal": task.get("one_line_goal") or "",
-        },
+    task = _sec(data, "task")
+    ctx = _sec(data, "context")
+    deliv = _sec(data, "deliverables")
+    ifaces = _sec(data, "interfaces")
+    rules = _sec(data, "rules")
+    accept = _sec(data, "acceptance")
+    notes = _sec(data, "notes_for_llm")
+    return {
+        "task": {"title": _sget(task, "title"), "one_line_goal": _sget(task, "one_line_goal")},
         "context": {
-            "product_area": context.get("product_area") or "",
-            "current_behavior": context.get("current_behavior") or "",
-            "desired_behavior": context.get("desired_behavior") or "",
+            "product_area": _sget(ctx, "product_area"),
+            "current_behavior": _sget(ctx, "current_behavior"),
+            "desired_behavior": _sget(ctx, "desired_behavior"),
         },
         "deliverables": {
-            "language": deliverables.get("language") or "any",
-            "must_generate": _ensure_list(deliverables.get("must_generate")),
-            "files_to_create_or_edit": _ensure_list(
-                deliverables.get("files_to_create_or_edit")
-            ),
+            "language": _sget(deliv, "language", "any"),
+            "must_generate": _ensure_list(deliv.get("must_generate")),
+            "files_to_create_or_edit": _ensure_list(deliv.get("files_to_create_or_edit")),
         },
         "interfaces": {
-            "inputs": _ensure_list(interfaces.get("inputs")),
-            "outputs": _ensure_list(interfaces.get("outputs")),
+            "inputs": _ensure_list(ifaces.get("inputs")),
+            "outputs": _ensure_list(ifaces.get("outputs")),
         },
         "rules": {
             "must": _ensure_list(rules.get("must")),
@@ -71,20 +76,16 @@ def normalize_llm_task(data: Dict[str, Any]) -> Dict[str, Any]:
             "performance": _ensure_list(rules.get("performance")),
         },
         "acceptance": {
-            "tests": _ensure_list(acceptance.get("tests")),
-            "done_definition": _ensure_list(acceptance.get("done_definition")),
+            "tests": _ensure_list(accept.get("tests")),
+            "done_definition": _ensure_list(accept.get("done_definition")),
         },
-        "examples": _ensure_list(examples),
+        "examples": _ensure_list(data.get("examples")),
         "notes_for_llm": {
             "constraints": _ensure_list(notes.get("constraints")),
             "style": _ensure_list(notes.get("style")),
-            "language_specific_hints": _ensure_list(
-                notes.get("language_specific_hints")
-            ),
+            "language_specific_hints": _ensure_list(notes.get("language_specific_hints")),
         },
     }
-
-    return normalized
 
 
 _SECTION_KEYS = {

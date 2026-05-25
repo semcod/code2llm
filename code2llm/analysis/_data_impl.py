@@ -222,26 +222,26 @@ def _analyze_data_types(result: AnalysisResult) -> list:
 # ---------------------------------------------------------------------------
 
 
+_NAME_TYPE_KEYWORDS: List[tuple] = [
+    ("list", ("list", "items")),
+    ("dict", ("dict", "map")),
+    ("str",  ("text", "string")),
+    ("int",  ("count", "index")),
+]
+_DOC_TYPE_KEYWORDS: List[tuple] = [
+    ("list", ("list",)),
+    ("dict", ("dict",)),
+    ("str",  ("string", "text")),
+]
+
+
 def _get_function_data_types(func) -> list:
     """Derive data type labels for a function from its name and docstring."""
-    types: List[str] = []
     name = func.name.lower()
-    if "list" in name or "items" in name:
-        types.append("list")
-    if "dict" in name or "map" in name:
-        types.append("dict")
-    if "text" in name or "string" in name:
-        types.append("str")
-    if "count" in name or "index" in name:
-        types.append("int")
+    types = [dt for dt, kws in _NAME_TYPE_KEYWORDS if any(kw in name for kw in kws)]
     if func.docstring:
         doc = func.docstring.lower()
-        if "list" in doc:
-            types.append("list")
-        if "dict" in doc:
-            types.append("dict")
-        if "string" in doc or "text" in doc:
-            types.append("str")
+        types += [dt for dt, kws in _DOC_TYPE_KEYWORDS if any(kw in doc for kw in kws)]
     return list(set(types))
 
 
@@ -306,55 +306,51 @@ def _identify_process_patterns(result: AnalysisResult) -> list:
     return sorted(res, key=lambda x: x["count"], reverse=True)
 
 
+def _type_consolidations(data_types: list) -> list:
+    """Find groups of similar data types that could be consolidated."""
+    similar: Dict[str, list] = {}
+    for dt in data_types:
+        sig = ",".join(sorted(dt["detected_types"]))
+        similar.setdefault(sig, []).append(dt)
+    result = []
+    for sig, sims in similar.items():
+        if len(sims) > 1:
+            usage = sum(s["usage_count"] for s in sims)
+            if usage > 10:
+                result.append({"type_signature": sig, "similar_types": [s["type_name"] for s in sims],
+                                "total_usage": usage, "potential_reduction": len(sims) - 1})
+    return result
+
+
+def _process_consolidations(result: AnalysisResult) -> list:
+    """Find repeated process patterns that could be consolidated."""
+    return [
+        {"pattern_type": p["pattern_type"], "function_count": p["count"],
+         "potential_reduction": p["count"] // 3}
+        for p in _identify_process_patterns(result) if p["count"] > 5
+    ]
+
+
+def _hub_optimizations(dfg: dict) -> list:
+    """Identify hub nodes that are candidates for splitting or caching."""
+    return [
+        {"function": hub["id"], "connections": hub["in_degree"] + hub["out_degree"],
+         "optimization_type": "split" if hub["out_degree"] > 10 else "cache"}
+        for hub in list(n for n in dfg["nodes"].values() if n["is_hub"])[:10]
+    ]
+
+
 def _analyze_optimization_opportunities(
     result: AnalysisResult, data_types: list, dfg: dict
 ) -> dict:
     """Analyze optimization opportunities in data handling."""
-    opt: Dict[str, Any] = {
-        "potential_score": 0.0,
-        "type_consolidation": [],
-        "process_consolidation": [],
-        "hub_optimization": [],
+    type_cons = _type_consolidations(data_types)
+    proc_cons = _process_consolidations(result)
+    hub_opts = _hub_optimizations(dfg)
+    return {
+        "potential_score": (len(type_cons) * 10 + len(proc_cons) * 15 + len(hub_opts) * 5) / 100.0,
+        "type_consolidation": type_cons,
+        "process_consolidation": proc_cons,
+        "hub_optimization": hub_opts,
         "recommendations": [],
     }
-    similar: Dict[str, list] = {}
-    for dt in data_types:
-        sig = ",".join(sorted(dt["detected_types"]))
-        if sig not in similar:
-            similar[sig] = []
-        similar[sig].append(dt)
-    for _sig, sims in similar.items():
-        if len(sims) > 1:
-            usage = sum(s["usage_count"] for s in sims)
-            if usage > 10:
-                opt["type_consolidation"].append(
-                    {
-                        "type_signature": _sig,
-                        "similar_types": [s["type_name"] for s in sims],
-                        "total_usage": usage,
-                        "potential_reduction": len(sims) - 1,
-                    }
-                )
-    for p in _identify_process_patterns(result):
-        if p["count"] > 5:
-            opt["process_consolidation"].append(
-                {
-                    "pattern_type": p["pattern_type"],
-                    "function_count": p["count"],
-                    "potential_reduction": p["count"] // 3,
-                }
-            )
-    for hub in [n for n in dfg["nodes"].values() if n["is_hub"]][:10]:
-        opt["hub_optimization"].append(
-            {
-                "function": hub["id"],
-                "connections": hub["in_degree"] + hub["out_degree"],
-                "optimization_type": "split" if hub["out_degree"] > 10 else "cache",
-            }
-        )
-    opt["potential_score"] = (
-        len(opt["type_consolidation"]) * 10
-        + len(opt["process_consolidation"]) * 15
-        + len(opt["hub_optimization"]) * 5
-    ) / 100.0
-    return opt
