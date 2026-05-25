@@ -49,58 +49,41 @@ class ProjectYAMLExporter(BaseExporter):
             )
         return output
 
+    def _build_project_stats(self, result: AnalysisResult, total_lines: int) -> Dict[str, Any]:
+        """Build the project.stats dict with counts of files, lines, functions, classes."""
+        files = {fi.file for fi in result.functions.values() if not _is_excluded(fi.file)}
+        return {
+            "files": len(files) or len(result.modules),
+            "lines": total_lines,
+            "functions": sum(1 for f in result.functions.values() if not _is_excluded(f.file)),
+            "classes": sum(1 for c in result.classes.values() if not _is_excluded(c.file)),
+        }
+
     def _build_project_yaml(
         self, result: AnalysisResult, prev_evolution: List[Dict]
     ) -> Dict[str, Any]:
         """Build complete project.yaml structure."""
         line_counts = _scan_line_counts(result.project_path, result=result)
-        # Filter out venv/site-packages/etc — only count lines of non-excluded files
         filtered_lines = {k: v for k, v in line_counts.items() if not _is_excluded(k)}
-        total_lines = sum(filtered_lines.values()) // 2  # keys stored twice (abs + rel)
-
+        total_lines = sum(filtered_lines.values()) // 2
         modules = build_modules(result, line_counts)
         health = build_health(result, modules)
         hotspots = build_hotspots(result)
-        refactoring = build_refactoring(result, modules, hotspots)
-        evolution = build_evolution(health, total_lines, prev_evolution)
-
         return {
             "version": "1",
             "project": {
-                "name": Path(result.project_path).name
-                if result.project_path
-                else "unknown",
+                "name": Path(result.project_path).name if result.project_path else "unknown",
                 "repo": result.project_path or "",
                 "language": self._detect_primary_language(result),
                 "analyzed_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "tool": "code2llm",
-                "stats": {
-                    "files": len(
-                        set(
-                            fi.file
-                            for fi in result.functions.values()
-                            if not _is_excluded(fi.file)
-                        )
-                    )
-                    or len(result.modules),
-                    "lines": total_lines,
-                    "functions": len(
-                        [
-                            f
-                            for f in result.functions.values()
-                            if not _is_excluded(f.file)
-                        ]
-                    ),
-                    "classes": len(
-                        [c for c in result.classes.values() if not _is_excluded(c.file)]
-                    ),
-                },
+                "stats": self._build_project_stats(result, total_lines),
             },
             "health": health,
             "modules": modules,
             "hotspots": hotspots,
-            "refactoring": refactoring,
-            "evolution": evolution,
+            "refactoring": build_refactoring(result, modules, hotspots),
+            "evolution": build_evolution(health, total_lines, prev_evolution),
         }
 
     def _detect_primary_language(self, result: AnalysisResult) -> str:
