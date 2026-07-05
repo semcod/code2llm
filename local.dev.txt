@@ -1,0 +1,12 @@
+# local.dev.txt — locally developed dependencies of this project (generated 2026-07-04)
+# by ~/github/local.dev.sh — DO NOT EDIT; see ~/github/local.dev.md
+# project: code2llm 0.5.169 (python) at /home/tom/github/semcod/code2llm
+# deps declared: 33 | with local source: 4
+
+## LOCAL DEPS  (dep | required | local source (version) | installed | status)
+code2logic | * | /home/tom/github/semcod/code2logic (1.0.50) | 1.0.48 non-editable | STALE-INSTALL (local 1.0.50) -> fix: pip install -e /home/tom/github/semcod/code2logic  [pyproject.toml]
+costs | >=0.1.20 | /home/tom/github/semcod/costs (0.1.53) | 0.1.50 non-editable | STALE-INSTALL (local 0.1.53) -> fix: pip install -e /home/tom/github/semcod/costs  [pyproject.toml[dev]]
+goal | >=2.1.218 | /home/tom/github/semcod/goal (2.1.266) | 2.1.240 non-editable | STALE-INSTALL (local 2.1.266) -> fix: pip install -e /home/tom/github/semcod/goal  [pyproject.toml[dev]]
+pfix | >=0.1.60 | /home/tom/github/semcod/pfix (0.1.76) | 0.1.73 editable | OK-EDITABLE  [pyproject.toml[dev]]
+
+## EXTERNAL DEPS (no local source, 29): astroid, black, flake8, jinja2, matplotlib, mypy, networkx, numpy, psutil, pytest, pytest-cov, pytest-xdist, pyyaml, radon, scipy, tiktoken, tree-sitter, tree-sitter-c, tree-sitter-c-sharp, tree-sitter-cpp, tree-sitter-go, tree-sitter-java, tree-sitter-javascript, tree-sitter-php, tree-sitter-python, tree-sitter-ruby, tree-sitter-rust, tree-sitter-typescript, vulture

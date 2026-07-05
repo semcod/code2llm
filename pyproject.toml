@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "code2llm"
-version = "0.5.169"
+version = "0.5.171"
 description = "High-performance Python code flow analysis with optimized TOON format - CFG, DFG, call graphs, and intelligent code queries"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -62,9 +62,7 @@ dependencies = [
     "tree-sitter-ruby>=0.21",
 ]
 
-[project.license]
-text = "Apache-2.0"
-
+license = "Apache-2.0"
 [project.optional-dependencies]
 dev = [
     "pytest>=6.2",

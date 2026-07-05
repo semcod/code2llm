@@ -29,8 +29,8 @@ setup(
     description="Python code flow analysis tool - CFG, DFG, and call graph extraction",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    author="STTS Project",
-    author_email="",
+    author="Tom Sapletta",
+    author_email="tom@sapletta.com",
     url="https://github.com/wronai/stts",
     packages=find_packages(),
     entry_points={

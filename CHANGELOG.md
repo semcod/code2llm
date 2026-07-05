@@ -1,3 +1,15 @@
+## [0.5.170] - 2026-07-05
+
+### Fixed
+
+- `_SKIP_DIR_NAMES` blanket-excluded any directory named exactly `lib`, `lib64`, `include`,
+  `bin`, or `share` from analysis, regardless of location. These are common legitimate source
+  directory names (Ruby gems keep all source in `lib/`, PlatformIO/Arduino firmware projects
+  keep custom libraries in `lib/`, C/C++ projects keep headers in `include/`, Node packages
+  ship CLI entrypoints in `bin/`), so real code was silently dropped from the analysis. The
+  entries were also redundant: virtualenv directories are already fully pruned via the
+  `venv`/`.venv`/`env`/`.env` entries, and `site-packages` remains excluded directly.
+
 ## [Unreleased]
 
 ### Performance
@@ -17,6 +29,19 @@
 - Remove ~85 unused imports across 40+ files (analysis, core, exporters, generators, nlp, patterns, refactor)
 - Fix Mermaid comment syntax: `.mmd` files use `%%` for comments, not `#`
 - Fix Chromium sandbox crash: pass `--no-sandbox` to puppeteer/mmdc for PNG generation
+
+## [0.5.171] - 2026-07-05
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
+### Other
+- Update VERSION
+- Update code2llm/__init__.py
+- Update code2llm/core/file_filter.py
+- Update examples/docker-doql-example/rust/local.dev.txt
+- Update local.dev.txt
 
 ## [0.5.169] - 2026-06-29
 
