@@ -131,18 +131,34 @@ class SmellDetector:
         return smells
 
     def _detect_data_clumps(self) -> List[CodeSmell]:
-        """Detect 3+ variables frequently passed together."""
+        """Detect 3+ variables frequently passed together.
+
+        Grouped by (file, argument-set), not argument-set alone: a common
+        constructor shape like `(self, project_root, config)` is a
+        conventional pattern reused independently by unrelated classes
+        across unrelated files (any two classes that each take a project
+        root and a config object) -- that's coincidence, not evidence the
+        two classes should share a bundled parameter object. Grouping by
+        bare argument-set alone falsely flagged such coincidences as data
+        clumps (reproduced: `wup.anomaly_detector.AnomalyDetector.__init__`
+        and `wup.testql_monitor.TestQLMonitor.__init__` -- two unrelated
+        classes in unrelated files -- flagged as clumped on `project_root,
+        self, config`). A genuine data clump -- args that should become one
+        object -- is a same-file (usually same-class) phenomenon; scoping
+        by file preserves that signal while dropping cross-file
+        coincidental-signature noise.
+        """
         smells = []
         # Simplified: find functions with same 3+ arguments
-        arg_sets = {}  # frozenset(args) -> List[func_names]
+        arg_sets = {}  # (file, frozenset(args)) -> List[func_names]
         for func_name, func_info in self.result.functions.items():
             if len(func_info.args) >= 3:
-                args = frozenset(func_info.args)
-                if args not in arg_sets:
-                    arg_sets[args] = []
-                arg_sets[args].append(func_name)
+                key = (func_info.file, frozenset(func_info.args))
+                if key not in arg_sets:
+                    arg_sets[key] = []
+                arg_sets[key].append(func_name)
 
-        for args, funcs in arg_sets.items():
+        for (file, args), funcs in arg_sets.items():
             if len(funcs) >= 2:
                 for func_name in funcs:
                     func_info = self.result.functions[func_name]

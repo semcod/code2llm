@@ -2,6 +2,24 @@
 
 ### Fixed
 
+- `SmellDetector._detect_data_clumps()` had the same cross-file false-positive
+  bug as `_detect_shotgun_surgery()` (previous entry, same root cause): it
+  grouped functions by their argument-*name* set alone, ignoring which file
+  each function was in. A common constructor shape like
+  `(self, project_root, config)` is conventionally reused independently by
+  unrelated classes across unrelated files/packages (any two classes that
+  each take a project root and a config object) — but 2+ such coincidental,
+  unrelated occurrences anywhere in the analyzed tree falsely triggered
+  "Data Clump" (reproduced live: `wup.anomaly_detector.AnomalyDetector.
+  __init__` and `wup.testql_monitor.TestQLMonitor.__init__` — two unrelated
+  classes in unrelated files — flagged as clumped on `project_root, self,
+  config`). A genuine data clump — args that should become one object — is
+  a same-file (usually same-class) phenomenon; fixed by grouping by
+  `(file, argument-set)` instead of the argument-set alone. Verified against
+  the real project that surfaced this: data-clump smells in `wup` dropped
+  from findings spanning unrelated files down to 16 genuine, correctly
+  file-scoped findings. 4 new tests (`tests/test_smells_data_clumps.py`).
+  Full suite (286 tests) passes.
 - `psutil` is imported directly by `code2llm/core/config.py` (loaded via the
   package's own top-level `__init__.py`), but was never declared in
   `pyproject.toml`'s `dependencies` — a clean install (`uv sync` respecting
@@ -36,6 +54,18 @@
   file-scoped findings. 4 new tests
   (`tests/test_smells_shotgun_surgery.py`) — this detector had zero prior
   test coverage. Full suite (282 tests) passes.
+
+## [0.5.173] - 2026-07-06
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
+### Test
+- Update tests/test_smells_data_clumps.py
+
+### Other
+- Update code2llm/analysis/smells.py
 
 ## [0.5.172] - 2026-07-06
 
