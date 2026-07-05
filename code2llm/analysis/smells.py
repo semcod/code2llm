@@ -163,16 +163,33 @@ class SmellDetector:
         return smells
 
     def _detect_shotgun_surgery(self) -> List[CodeSmell]:
-        """Detect variables whose mutation requires changes across many functions."""
+        """Detect variables whose mutation requires changes across many functions.
+
+        Grouped by (file, variable), not variable name alone: a generic local
+        name like `args`, `data`, or `client` is conventionally reused as an
+        independent local in unrelated functions across unrelated files/
+        packages (every argparse `main()` has an `args`) -- that's naming
+        coincidence, not a variable whose logic is genuinely coupled across
+        call sites. Grouping by bare name alone falsely flagged every such
+        coincidence as "shotgun surgery" (reproduced: 40+ false-positive
+        tickets in a single monorepo, e.g. `args` in a 40-line, one-function
+        CLI file reported as "spans 8 functions" -- the other 7 were
+        unrelated `args` locals in unrelated files elsewhere in the tree).
+        Real shotgun surgery -- one variable/attribute whose change genuinely
+        ripples across many functions -- is a same-file (or same-class)
+        phenomenon; scoping by file preserves that signal while dropping the
+        cross-file name-collision noise.
+        """
         smells = []
-        var_mutators = {}  # variable -> set(functions)
+        var_mutators = {}  # (file, variable) -> set(functions)
 
         for mutation in self.result.mutations:
-            if mutation.variable not in var_mutators:
-                var_mutators[mutation.variable] = set()
-            var_mutators[mutation.variable].add(mutation.scope)
+            key = (mutation.file, mutation.variable)
+            if key not in var_mutators:
+                var_mutators[key] = set()
+            var_mutators[key].add(mutation.scope)
 
-        for var, funcs in var_mutators.items():
+        for (file, var), funcs in var_mutators.items():
             if len(funcs) >= 5:
                 # Find a representative function to report the smell
                 func_name = list(funcs)[0]
@@ -188,10 +205,11 @@ class SmellDetector:
                         line=func_info.line,
                         severity=0.8,
                         description=(
-                            f"Mutation of variable '{var}' spans {len(funcs)} functions."
+                            f"Mutation of variable '{var}' spans {len(funcs)} functions"
+                            f" in {file}."
                             " Changing this logic requires work in many places."
                         ),
-                        context={"variable": var, "affected_functions": list(funcs)},
+                        context={"variable": var, "file": file, "affected_functions": list(funcs)},
                     )
                 )
         return smells

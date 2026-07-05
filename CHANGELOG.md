@@ -1,3 +1,55 @@
+## [Unreleased]
+
+### Fixed
+
+- `psutil` is imported directly by `code2llm/core/config.py` (loaded via the
+  package's own top-level `__init__.py`), but was never declared in
+  `pyproject.toml`'s `dependencies` — a clean install (`uv sync` respecting
+  only the lockfile, or a fresh `pip install code2llm`) could not even
+  `import code2llm` (2026-07-06: surfaced once `goal`'s own test-dependency
+  check stopped silently accepting a broken environment — see the
+  `goal`/`_ensure_python_test_dependency` fix in the same session — and a
+  real `uv sync` ran for the first time in a while). Added
+  `"psutil>=5.9"` to `dependencies` and regenerated `uv.lock`. Verified:
+  full suite (282 tests) passes from a `uv sync --all-extras`-clean venv.
+- `requires-python` was `>=3.8`, but `code2llm[dev]`'s own `goal>=2.1.218`
+  dependency only supports `>=3.10` — `uv lock`/`uv sync` failed outright
+  with an unsatisfiable-requirements error for any resolution covering the
+  full advertised range. Bumped to `>=3.10` to match reality.
+- `SmellDetector._detect_shotgun_surgery()` grouped mutations by variable
+  *name* alone, ignoring which file each mutation was in. A generic local
+  name (`args`, `data`, `client`, `client_id`, `default_file`, `errors`) is
+  conventionally reused as an independent local variable in unrelated
+  functions across unrelated files/packages — every argparse-based
+  `main()` has an `args` — but 5+ such coincidental, unrelated occurrences
+  anywhere in the analyzed tree falsely triggered "Shotgun Surgery"
+  (reproduced live: 40+ false-positive planfile tickets generated for a
+  single monorepo, including `args` in a 40-line, one-function CLI file
+  reported as "spans 8 functions" — the other 7 were unrelated `args`
+  locals in unrelated files elsewhere in the tree). Real shotgun surgery —
+  one variable/attribute whose change genuinely ripples across many call
+  sites — is a same-file phenomenon; fixed by grouping mutations by
+  `(file, variable)` instead of `variable` alone, which preserves genuine
+  same-file findings while dropping the cross-file name-collision noise.
+  Verified against the real monorepo that surfaced this: shotgun-surgery
+  smells dropped from 8+ false positives down to 3 genuine, correctly
+  file-scoped findings. 4 new tests
+  (`tests/test_smells_shotgun_surgery.py`) — this detector had zero prior
+  test coverage. Full suite (282 tests) passes.
+
+## [0.5.172] - 2026-07-06
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
+### Test
+- Update tests/test_smells_shotgun_surgery.py
+
+### Other
+- Update code2llm/analysis/smells.py
+- Update uv.lock
+
 ## [0.5.170] - 2026-07-05
 
 ### Fixed
