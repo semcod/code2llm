@@ -3,6 +3,6 @@
   "project": "/home/tom/github/semcod/code2llm",
   "runtime_dir": ".planfile/.koru",
   "schema": "koru.project/v1",
-  "source": "auto",
-  "updated_at": "2026-05-25T19:14:12.302770+00:00"
+  "source": "init",
+  "updated_at": "2026-07-05T23:19:11.602652+00:00"
 }

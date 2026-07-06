@@ -207,3 +207,6 @@ credentials/
 # Separate projects
 webops/
 .redsl/
+
+# koru runtime artefacts (generated)
+.koru/

@@ -535,21 +535,35 @@ sprint:
       sync: {}
       updated_at: '2026-05-24T20:02:00.000000+00:00'
     PLF-009:
-      id: PLF-009
-      name: Remove 62 duplicated classes (code2llm analysis)
-      status: done
-      priority: high
-      sprint: current
-      source:
-        tool: koru-scan
-        timestamp: '2026-05-24T18:44:43.963603+00:00'
-        context:
-          input: '`project/analysis.toon.yaml` reports **62** duplicated classes.
-            Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
-          signal: code2llm_dup
-          dedupe_key: koru-scan:code2llm_dup:project/analysis.toon.yaml
+      blocked_by: []
+      blocks: []
+      created_at: '2026-05-24T18:44:43.963603+00:00'
       description: '`project/analysis.toon.yaml` reports **62** duplicated classes.
         Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+      execution:
+        attempt: 0
+        max_attempts: 1
+        queue: default
+        state: ready
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/analysis.toon.yaml
+      history:
+      - action: created
+        message: '`project/analysis.toon.yaml` reports **62** duplicated classes.
+          Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+        source: koru task
+        timestamp: '2026-05-24T18:44:43.963603+00:00'
+      id: PLF-009
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '`project/analysis.toon.yaml` reports **62** duplicated classes. Extract
+          shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
       labels:
       - koru
       - nl-task
@@ -558,34 +572,324 @@ sprint:
       - duplication
       - refactor
       - scan
-      blocked_by: []
-      blocks: []
-      files:
-      - project/analysis.toon.yaml
-      executor:
-        kind: human
-        mode: interactive
-      execution:
-        queue: default
-        state: ready
-        attempt: 0
-        max_attempts: 1
-      inputs:
-        prompt: '`project/analysis.toon.yaml` reports **62** duplicated classes. Extract
-          shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
-        env_keys: []
-        api_method: GET
-        api_headers: {}
-        api_timeout_seconds: 30.0
+      name: Remove 62 duplicated classes (code2llm analysis)
       outputs:
         artifacts: []
         notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-scan:code2llm_dup:project/analysis.toon.yaml
+          input: '`project/analysis.toon.yaml` reports **62** duplicated classes.
+            Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
+          signal: code2llm_dup
+        timestamp: '2026-05-24T18:44:43.963603+00:00'
+        tool: koru-scan
+      sprint: current
+      status: done
       sync: {}
-      history:
-      - timestamp: '2026-05-24T18:44:43.963603+00:00'
-        action: created
-        source: koru task
-        message: '`project/analysis.toon.yaml` reports **62** duplicated classes.
-          Extract shared helpers/modules; re-run `code2llm ./ -f toon` to refresh.'
-      created_at: '2026-05-24T18:44:43.963603+00:00'
       updated_at: '2026-05-24T18:44:43.963603+00:00'
+    PLF-010:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-05T23:22:51.812285+00:00'
+      description: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+        brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+        Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+        ticket done.
+
+
+        Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+      execution:
+        attempt: 0
+        finished_at: '2026-07-06T08:05:09.988289Z'
+        max_attempts: 1
+        queue: operator
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files: []
+      history:
+      - action: created
+        message: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+          brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+          Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+          ticket done.
+
+
+          Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+        source: koru task
+        timestamp: '2026-07-05T23:22:51.812285+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-06T08:05:09.988723+00:00'
+      id: PLF-010
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+          brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+          Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+          ticket done.
+
+
+          Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - operator
+      - auto-pipeline
+      - step:os_calibrate
+      name: '[OPERATOR] Kalibracja czatu OS injectora (auto) brak kalibracji chatu
+        dla auto — task koru:ide-os:calibrate IDE=auto ...'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-operator-pipeline:operator-kalibracja-czatu-os-injectora-auto-brak-kalibracji-chatu-dla-auto-task-koru-ide-os-calibrate-ide-auto-...
+          detail: brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+          input: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+            brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+            Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+            ticket done.
+
+
+            Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+          step_id: os_calibrate
+          task_command: task koru:ide-os:calibrate IDE=auto
+        timestamp: '2026-07-05T23:22:51.812285+00:00'
+        tool: koru-operator-pipeline
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-06T08:05:09.988702+00:00'
+    PLF-011:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-05T23:22:54.240847+00:00'
+      description: '`project/validation.toon.yaml` reports 0 error(s) and 270 warning(s).
+        Fix the highest-impact validation failures first, then re-run `vallm validate`
+        / the project validation task and refresh the report.'
+      execution:
+        attempt: 0
+        max_attempts: 1
+        queue: default
+        state: ready
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/validation.toon.yaml
+      history:
+      - action: created
+        message: '`project/validation.toon.yaml` reports 0 error(s) and 270 warning(s).
+          Fix the highest-impact validation failures first, then re-run `vallm validate`
+          / the project validation task and refresh the report.'
+        source: koru task
+        timestamp: '2026-07-05T23:22:54.240847+00:00'
+      id: PLF-011
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '`project/validation.toon.yaml` reports 0 error(s) and 270 warning(s).
+          Fix the highest-impact validation failures first, then re-run `vallm validate`
+          / the project validation task and refresh the report.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - vallm
+      - validation
+      - scan
+      name: Repair VALLM validation findings
+      outputs:
+        artifacts: []
+        notes: []
+      priority: normal
+      source:
+        context:
+          dedupe_key: koru-scan:vallm_validation:project/validation.toon.yaml
+          input: '`project/validation.toon.yaml` reports 0 error(s) and 270 warning(s).
+            Fix the highest-impact validation failures first, then re-run `vallm validate`
+            / the project validation task and refresh the report.'
+          signal: vallm_validation
+        timestamp: '2026-07-05T23:22:54.240847+00:00'
+        tool: koru-scan
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-05T23:22:54.240847+00:00'
+    PLF-012:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-06T08:05:09.559091+00:00'
+      description: '[OPERATOR] Koru self-control (paczka / VSIX / runtime): self-control
+        auto-repair ran (install_plugin, shutdown_daemon_for_reload, start_daemon_for_reconnect,
+        reload_ide_and_reconnect (+1 more)); autopilot_install_manager: ide=vscode;
+        socket=/run/user/1000/koru-autopilot-vscode.sock; package=0.1.389; source=0.1.390;
+        connected=False; installed=0.2.12; expected=0.2.12; repairable=koru_version_mismatch:warning
+
+
+        Shell: `koru self --project /home/tom/github/semcod/code2llm --ide vscode
+        repair --yes`'
+      execution:
+        assigned_to: koru-shell
+        attempt: 0
+        finished_at: '2026-07-06T08:05:14.829921Z'
+        lease_expires_at: '2026-07-06T09:05:11.985601Z'
+        max_attempts: 1
+        queue: operator
+        started_at: '2026-07-06T08:05:12.381196Z'
+        state: done
+      executor:
+        kind: shell
+        mode: noninteractive
+      files: []
+      history:
+      - action: created
+        message: '[OPERATOR] Koru self-control (paczka / VSIX / runtime): self-control
+          auto-repair ran (install_plugin, shutdown_daemon_for_reload, start_daemon_for_reconnect,
+          reload_ide_and_reconnect (+1 more)); autopilot_install_manager: ide=vscode;
+          socket=/run/user/1000/koru-autopilot-vscode.sock; package=0.1.389; source=0.1.390;
+          connected=False; installed=0.2.12; expected=0.2.12; repairable=koru_version_mismatch:warning
+
+
+          Shell: `koru self --project /home/tom/github/semcod/code2llm --ide vscode
+          repair --yes`'
+        source: koru task
+        timestamp: '2026-07-06T08:05:09.559091+00:00'
+      - action: update
+        changes:
+        - execution
+        source: planfile.store
+        timestamp: '2026-07-06T08:05:11.985994+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: running
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: in_progress
+        timestamp: '2026-07-06T08:05:12.381612+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-06T08:05:14.424945+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: running
+        previous_status: in_progress
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-06T08:05:14.830336+00:00'
+      id: PLF-012
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '[OPERATOR] Koru self-control (paczka / VSIX / runtime): self-control
+          auto-repair ran (install_plugin, shutdown_daemon_for_reload, start_daemon_for_reconnect,
+          reload_ide_and_reconnect (+1 more)); autopilot_install_manager: ide=vscode;
+          socket=/run/user/1000/koru-autopilot-vscode.sock; package=0.1.389; source=0.1.390;
+          connected=False; installed=0.2.12; expected=0.2.12; repairable=koru_version_mismatch:warning
+
+
+          Shell: `koru self --project /home/tom/github/semcod/code2llm --ide vscode
+          repair --yes`'
+        script: koru self --project /home/tom/github/semcod/code2llm --ide vscode
+          repair --yes
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - operator
+      - auto-pipeline
+      - step:self_control
+      name: '[OPERATOR] Koru self-control (paczka / VSIX / runtime): self-control
+        auto-repair ran (install_plugin, shutdown_daemon...'
+      outputs:
+        artifacts: []
+        notes:
+        - "KORU-SHELL-RUN {\"exit_code\": 0, \"run_id\": \"27abb20be3504f74\", \"stderr_chars\":
+          0, \"stdout_chars\": 1511, \"truncated\": false}\n--- stdout ---\nkoru self-control:
+          project=/home/tom/github/semcod/code2llm\nkoru self-control: ok=True needs_repair=False
+          summary={'ok': 4, 'warn': 1, 'fail': 0, 'skip': 0}\n  - OK package_identity:
+          source=-; installed=0.1.390; python=/home/tom/github/semcod/koru/.venv/bin/python3\n
+          \ - OK entrypoint_identity: path_koru=/home/tom/github/semcod/koru/.venv/bin/koru;
+          local_koru=-\n  - WARN autopilot_install_manager: ide=vscode; socket=/run/user/1000/koru-autopilot-vscode.sock;
+          package=0.1.390; source=0.1.390; connected=False; installed=0.2.12; expected=0.2.12;
+          advisory=plugin_installed_ok_but_not_connected:info,plugin_not_connected:error\n
+          \ - OK interface_registry: interfaces=13; families=artifact_exchange,browser_control,desktop_control,ide_control,observation,tool_invocation\n
+          \ - OK environment_profile: os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack;
+          submit_key=Return; keyboard_fallback=False\nkoru self-control: ecosystem\n
+          \ - OK koru_package (python_package): current=0.1.390 expected=-\n  - OK
+          koru_entrypoint (cli_entrypoint): current=/home/tom/github/semcod/koru/.venv/bin/koru
+          expected=-\n  - WARN autopilot_install_manager (control_plane): current=issues
+          expected=ok\n  - WARN autopilot_plugin:vscode (ide_plugin): current=0.2.12
+          expected=0.2.12\n  - OK interface_registry (runtime_contract): current=13
+          expected=loadable\n  - OK environment_profile (runtime_contract): current=os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack
+          expected=ide=vscode\n\n\n--- stderr ---\n(empty)"
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-operator-pipeline:operator-koru-self-control-paczka-/-vsix-/-runtime-self-control-auto-repair-ran-install_plugin-shutdown_daemon...
+          detail: 'self-control auto-repair ran (install_plugin, shutdown_daemon_for_reload,
+            start_daemon_for_reconnect, reload_ide_and_reconnect (+1 more)); autopilot_install_manager:
+            ide=vscode; socket=/run/user/1000/koru-autopilot-vscode.sock; package=0.1.389;
+            source=0.1.390; connected=False; installed=0.2.12; expected=0.2.12; repairable=koru_version_mismatch:warning'
+          input: '[OPERATOR] Koru self-control (paczka / VSIX / runtime): self-control
+            auto-repair ran (install_plugin, shutdown_daemon_for_reload, start_daemon_for_reconnect,
+            reload_ide_and_reconnect (+1 more)); autopilot_install_manager: ide=vscode;
+            socket=/run/user/1000/koru-autopilot-vscode.sock; package=0.1.389; source=0.1.390;
+            connected=False; installed=0.2.12; expected=0.2.12; repairable=koru_version_mismatch:warning
+
+
+            Shell: `koru self --project /home/tom/github/semcod/code2llm --ide vscode
+            repair --yes`'
+          step_id: self_control
+          task_command: koru self --project /home/tom/github/semcod/code2llm --ide
+            vscode repair --yes
+        timestamp: '2026-07-06T08:05:09.559091+00:00'
+        tool: koru-operator-pipeline
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-06T08:05:14.830313+00:00'
