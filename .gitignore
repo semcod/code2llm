@@ -210,3 +210,9 @@ webops/
 
 # koru runtime artefacts (generated)
 .koru/
+.github/
+.nlp2dsl/
+.planfile/
+.pyqual/
+.ruff_cache/
+.wup/
