@@ -54,7 +54,8 @@ def _build_refactor_steps(ctx: Dict[str, Any]) -> List[str]:
     """Build list of refactoring step strings from health, duplicates, and cycles."""
     steps: List[str] = []
     if ctx["duplicates"]:
-        steps.append(f"rm duplicates  (-{len(ctx['duplicates'])} dup classes)")
+        group_count = len({d["class_name"] for d in ctx["duplicates"]})
+        steps.append(f"rm duplicates  (-{group_count} dup groups)")
     for gi in [h for h in ctx["health"] if h["code"] == "GOD"]:
         steps.append(f"split {gi['message'].split('=')[0].strip()}  (god module)")
     cc_issues = [h for h in ctx["health"] if h["code"] == "CC"]

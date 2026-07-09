@@ -39,6 +39,24 @@ EXCLUDE_PATTERNS = {
     ".envs",
 }
 
+# Paths where duplicate class names are intentional (twin sites, examples, contracts).
+# Excluded from duplicate *detection* only — other metrics still apply.
+INTENTIONAL_DUP_COPY_MARKERS: tuple[str, ...] = (
+    "pc1/",
+    "pc2/",
+    "examples/",
+    "-contract-",
+)
+
+
+@lru_cache(maxsize=4096)
+def is_intentional_duplicate_copy(path: str) -> bool:
+    """True when *path* is an intentional parallel copy (not actionable duplication)."""
+    if not path:
+        return False
+    norm = path.replace("\\", "/").lower()
+    return any(marker in norm for marker in INTENTIONAL_DUP_COPY_MARKERS)
+
 
 @lru_cache(maxsize=4096)
 def is_excluded_path(path: str) -> bool:

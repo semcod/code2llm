@@ -41,7 +41,7 @@ class ToonRenderer:
         all_cc = [f["cc"] for f in ctx["func_metrics"]]
         avg_cc = round(sum(all_cc) / len(all_cc), 1) if all_cc else 0.0
         critical = len([f for f in ctx["func_metrics"] if f["cc"] >= CC_CRITICAL])
-        ndups = len(ctx["duplicates"])
+        ndups = len({d["class_name"] for d in ctx["duplicates"]})
         ncycles = len(ctx["cycles"])
         lang_label = _detect_language_label(result)
         return [

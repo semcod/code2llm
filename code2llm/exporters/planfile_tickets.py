@@ -256,9 +256,51 @@ def _god_module_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion
 
 
 def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
-    """Yield deduplication tickets for class pairs with ≥60% method-name overlap."""
+    """Yield one deduplication ticket per duplicate *class name group* (not per pair)."""
+    from collections import defaultdict
+
+    from code2llm.exporters.flow_constants import is_intentional_duplicate_copy
+
+    pairs = _duplicate_class_pairs(result)
+    groups: dict[str, set[str]] = defaultdict(set)
+    for left_name, left_file, right_file in pairs:
+        groups[left_name].add(left_file)
+        groups[left_name].add(right_file)
+
     tickets: list[PlanfileTicketSuggestion] = []
-    classes = list(result.classes.values())
+    for class_name, files in sorted(groups.items()):
+        rel_files = tuple(sorted(files))
+        if all(is_intentional_duplicate_copy(f) for f in rel_files):
+            continue
+        tickets.append(
+            PlanfileTicketSuggestion(
+                signal="code2llm_dup",
+                title=f"Consolidate duplicate class {class_name}",
+                description=(
+                    f"code2llm found `{class_name}` in {len(rel_files)} files: "
+                    f"{', '.join(rel_files)}.\n\n"
+                    "Extract a shared base/helper or merge the duplicated behavior, then "
+                    "re-run code2llm to confirm the duplicate signal is gone."
+                ),
+                priority="high",
+                labels=("llm-ready", "code2llm", "duplication", "refactor"),
+                files=rel_files,
+                dedupe_key=f"code2llm:dup:{class_name}",
+            ),
+        )
+    return tickets
+
+
+def _duplicate_class_pairs(result: AnalysisResult) -> list[tuple[str, str, str]]:
+    """Return (class_name, file_a, file_b) for each similar class pair."""
+    from code2llm.exporters.flow_constants import is_intentional_duplicate_copy
+
+    pairs: list[tuple[str, str, str]] = []
+    classes = [
+        c
+        for c in result.classes.values()
+        if not is_intentional_duplicate_copy(c.file)
+    ]
     for index, left in enumerate(classes):
         left_methods = _method_names(left)
         if len(left_methods) < 3:
@@ -275,23 +317,8 @@ def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSugge
                 continue
             left_file = _rel_path(left.file, result.project_path)
             right_file = _rel_path(right.file, result.project_path)
-            tickets.append(
-                PlanfileTicketSuggestion(
-                    signal="code2llm_dup",
-                    title=f"Consolidate duplicate class {left.name}",
-                    description=(
-                        f"code2llm found similar `{left.name}` classes in `{left_file}` "
-                        f"and `{right_file}` with {len(overlap)} overlapping methods.\n\n"
-                        "Extract a shared base/helper or merge the duplicated behavior, then "
-                        "re-run code2llm to confirm the duplicate signal is gone."
-                    ),
-                    priority="high",
-                    labels=("llm-ready", "code2llm", "duplication", "refactor"),
-                    files=(left_file, right_file),
-                    dedupe_key=f"code2llm:dup:{left.name}:{left_file}:{right_file}",
-                ),
-            )
-    return tickets
+            pairs.append((left.name, left_file, right_file))
+    return pairs
 
 
 def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:

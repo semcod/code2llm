@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from code2llm.core.models import AnalysisResult, ClassInfo
 
-from .helpers import _is_excluded, _rel_path
+from .helpers import _is_excluded, _rel_path, is_intentional_duplicate_copy
 
 
 class DuplicatesMetricsComputer:
@@ -22,7 +22,9 @@ class DuplicatesMetricsComputer:
         dupes: List[Dict[str, Any]] = []
         # Filter out excluded classes first
         class_list = [
-            (q, c) for q, c in result.classes.items() if not _is_excluded(c.file)
+            (q, c)
+            for q, c in result.classes.items()
+            if not _is_excluded(c.file) and not is_intentional_duplicate_copy(c.file)
         ]
 
         for i, (qa, ca) in enumerate(class_list):

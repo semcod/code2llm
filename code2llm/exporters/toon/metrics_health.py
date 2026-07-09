@@ -31,21 +31,23 @@ class HealthMetricsComputer:
         return issues[:20]  # MAX_HEALTH_ISSUES
 
     def _check_duplicates_health(self, ctx, issues):
-        """Check for duplicate classes."""
-        ndups = len(ctx["duplicates"])
+        """Check for duplicate classes (report merged name-groups, not pair count)."""
+        dupes = ctx["duplicates"]
+        group_names = {d.get("class_name") for d in dupes if d.get("class_name")}
+        ndups = len(group_names)
         if ndups > 0:
             dup_lines = sum(
                 ctx["files"].get(d.get("fileA_abs", ""), {}).get("lines", 0)
-                for d in ctx["duplicates"]
+                for d in dupes
             )
             issues.append(
                 {
                     "severity": "red",
                     "code": "DUP",
-                    "message": f"{ndups} classes duplicated ({dup_lines}L wasted)"
+                    "message": f"{ndups} duplicate class groups ({dup_lines}L wasted)"
                     if dup_lines
-                    else f"{ndups} classes duplicated",
-                    "impact": f"-{ndups} dup classes",
+                    else f"{ndups} duplicate class groups",
+                    "impact": f"-{ndups} dup groups",
                 }
             )
 

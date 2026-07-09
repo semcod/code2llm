@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Set
 
 from code2llm.core.models import AnalysisResult, FunctionInfo
-from code2llm.exporters.flow_constants import is_excluded_path
+from code2llm.exporters.flow_constants import is_excluded_path, is_intentional_duplicate_copy
 
 # Re-export is_excluded_path from flow_constants to eliminate duplication
 
