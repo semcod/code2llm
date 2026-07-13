@@ -55,6 +55,23 @@
   (`tests/test_smells_shotgun_surgery.py`) — this detector had zero prior
   test coverage. Full suite (282 tests) passes.
 
+## [0.5.174] - 2026-07-13
+
+### Docs
+- Update README.md
+
+### Other
+- Update .koru/event-store.jsonl
+- Update .nlp2dsl/environment.doql.less
+- Update .nlp2dsl/registry/environment.doql.less
+- Update .planfile/.koru/autonomous-state.json
+- Update .planfile/.koru/autonomy-telemetry.json
+- Update .planfile/.koru/event-store.jsonl
+- Update .planfile/sprints/current.yaml
+- Update .planfile/sprints/current.yaml.fast.json
+- Update uv.lock
+- Update wup.yaml
+
 ## [0.5.173] - 2026-07-06
 
 ### Docs

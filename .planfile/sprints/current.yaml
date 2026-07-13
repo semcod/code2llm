@@ -16,7 +16,7 @@ sprint:
         attempt: 0
         max_attempts: 1
         queue: default
-        state: ready
+        state: waiting_input
       executor:
         kind: human
         mode: interactive
@@ -30,17 +30,55 @@ sprint:
           queue). Wydziel `domain/`, `application/`, `adapters/`.'
         source: koru task
         timestamp: '2026-05-24T17:21:33.682171+00:00'
+      - action: update
+        changes:
+        - execution
+        - inputs
+        - outputs
+        execution_state: waiting_input
+        previous_execution_state: ready
+        source: planfile.store
+        timestamp: '2026-07-10T04:08:26.935906+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-10T04:09:16.373690+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-10T04:12:01.738646+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-10T04:12:18.709916+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-10T04:18:53.297346+00:00'
       id: PLF-001
       inputs:
         api_headers: {}
         api_method: GET
         api_timeout_seconds: 30.0
         env_keys: []
-        prompt: 'Architektura heksagonalna w {{project}}
-
-
-          Dla wybranego modułu zaproponuj porty (interfejsy) + adaptery (DB, HTTP,
-          queue). Wydziel `domain/`, `application/`, `adapters/`.'
+        prompt: 'PLF-001 needs operator decisions to become executable. (1) TARGET
+          PROJECT: resolved to code2llm (repo root package; sibling tickets PLF-003/4/5
+          all labeled code2llm; source.tool=koru-cli-nl left the token unsubstituted).
+          (2) TARGET MODULE: files:[] is empty and the brief says ''selected module''
+          -- NAME one module. Candidates: code2llm/core/analyzer.py + core/file_analyzer.py
+          (analysis domain coupled to filesystem/cache I/O) or code2llm/core/export_pipeline.py
+          (orchestration). (3) DONE-DEFINITION: choose (A) DESIGN DOC ONLY = ADR proposing
+          ports+adapters mapped to code2llm''s real I/O surfaces (filesystem + cache),
+          verified by architect review; OR (B) ACTUAL CODE EXTRACTION into domain/
+          application/ adapters/, verified by green pytest + unchanged import behavior
+          + review. Caveat: code2llm has no DB/HTTP/queue, so ''DB/HTTP/queue adapters''
+          must be reinterpreted as filesystem/cache adapters.'
       labels:
       - koru
       - nl-task
@@ -51,7 +89,41 @@ sprint:
       name: Architektura heksagonalna w {{project}}
       outputs:
         artifacts: []
-        notes: []
+        notes:
+        - 'Cycle 325 diagnosis. Verified: actual ticket status=open, execution.state=ready,
+          attempt=0 — no work was ever started (no completed IDE work exists; no domain/application/adapters
+          dirs or port/adapter code anywhere in the tree). Prompt has a literal unsubstituted
+          {{project}}, files:[], acceptance_criteria:[], executor.kind=human. The
+          stuck loop is the koru autonomy daemon: autonomy-telemetry shows stagnation_streak=286,
+          queue_status=waiting_input, previous_signature=waiting_input:PLF-001, next_step=''retry
+          next cycle (cached winner discarded)'' — it re-drives an unexecutable human/interactive
+          ticket every cycle. Operator action needed: supply project+module+scope,
+          or recreate via koru wizard with {{project}} substituted. Marked waiting_input
+          per handoff branch for ''blocked or missing input''. NOTE: ticket was already
+          open/ready (attempt 0) in the store — the ''waiting_input for 287 cycles''
+          framing comes from the daemon queue, not from ticket state transitions.'
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+        - 'Re-check. Verified directly from .planfile/sprints/current.yaml: description/title
+          contain a literal unsubstituted {{project}}; executor.kind=human mode=interactive
+          (not autonomously executable); files:[] (no module selected); no acceptance_criteria
+          field present at all (no done-definition); status=open, execution.state=waiting_input.
+          No completed IDE work exists to move out of waiting_input, so the correct
+          terminal state remains waiting_input pending operator input on project+module+scope.'
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+        - 'Agent verification: (a) {{project}}=code2llm -- repo root package, PLF-003/4/5
+          all labeled code2llm. (b) No DB/HTTP/queue in package: grep across code2llm/
+          for fastapi/flask/aiohttp/uvicorn/sqlalchemy/sqlite3/redis/rabbitmq/celery/kafka/requests/httpx/urllib
+          = zero hits except analysis/side_effects.py which only DETECTS such patterns
+          in analyzed code (does not call them). So the hexagonal DB/HTTP/queue framing
+          is a mismatched generic scaffold. (c) files:[] empty + ''selected module''
+          wording = module is operator''s choice. (d) executor.kind=human/interactive
+          -> cannot run autonomously. Recommendation: module=core/file_analyzer.py+analyzer.py;
+          outcome=design doc (ADR) first, since the framing mismatch means scope must
+          be confirmed before any code extraction.'
       priority: normal
       source:
         context:
@@ -65,7 +137,7 @@ sprint:
       sprint: current
       status: open
       sync: {}
-      updated_at: '2026-05-24T17:21:33.682171+00:00'
+      updated_at: '2026-07-10T04:18:53.297316+00:00'
     PLF-002:
       blocked_by: []
       blocks: []
