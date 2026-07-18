@@ -280,6 +280,9 @@ class TestProjectMap:
         assert "etl.py" in map_content
         assert "utils.py" in map_content
 
+    def test_declares_code2llm_as_canonical_producer(self, map_content):
+        assert "# producer: code2llm | artifact: map.toon.yaml | schema: 1" in map_content
+
     def test_has_import_info(self, map_content):
         assert "i:" in map_content or "import" in map_content.lower()
 

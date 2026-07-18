@@ -8,6 +8,8 @@ from code2llm.core.models import AnalysisResult, FunctionInfo, ModuleInfo
 from .utils import count_total_lines, detect_languages
 from .alerts import build_alerts, build_hotspots, load_evolution_trend
 
+MAP_PRODUCER_HEADER = "# producer: code2llm | artifact: map.toon.yaml | schema: 1"
+
 
 def render_header(
     result: AnalysisResult, output_path: str, is_excluded_path
@@ -38,6 +40,7 @@ def render_header(
 
     lines = [
         f"# {project_name} | {stats_line['files']}f {stats_line['lines']}L | {lang_str} | {datetime.now().strftime('%Y-%m-%d')}",  # noqa: E501
+        MAP_PRODUCER_HEADER,
         f"# stats: {stats_line['funcs']} func | {stats_line['classes']} cls | {stats_line['files']} mod | CC̄={stats_line['avg_cc']} | critical:{stats_line['critical']} | cycles:{stats_line['cycles']}",  # noqa: E501
         alerts_line,
         hotspots_line,
@@ -78,4 +81,4 @@ def _render_hotspots_line(funcs: List[FunctionInfo]) -> str:
     return f"# hotspots[{len(hotspots)}]: {'; '.join(hotspots) if hotspots else 'none'}"
 
 
-__all__ = ["render_header"]
+__all__ = ["MAP_PRODUCER_HEADER", "render_header"]

@@ -42,6 +42,10 @@ def _build_export_config(args, formats: List[str]) -> Dict[str, Any]:
     """Build config dict for export caching."""
     return {
         "formats": sorted(formats),
+        "mode": getattr(args, "mode", None),
+        "strategy": getattr(args, "strategy", None),
+        "exclude": sorted(str(item) for item in (getattr(args, "exclude", None) or [])),
+        "gitignore": getattr(args, "gitignore", None),
         "png": getattr(args, "png", False),
         "no_png": getattr(args, "no_png", False),
         "flow_include_examples": getattr(args, "flow_include_examples", False),

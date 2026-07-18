@@ -7,6 +7,8 @@ Provides:
 """
 
 from abc import ABC, abstractmethod
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Type, ClassVar
 from code2llm.core.models import AnalysisResult
@@ -80,9 +82,31 @@ class BaseExporter(ABC):
         return path
 
     def _write_text(self, output_path: str, content: str) -> Path:
-        """Write text content to file, ensuring directory exists."""
+        """Atomically write text content, ensuring the directory exists.
+
+        Analysis artifacts are consumed by background tools immediately after
+        generation.  A same-directory temporary file plus ``os.replace`` keeps
+        readers from observing a truncated map while an export is in progress.
+        """
         path = self._ensure_dir(output_path)
-        path.write_text(content, encoding="utf-8")
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=path.parent,
+                prefix=f".{path.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as handle:
+                handle.write(content)
+                handle.flush()
+                os.fsync(handle.fileno())
+                temporary = Path(handle.name)
+            os.replace(temporary, path)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
         return path
 
 

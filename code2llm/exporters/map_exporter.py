@@ -41,10 +41,7 @@ class MapExporter(BaseExporter):
         lines.extend(render_module_list(result, is_excluded_path))
         lines.extend(render_details(result, is_excluded_path))
 
-        path = self._ensure_dir(output_path)
-        with open(path, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines) + "\n")
-        return path
+        return self._write_text(output_path, "\n".join(lines) + "\n")
 
     def export_to_yaml(
         self, result: AnalysisResult, output_path: str, **kwargs
