@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional, Set
 
 from code2llm.core.models import AnalysisResult, ClassInfo
 
+from code2llm.exporters.flow_constants import is_intentional_duplicate_pair
+
 from .helpers import _is_excluded, _rel_path, is_intentional_duplicate_copy
 
 
@@ -46,6 +48,8 @@ class DuplicatesMetricsComputer:
         for j in range(i + 1, len(class_list)):
             qb, cb = class_list[j]
             if ca.name != cb.name:
+                continue
+            if is_intentional_duplicate_pair(ca.file, cb.file):
                 continue
 
             methods_b = {m.split(".")[-1] for m in cb.methods}

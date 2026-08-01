@@ -772,10 +772,13 @@ sprint:
         Fix the highest-impact validation failures first, then re-run `vallm validate`
         / the project validation task and refresh the report.'
       execution:
+        assigned_to: null
         attempt: 0
+        finished_at: '2026-07-30T20:14:38.835930+00:00'
+        lease_expires_at: null
         max_attempts: 1
         queue: default
-        state: ready
+        state: done
       executor:
         kind: human
         mode: interactive
@@ -788,6 +791,17 @@ sprint:
           / the project validation task and refresh the report.'
         source: koru task
         timestamp: '2026-07-05T23:22:54.240847+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:38.835964+00:00'
       id: PLF-011
       inputs:
         api_headers: {}
@@ -807,7 +821,8 @@ sprint:
       name: Repair VALLM validation findings
       outputs:
         artifacts: []
-        notes: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/validation.toon.yaml'
       priority: normal
       source:
         context:
@@ -819,9 +834,9 @@ sprint:
         timestamp: '2026-07-05T23:22:54.240847+00:00'
         tool: koru-scan
       sprint: current
-      status: open
+      status: done
       sync: {}
-      updated_at: '2026-07-05T23:22:54.240847+00:00'
+      updated_at: '2026-07-30T20:14:38.835950+00:00'
     PLF-012:
       blocked_by: []
       blocks: []
@@ -925,25 +940,26 @@ sprint:
       outputs:
         artifacts: []
         notes:
-        - "KORU-SHELL-RUN {\"exit_code\": 0, \"run_id\": \"27abb20be3504f74\", \"stderr_chars\":
-          0, \"stdout_chars\": 1511, \"truncated\": false}\n--- stdout ---\nkoru self-control:
-          project=/home/tom/github/semcod/code2llm\nkoru self-control: ok=True needs_repair=False
-          summary={'ok': 4, 'warn': 1, 'fail': 0, 'skip': 0}\n  - OK package_identity:
-          source=-; installed=0.1.390; python=/home/tom/github/semcod/koru/.venv/bin/python3\n
-          \ - OK entrypoint_identity: path_koru=/home/tom/github/semcod/koru/.venv/bin/koru;
-          local_koru=-\n  - WARN autopilot_install_manager: ide=vscode; socket=/run/user/1000/koru-autopilot-vscode.sock;
-          package=0.1.390; source=0.1.390; connected=False; installed=0.2.12; expected=0.2.12;
-          advisory=plugin_installed_ok_but_not_connected:info,plugin_not_connected:error\n
-          \ - OK interface_registry: interfaces=13; families=artifact_exchange,browser_control,desktop_control,ide_control,observation,tool_invocation\n
-          \ - OK environment_profile: os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack;
-          submit_key=Return; keyboard_fallback=False\nkoru self-control: ecosystem\n
-          \ - OK koru_package (python_package): current=0.1.390 expected=-\n  - OK
-          koru_entrypoint (cli_entrypoint): current=/home/tom/github/semcod/koru/.venv/bin/koru
-          expected=-\n  - WARN autopilot_install_manager (control_plane): current=issues
-          expected=ok\n  - WARN autopilot_plugin:vscode (ide_plugin): current=0.2.12
-          expected=0.2.12\n  - OK interface_registry (runtime_contract): current=13
-          expected=loadable\n  - OK environment_profile (runtime_contract): current=os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack
-          expected=ide=vscode\n\n\n--- stderr ---\n(empty)"
+        - "KORU-SHELL-RUN {\"exit_code\": 0, \"run_id\": \"27abb20be3504f74\", \"\
+          stderr_chars\": 0, \"stdout_chars\": 1511, \"truncated\": false}\n--- stdout\
+          \ ---\nkoru self-control: project=/home/tom/github/semcod/code2llm\nkoru\
+          \ self-control: ok=True needs_repair=False summary={'ok': 4, 'warn': 1,\
+          \ 'fail': 0, 'skip': 0}\n  - OK package_identity: source=-; installed=0.1.390;\
+          \ python=/home/tom/github/semcod/koru/.venv/bin/python3\n  - OK entrypoint_identity:\
+          \ path_koru=/home/tom/github/semcod/koru/.venv/bin/koru; local_koru=-\n\
+          \  - WARN autopilot_install_manager: ide=vscode; socket=/run/user/1000/koru-autopilot-vscode.sock;\
+          \ package=0.1.390; source=0.1.390; connected=False; installed=0.2.12; expected=0.2.12;\
+          \ advisory=plugin_installed_ok_but_not_connected:info,plugin_not_connected:error\n\
+          \  - OK interface_registry: interfaces=13; families=artifact_exchange,browser_control,desktop_control,ide_control,observation,tool_invocation\n\
+          \  - OK environment_profile: os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack;\
+          \ submit_key=Return; keyboard_fallback=False\nkoru self-control: ecosystem\n\
+          \  - OK koru_package (python_package): current=0.1.390 expected=-\n  - OK\
+          \ koru_entrypoint (cli_entrypoint): current=/home/tom/github/semcod/koru/.venv/bin/koru\
+          \ expected=-\n  - WARN autopilot_install_manager (control_plane): current=issues\
+          \ expected=ok\n  - WARN autopilot_plugin:vscode (ide_plugin): current=0.2.12\
+          \ expected=0.2.12\n  - OK interface_registry (runtime_contract): current=13\
+          \ expected=loadable\n  - OK environment_profile (runtime_contract): current=os=x11|ide=vscode|llm=ide_chat|control=plugin_socket_vscode_family|verify=strict_ack\
+          \ expected=ide=vscode\n\n\n--- stderr ---\n(empty)"
       priority: high
       source:
         context:
@@ -970,3 +986,4334 @@ sprint:
       status: done
       sync: {}
       updated_at: '2026-07-08T01:05:03.071891+00:00'
+    PLF-013:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.239331+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/evolution.toon.yaml Source intent: Update project/evolution.toon.yaml
+        Paths: project/evolution.toon.yaml.
+
+
+        Plan id: CPLAN-2afbbe6dddf51fe20b48
+
+        Plan hash: 2afbbe6dddf51fe20b4821ee371284f81fe39b86e819c1795a83a70e7c97d9f2
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/evolution.toon.yaml
+
+
+        Proposed changes:
+
+        - modify `project/evolution.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-00acd8f7b69f2503f070
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/evolution.toon.yaml.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-00acd8f7b69f2503f070.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/evolution.toon.yaml and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-00acd8f7b69f2503f070
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:39.808986+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/evolution.toon.yaml
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/evolution.toon.yaml
+          Source intent: Update project/evolution.toon.yaml Paths: project/evolution.toon.yaml.
+
+
+          Plan id: CPLAN-2afbbe6dddf51fe20b48
+
+          Plan hash: 2afbbe6dddf51fe20b4821ee371284f81fe39b86e819c1795a83a70e7c97d9f2
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/evolution.toon.yaml
+
+
+          Proposed changes:
+
+          - modify `project/evolution.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-00acd8f7b69f2503f070
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/evolution.toon.yaml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-00acd8f7b69f2503f070.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/evolution.toon.yaml and
+          re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-00acd8f7b69f2503f070
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.239331+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:39.809017+00:00'
+      id: PLF-013
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/evolution.toon.yaml
+          Source intent: Update project/evolution.toon.yaml Paths: project/evolution.toon.yaml.
+
+
+          Plan id: CPLAN-2afbbe6dddf51fe20b48
+
+          Plan hash: 2afbbe6dddf51fe20b4821ee371284f81fe39b86e819c1795a83a70e7c97d9f2
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/evolution.toon.yaml
+
+
+          Proposed changes:
+
+          - modify `project/evolution.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-00acd8f7b69f2503f070
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/evolution.toon.yaml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-00acd8f7b69f2503f070.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/evolution.toon.yaml and
+          re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-00acd8f7b69f2503f070
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/evolution.toon.yaml'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/evolution.toon.yaml'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-2afbbe6dddf51fe20b48
+          diagnostic_ids:
+          - DIAG-00acd8f7b69f2503f070
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779731043960342129
+              path: project/evolution.toon.yaml
+              sha256: 7aedae75ec44b07dee7b13a3bd34ae3d81348bef96fdf7bd011bc8c101a43228
+              size_bytes: 1880
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/evolution.toon.yaml
+            Source intent: Update project/evolution.toon.yaml Paths: project/evolution.toon.yaml.
+
+
+            Plan id: CPLAN-2afbbe6dddf51fe20b48
+
+            Plan hash: 2afbbe6dddf51fe20b4821ee371284f81fe39b86e819c1795a83a70e7c97d9f2
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/evolution.toon.yaml
+
+
+            Proposed changes:
+
+            - modify `project/evolution.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-00acd8f7b69f2503f070
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/evolution.toon.yaml.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-00acd8f7b69f2503f070.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/evolution.toon.yaml and
+            re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-00acd8f7b69f2503f070
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 2afbbe6dddf51fe20b4821ee371284f81fe39b86e819c1795a83a70e7c97d9f2
+          plan_id: CPLAN-2afbbe6dddf51fe20b48
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-d6d54690f1cea6c8be5c
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.239331+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:39.809006+00:00'
+    PLF-014:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.338875+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update
+        project/analysis.toon Source intent: update project/analysis.toon Paths: project/analysis.toon.
+
+
+        Plan id: CPLAN-0e1cdca0fb23a4b1edbf
+
+        Plan hash: 0e1cdca0fb23a4b1edbf375bdcac66578dca4837f6fae0af531e024ad67cb9c4
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/analysis.toon
+
+
+        Proposed changes:
+
+        - modify `project/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-01395ff268999ecb9fa1
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/analysis.toon.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-01395ff268999ecb9fa1.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/analysis.toon and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-01395ff268999ecb9fa1
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:40.776106+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/analysis.toon
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/analysis.toon
+          Source intent: update project/analysis.toon Paths: project/analysis.toon.
+
+
+          Plan id: CPLAN-0e1cdca0fb23a4b1edbf
+
+          Plan hash: 0e1cdca0fb23a4b1edbf375bdcac66578dca4837f6fae0af531e024ad67cb9c4
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/analysis.toon
+
+
+          Proposed changes:
+
+          - modify `project/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01395ff268999ecb9fa1
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/analysis.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01395ff268999ecb9fa1.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/analysis.toon and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01395ff268999ecb9fa1
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.338875+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:40.776142+00:00'
+      id: PLF-014
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/analysis.toon
+          Source intent: update project/analysis.toon Paths: project/analysis.toon.
+
+
+          Plan id: CPLAN-0e1cdca0fb23a4b1edbf
+
+          Plan hash: 0e1cdca0fb23a4b1edbf375bdcac66578dca4837f6fae0af531e024ad67cb9c4
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/analysis.toon
+
+
+          Proposed changes:
+
+          - modify `project/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01395ff268999ecb9fa1
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/analysis.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01395ff268999ecb9fa1.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/analysis.toon and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01395ff268999ecb9fa1
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement update project/analysis.toon'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/analysis.toon'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-0e1cdca0fb23a4b1edbf
+          diagnostic_ids:
+          - DIAG-01395ff268999ecb9fa1
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files: []
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/analysis.toon
+            Source intent: update project/analysis.toon Paths: project/analysis.toon.
+
+
+            Plan id: CPLAN-0e1cdca0fb23a4b1edbf
+
+            Plan hash: 0e1cdca0fb23a4b1edbf375bdcac66578dca4837f6fae0af531e024ad67cb9c4
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/analysis.toon
+
+
+            Proposed changes:
+
+            - modify `project/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-01395ff268999ecb9fa1
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/analysis.toon.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-01395ff268999ecb9fa1.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/analysis.toon and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-01395ff268999ecb9fa1
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 0e1cdca0fb23a4b1edbf375bdcac66578dca4837f6fae0af531e024ad67cb9c4
+          plan_id: CPLAN-0e1cdca0fb23a4b1edbf
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-0584f71c22fa1756aa59
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.338875+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:40.776129+00:00'
+    PLF-015:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.452648+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/index.html Source intent: Update project/index.html Paths: project/index.html.
+
+
+        Plan id: CPLAN-761e0f62405802b1ef7c
+
+        Plan hash: 761e0f62405802b1ef7c9e53a5978d339dbc63b0b21883231ede8dab5fbf8534
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/index.html
+
+
+        Proposed changes:
+
+        - modify `project/index.html`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+        do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-0163ad21a59204421ee2
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/index.html.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-0163ad21a59204421ee2.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/index.html and re-run todo2code
+        diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-0163ad21a59204421ee2
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:41.729193+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/index.html
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/index.html
+          Source intent: Update project/index.html Paths: project/index.html.
+
+
+          Plan id: CPLAN-761e0f62405802b1ef7c
+
+          Plan hash: 761e0f62405802b1ef7c9e53a5978d339dbc63b0b21883231ede8dab5fbf8534
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/index.html
+
+
+          Proposed changes:
+
+          - modify `project/index.html`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0163ad21a59204421ee2
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/index.html.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0163ad21a59204421ee2.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/index.html and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0163ad21a59204421ee2
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.452648+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:41.729227+00:00'
+      id: PLF-015
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/index.html
+          Source intent: Update project/index.html Paths: project/index.html.
+
+
+          Plan id: CPLAN-761e0f62405802b1ef7c
+
+          Plan hash: 761e0f62405802b1ef7c9e53a5978d339dbc63b0b21883231ede8dab5fbf8534
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/index.html
+
+
+          Proposed changes:
+
+          - modify `project/index.html`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0163ad21a59204421ee2
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/index.html.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0163ad21a59204421ee2.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/index.html and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0163ad21a59204421ee2
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/index.html'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/index.html'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-761e0f62405802b1ef7c
+          diagnostic_ids:
+          - DIAG-0163ad21a59204421ee2
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779715047558852648
+              path: project/index.html
+              sha256: 9d289ce97550763be7d9c9a596217134bf0a9eda46ee612ad5999983336f0427
+              size_bytes: 869805
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/index.html
+            Source intent: Update project/index.html Paths: project/index.html.
+
+
+            Plan id: CPLAN-761e0f62405802b1ef7c
+
+            Plan hash: 761e0f62405802b1ef7c9e53a5978d339dbc63b0b21883231ede8dab5fbf8534
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/index.html
+
+
+            Proposed changes:
+
+            - modify `project/index.html`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-0163ad21a59204421ee2
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/index.html.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-0163ad21a59204421ee2.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/index.html and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-0163ad21a59204421ee2
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 761e0f62405802b1ef7c9e53a5978d339dbc63b0b21883231ede8dab5fbf8534
+          plan_id: CPLAN-761e0f62405802b1ef7c
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-467aa148d6b5ac97f1db
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.452648+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:41.729215+00:00'
+    PLF-016:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.583480+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/calls.mmd Source intent: Update project/calls.mmd Paths: project/calls.mmd.
+
+
+        Plan id: CPLAN-d1870358eb2160b6b0c5
+
+        Plan hash: d1870358eb2160b6b0c5c95a31f18c280efeeda154e57381d8085dfbe2884b8d
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/calls.mmd
+
+
+        Proposed changes:
+
+        - modify `project/calls.mmd`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+        do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-01bc2fa2b78d02e55cc1
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/calls.mmd.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-01bc2fa2b78d02e55cc1.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/calls.mmd and re-run todo2code
+        diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-01bc2fa2b78d02e55cc1
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:42.698284+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/calls.mmd
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/calls.mmd
+          Source intent: Update project/calls.mmd Paths: project/calls.mmd.
+
+
+          Plan id: CPLAN-d1870358eb2160b6b0c5
+
+          Plan hash: d1870358eb2160b6b0c5c95a31f18c280efeeda154e57381d8085dfbe2884b8d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/calls.mmd
+
+
+          Proposed changes:
+
+          - modify `project/calls.mmd`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+          do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01bc2fa2b78d02e55cc1
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/calls.mmd.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01bc2fa2b78d02e55cc1.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/calls.mmd and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01bc2fa2b78d02e55cc1
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.583480+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:42.698317+00:00'
+      id: PLF-016
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/calls.mmd
+          Source intent: Update project/calls.mmd Paths: project/calls.mmd.
+
+
+          Plan id: CPLAN-d1870358eb2160b6b0c5
+
+          Plan hash: d1870358eb2160b6b0c5c95a31f18c280efeeda154e57381d8085dfbe2884b8d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/calls.mmd
+
+
+          Proposed changes:
+
+          - modify `project/calls.mmd`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+          do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01bc2fa2b78d02e55cc1
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/calls.mmd.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01bc2fa2b78d02e55cc1.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/calls.mmd and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01bc2fa2b78d02e55cc1
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/calls.mmd'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/calls.mmd'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-d1870358eb2160b6b0c5
+          diagnostic_ids:
+          - DIAG-01bc2fa2b78d02e55cc1
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779715035164317088
+              path: project/calls.mmd
+              sha256: 7294e19abe48b0a60ef3e915c4dd7894866e1b296e5443c14a3b4610ff24ad35
+              size_bytes: 93298
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/calls.mmd
+            Source intent: Update project/calls.mmd Paths: project/calls.mmd.
+
+
+            Plan id: CPLAN-d1870358eb2160b6b0c5
+
+            Plan hash: d1870358eb2160b6b0c5c95a31f18c280efeeda154e57381d8085dfbe2884b8d
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/calls.mmd
+
+
+            Proposed changes:
+
+            - modify `project/calls.mmd`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-01bc2fa2b78d02e55cc1
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/calls.mmd.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-01bc2fa2b78d02e55cc1.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/calls.mmd and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-01bc2fa2b78d02e55cc1
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: d1870358eb2160b6b0c5c95a31f18c280efeeda154e57381d8085dfbe2884b8d
+          plan_id: CPLAN-d1870358eb2160b6b0c5
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-4c76ed31671657213557
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.583480+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:42.698304+00:00'
+    PLF-017:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.733506+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: **Renamed
+        `llm_prompt.md` → `context.md`** — LLM narrative context Source intent: **Renamed
+        `llm_prompt.md` → `context.md`** — LLM narrative context Paths: context.md,
+        llm_prompt.md. Symbols: context.md, LLM, llm_prompt.md.
+
+
+        Plan id: CPLAN-8c99b421faa08adb9c77
+
+        Plan hash: 8c99b421faa08adb9c77a37cad1bdbf59a6a71d137aa4d5572b5ae5043f14690
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - context.md
+
+        - llm_prompt.md
+
+
+        Proposed changes:
+
+        - modify `context.md` (LLM, context.md, llm_prompt.md): Zweryfikować wpis
+        lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+        - modify `llm_prompt.md` (LLM, context.md, llm_prompt.md): Zweryfikować wpis
+        lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Provide AST evidence for symbols: LLM, context.md, llm_prompt.md.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-01e17d1cd1eafcd40fb7
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: context.md, llm_prompt.md.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-01e17d1cd1eafcd40fb7.
+
+        - Touches 2 declared paths.
+
+
+        Rollback: Revert the proposed changes to context.md, llm_prompt.md and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-01e17d1cd1eafcd40fb7
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        attempt: 0
+        max_attempts: 1
+        queue: default
+        state: ready
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - context.md
+      - llm_prompt.md
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: **Renamed
+          `llm_prompt.md` → `context.md`** — LLM narrative context Source intent:
+          **Renamed `llm_prompt.md` → `context.md`** — LLM narrative context Paths:
+          context.md, llm_prompt.md. Symbols: context.md, LLM, llm_prompt.md.
+
+
+          Plan id: CPLAN-8c99b421faa08adb9c77
+
+          Plan hash: 8c99b421faa08adb9c77a37cad1bdbf59a6a71d137aa4d5572b5ae5043f14690
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - context.md
+
+          - llm_prompt.md
+
+
+          Proposed changes:
+
+          - modify `context.md` (LLM, context.md, llm_prompt.md): Zweryfikować wpis
+          lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+          - modify `llm_prompt.md` (LLM, context.md, llm_prompt.md): Zweryfikować
+          wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Provide AST evidence for symbols: LLM, context.md, llm_prompt.md.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01e17d1cd1eafcd40fb7
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: context.md, llm_prompt.md.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01e17d1cd1eafcd40fb7.
+
+          - Touches 2 declared paths.
+
+
+          Rollback: Revert the proposed changes to context.md, llm_prompt.md and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01e17d1cd1eafcd40fb7
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.733506+00:00'
+      id: PLF-017
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: **Renamed
+          `llm_prompt.md` → `context.md`** — LLM narrative context Source intent:
+          **Renamed `llm_prompt.md` → `context.md`** — LLM narrative context Paths:
+          context.md, llm_prompt.md. Symbols: context.md, LLM, llm_prompt.md.
+
+
+          Plan id: CPLAN-8c99b421faa08adb9c77
+
+          Plan hash: 8c99b421faa08adb9c77a37cad1bdbf59a6a71d137aa4d5572b5ae5043f14690
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - context.md
+
+          - llm_prompt.md
+
+
+          Proposed changes:
+
+          - modify `context.md` (LLM, context.md, llm_prompt.md): Zweryfikować wpis
+          lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+          - modify `llm_prompt.md` (LLM, context.md, llm_prompt.md): Zweryfikować
+          wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Provide AST evidence for symbols: LLM, context.md, llm_prompt.md.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-01e17d1cd1eafcd40fb7
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: context.md, llm_prompt.md.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-01e17d1cd1eafcd40fb7.
+
+          - Touches 2 declared paths.
+
+
+          Rollback: Revert the proposed changes to context.md, llm_prompt.md and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-01e17d1cd1eafcd40fb7
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement **Renamed `llm_prompt.md` → `context.md`** — LLM
+        narrative context'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-8c99b421faa08adb9c77
+          diagnostic_ids:
+          - DIAG-01e17d1cd1eafcd40fb7
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779731040525867031
+              path: context.md
+              sha256: 9a527d521a940c0e10ff2480a94925a54549c58740de1b8339b3f764da1af440
+              size_bytes: 25475
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: **Renamed
+            `llm_prompt.md` → `context.md`** — LLM narrative context Source intent:
+            **Renamed `llm_prompt.md` → `context.md`** — LLM narrative context Paths:
+            context.md, llm_prompt.md. Symbols: context.md, LLM, llm_prompt.md.
+
+
+            Plan id: CPLAN-8c99b421faa08adb9c77
+
+            Plan hash: 8c99b421faa08adb9c77a37cad1bdbf59a6a71d137aa4d5572b5ae5043f14690
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - context.md
+
+            - llm_prompt.md
+
+
+            Proposed changes:
+
+            - modify `context.md` (LLM, context.md, llm_prompt.md): Zweryfikować wpis
+            lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+            - modify `llm_prompt.md` (LLM, context.md, llm_prompt.md): Zweryfikować
+            wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo
+            symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Provide AST evidence for symbols: LLM, context.md, llm_prompt.md.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-01e17d1cd1eafcd40fb7
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: context.md, llm_prompt.md.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-01e17d1cd1eafcd40fb7.
+
+            - Touches 2 declared paths.
+
+
+            Rollback: Revert the proposed changes to context.md, llm_prompt.md and
+            re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-01e17d1cd1eafcd40fb7
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 8c99b421faa08adb9c77a37cad1bdbf59a6a71d137aa4d5572b5ae5043f14690
+          plan_id: CPLAN-8c99b421faa08adb9c77
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-6bc960ae574072f22679
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.733506+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-30T18:35:54.733506+00:00'
+    PLF-018:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:54.884008+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/compact_flow.png Source intent: Update project/compact_flow.png Paths:
+        project/compact_flow.png.
+
+
+        Plan id: CPLAN-b64ef2665c687a8f1538
+
+        Plan hash: b64ef2665c687a8f1538adcf8db2e250e6742472ebcd20af89dc74c54bc5753d
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/compact_flow.png
+
+
+        Proposed changes:
+
+        - modify `project/compact_flow.png`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-0259fb51af1f56155517
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/compact_flow.png.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-0259fb51af1f56155517.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/compact_flow.png and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-0259fb51af1f56155517
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:43.646644+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/compact_flow.png
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.png
+          Source intent: Update project/compact_flow.png Paths: project/compact_flow.png.
+
+
+          Plan id: CPLAN-b64ef2665c687a8f1538
+
+          Plan hash: b64ef2665c687a8f1538adcf8db2e250e6742472ebcd20af89dc74c54bc5753d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/compact_flow.png
+
+
+          Proposed changes:
+
+          - modify `project/compact_flow.png`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0259fb51af1f56155517
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/compact_flow.png.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0259fb51af1f56155517.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/compact_flow.png and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0259fb51af1f56155517
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:54.884008+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:43.646681+00:00'
+      id: PLF-018
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.png
+          Source intent: Update project/compact_flow.png Paths: project/compact_flow.png.
+
+
+          Plan id: CPLAN-b64ef2665c687a8f1538
+
+          Plan hash: b64ef2665c687a8f1538adcf8db2e250e6742472ebcd20af89dc74c54bc5753d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/compact_flow.png
+
+
+          Proposed changes:
+
+          - modify `project/compact_flow.png`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0259fb51af1f56155517
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/compact_flow.png.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0259fb51af1f56155517.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/compact_flow.png and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0259fb51af1f56155517
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/compact_flow.png'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/compact_flow.png'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-b64ef2665c687a8f1538
+          diagnostic_ids:
+          - DIAG-0259fb51af1f56155517
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779715039720964082
+              path: project/compact_flow.png
+              sha256: 23e9cc36f56516126ffcea60aceb4ee3a994e3df493c84ec4b0d0e52f63c5c1f
+              size_bytes: 97641
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.png
+            Source intent: Update project/compact_flow.png Paths: project/compact_flow.png.
+
+
+            Plan id: CPLAN-b64ef2665c687a8f1538
+
+            Plan hash: b64ef2665c687a8f1538adcf8db2e250e6742472ebcd20af89dc74c54bc5753d
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/compact_flow.png
+
+
+            Proposed changes:
+
+            - modify `project/compact_flow.png`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-0259fb51af1f56155517
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/compact_flow.png.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-0259fb51af1f56155517.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/compact_flow.png and
+            re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-0259fb51af1f56155517
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: b64ef2665c687a8f1538adcf8db2e250e6742472ebcd20af89dc74c54bc5753d
+          plan_id: CPLAN-b64ef2665c687a8f1538
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-104d2a773d76d25b63dc
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:54.884008+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:43.646669+00:00'
+    PLF-019:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:55.042293+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update
+        project/flow.toon Source intent: update project/flow.toon Paths: project/flow.toon.
+
+
+        Plan id: CPLAN-8e950c309a8a8451be83
+
+        Plan hash: 8e950c309a8a8451be83846b416c1dc0fc7d4415a8759814b902c575a8697455
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/flow.toon
+
+
+        Proposed changes:
+
+        - modify `project/flow.toon`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+        do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-02cd24ac55cedb3f6797
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/flow.toon.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-02cd24ac55cedb3f6797.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/flow.toon and re-run todo2code
+        diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-02cd24ac55cedb3f6797
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:44.596794+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/flow.toon
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/flow.toon
+          Source intent: update project/flow.toon Paths: project/flow.toon.
+
+
+          Plan id: CPLAN-8e950c309a8a8451be83
+
+          Plan hash: 8e950c309a8a8451be83846b416c1dc0fc7d4415a8759814b902c575a8697455
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/flow.toon
+
+
+          Proposed changes:
+
+          - modify `project/flow.toon`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+          do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-02cd24ac55cedb3f6797
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/flow.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-02cd24ac55cedb3f6797.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/flow.toon and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-02cd24ac55cedb3f6797
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:55.042293+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:44.596826+00:00'
+      id: PLF-019
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/flow.toon
+          Source intent: update project/flow.toon Paths: project/flow.toon.
+
+
+          Plan id: CPLAN-8e950c309a8a8451be83
+
+          Plan hash: 8e950c309a8a8451be83846b416c1dc0fc7d4415a8759814b902c575a8697455
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/flow.toon
+
+
+          Proposed changes:
+
+          - modify `project/flow.toon`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+          do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-02cd24ac55cedb3f6797
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/flow.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-02cd24ac55cedb3f6797.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/flow.toon and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-02cd24ac55cedb3f6797
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement update project/flow.toon'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/flow.toon'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-8e950c309a8a8451be83
+          diagnostic_ids:
+          - DIAG-02cd24ac55cedb3f6797
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files: []
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update project/flow.toon
+            Source intent: update project/flow.toon Paths: project/flow.toon.
+
+
+            Plan id: CPLAN-8e950c309a8a8451be83
+
+            Plan hash: 8e950c309a8a8451be83846b416c1dc0fc7d4415a8759814b902c575a8697455
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/flow.toon
+
+
+            Proposed changes:
+
+            - modify `project/flow.toon`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-02cd24ac55cedb3f6797
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/flow.toon.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-02cd24ac55cedb3f6797.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/flow.toon and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-02cd24ac55cedb3f6797
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 8e950c309a8a8451be83846b416c1dc0fc7d4415a8759814b902c575a8697455
+          plan_id: CPLAN-8e950c309a8a8451be83
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-4d750d4703b037b8c58c
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:55.042293+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:44.596814+00:00'
+    PLF-020:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:55.213144+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        root/analysis.toon.yaml Source intent: Update root/analysis.toon.yaml Paths:
+        root/analysis.toon.yaml.
+
+
+        Plan id: CPLAN-e51c213d87ada41f5a50
+
+        Plan hash: e51c213d87ada41f5a504c2d5f9b80ea1ee820d8d7110bd2afbb5961996bdb3e
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - root/analysis.toon.yaml
+
+
+        Proposed changes:
+
+        - modify `root/analysis.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-03013a2fe0e33fb76c6c
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: root/analysis.toon.yaml.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-03013a2fe0e33fb76c6c.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to root/analysis.toon.yaml and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-03013a2fe0e33fb76c6c
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:45.753092+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - root/analysis.toon.yaml
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update root/analysis.toon.yaml
+          Source intent: Update root/analysis.toon.yaml Paths: root/analysis.toon.yaml.
+
+
+          Plan id: CPLAN-e51c213d87ada41f5a50
+
+          Plan hash: e51c213d87ada41f5a504c2d5f9b80ea1ee820d8d7110bd2afbb5961996bdb3e
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - root/analysis.toon.yaml
+
+
+          Proposed changes:
+
+          - modify `root/analysis.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-03013a2fe0e33fb76c6c
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: root/analysis.toon.yaml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-03013a2fe0e33fb76c6c.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to root/analysis.toon.yaml and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-03013a2fe0e33fb76c6c
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:55.213144+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:45.753124+00:00'
+      id: PLF-020
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update root/analysis.toon.yaml
+          Source intent: Update root/analysis.toon.yaml Paths: root/analysis.toon.yaml.
+
+
+          Plan id: CPLAN-e51c213d87ada41f5a50
+
+          Plan hash: e51c213d87ada41f5a504c2d5f9b80ea1ee820d8d7110bd2afbb5961996bdb3e
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - root/analysis.toon.yaml
+
+
+          Proposed changes:
+
+          - modify `root/analysis.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-03013a2fe0e33fb76c6c
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: root/analysis.toon.yaml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-03013a2fe0e33fb76c6c.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to root/analysis.toon.yaml and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-03013a2fe0e33fb76c6c
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update root/analysis.toon.yaml'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: root/analysis.toon.yaml'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-e51c213d87ada41f5a50
+          diagnostic_ids:
+          - DIAG-03013a2fe0e33fb76c6c
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779731037632277051
+              path: root/analysis.toon.yaml
+              sha256: ca2cefcd6caf54ba9a0796092da3e42b9c27e36c785c61c571361ca490b6121f
+              size_bytes: 27996
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update root/analysis.toon.yaml
+            Source intent: Update root/analysis.toon.yaml Paths: root/analysis.toon.yaml.
+
+
+            Plan id: CPLAN-e51c213d87ada41f5a50
+
+            Plan hash: e51c213d87ada41f5a504c2d5f9b80ea1ee820d8d7110bd2afbb5961996bdb3e
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - root/analysis.toon.yaml
+
+
+            Proposed changes:
+
+            - modify `root/analysis.toon.yaml`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-03013a2fe0e33fb76c6c
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: root/analysis.toon.yaml.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-03013a2fe0e33fb76c6c.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to root/analysis.toon.yaml and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-03013a2fe0e33fb76c6c
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: e51c213d87ada41f5a504c2d5f9b80ea1ee820d8d7110bd2afbb5961996bdb3e
+          plan_id: CPLAN-e51c213d87ada41f5a50
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-6de5d0968d839d109445
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:55.213144+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:45.753112+00:00'
+    PLF-021:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:55.400239+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/batch_1/analysis.toon Source intent: Update project/batch_1/analysis.toon
+        Paths: project/batch_1/analysis.toon.
+
+
+        Plan id: CPLAN-4a5e0614cf449a5e2428
+
+        Plan hash: 4a5e0614cf449a5e2428b18829c381c165b828afdbdb8b210d5a13474c08c35f
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/batch_1/analysis.toon
+
+
+        Proposed changes:
+
+        - modify `project/batch_1/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-03130fc4884f2d59d23f
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/batch_1/analysis.toon.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-03130fc4884f2d59d23f.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/batch_1/analysis.toon and
+        re-run todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-03130fc4884f2d59d23f
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:47.090058+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/batch_1/analysis.toon
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/batch_1/analysis.toon
+          Source intent: Update project/batch_1/analysis.toon Paths: project/batch_1/analysis.toon.
+
+
+          Plan id: CPLAN-4a5e0614cf449a5e2428
+
+          Plan hash: 4a5e0614cf449a5e2428b18829c381c165b828afdbdb8b210d5a13474c08c35f
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/batch_1/analysis.toon
+
+
+          Proposed changes:
+
+          - modify `project/batch_1/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-03130fc4884f2d59d23f
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/batch_1/analysis.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-03130fc4884f2d59d23f.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/batch_1/analysis.toon and
+          re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-03130fc4884f2d59d23f
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:55.400239+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:47.090089+00:00'
+      id: PLF-021
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/batch_1/analysis.toon
+          Source intent: Update project/batch_1/analysis.toon Paths: project/batch_1/analysis.toon.
+
+
+          Plan id: CPLAN-4a5e0614cf449a5e2428
+
+          Plan hash: 4a5e0614cf449a5e2428b18829c381c165b828afdbdb8b210d5a13474c08c35f
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/batch_1/analysis.toon
+
+
+          Proposed changes:
+
+          - modify `project/batch_1/analysis.toon`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-03130fc4884f2d59d23f
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/batch_1/analysis.toon.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-03130fc4884f2d59d23f.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/batch_1/analysis.toon and
+          re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-03130fc4884f2d59d23f
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/batch_1/analysis.toon'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/batch_1/analysis.toon'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-4a5e0614cf449a5e2428
+          diagnostic_ids:
+          - DIAG-03130fc4884f2d59d23f
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files: []
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/batch_1/analysis.toon
+            Source intent: Update project/batch_1/analysis.toon Paths: project/batch_1/analysis.toon.
+
+
+            Plan id: CPLAN-4a5e0614cf449a5e2428
+
+            Plan hash: 4a5e0614cf449a5e2428b18829c381c165b828afdbdb8b210d5a13474c08c35f
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/batch_1/analysis.toon
+
+
+            Proposed changes:
+
+            - modify `project/batch_1/analysis.toon`: Zweryfikować wpis lub dodać
+            jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-03130fc4884f2d59d23f
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/batch_1/analysis.toon.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-03130fc4884f2d59d23f.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/batch_1/analysis.toon
+            and re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-03130fc4884f2d59d23f
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 4a5e0614cf449a5e2428b18829c381c165b828afdbdb8b210d5a13474c08c35f
+          plan_id: CPLAN-4a5e0614cf449a5e2428
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-f57bc9bf5682b902857c
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:55.400239+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:47.090077+00:00'
+    PLF-022:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:35:55.625703+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/compact_flow.mmd Source intent: Update project/compact_flow.mmd Paths:
+        project/compact_flow.mmd.
+
+
+        Plan id: CPLAN-509caee0eb798937b14b
+
+        Plan hash: 509caee0eb798937b14bdc6d998fd1757fab8afafb20bb38d0776e1d9a8bb055
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/compact_flow.mmd
+
+
+        Proposed changes:
+
+        - modify `project/compact_flow.mmd`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-05a984f346ae801f0a84
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/compact_flow.mmd.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-05a984f346ae801f0a84.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/compact_flow.mmd and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-05a984f346ae801f0a84
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:48.337248+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/compact_flow.mmd
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.mmd
+          Source intent: Update project/compact_flow.mmd Paths: project/compact_flow.mmd.
+
+
+          Plan id: CPLAN-509caee0eb798937b14b
+
+          Plan hash: 509caee0eb798937b14bdc6d998fd1757fab8afafb20bb38d0776e1d9a8bb055
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/compact_flow.mmd
+
+
+          Proposed changes:
+
+          - modify `project/compact_flow.mmd`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-05a984f346ae801f0a84
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/compact_flow.mmd.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-05a984f346ae801f0a84.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/compact_flow.mmd and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-05a984f346ae801f0a84
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:35:55.625703+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:48.337284+00:00'
+      id: PLF-022
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.mmd
+          Source intent: Update project/compact_flow.mmd Paths: project/compact_flow.mmd.
+
+
+          Plan id: CPLAN-509caee0eb798937b14b
+
+          Plan hash: 509caee0eb798937b14bdc6d998fd1757fab8afafb20bb38d0776e1d9a8bb055
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/compact_flow.mmd
+
+
+          Proposed changes:
+
+          - modify `project/compact_flow.mmd`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-05a984f346ae801f0a84
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/compact_flow.mmd.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-05a984f346ae801f0a84.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/compact_flow.mmd and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-05a984f346ae801f0a84
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      name: '[todo2code] Implement Update project/compact_flow.mmd'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/compact_flow.mmd'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-509caee0eb798937b14b
+          diagnostic_ids:
+          - DIAG-05a984f346ae801f0a84
+          evidence:
+            artifact:
+              mtime_ns: 1785436554005975894
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1779715035164491304
+              path: project/compact_flow.mmd
+              sha256: 3ade88d895bdcaf6977fed5ac27a3a69c2899f5da8ebce68eb87f7752ae26bd4
+              size_bytes: 2231
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/compact_flow.mmd
+            Source intent: Update project/compact_flow.mmd Paths: project/compact_flow.mmd.
+
+
+            Plan id: CPLAN-509caee0eb798937b14b
+
+            Plan hash: 509caee0eb798937b14bdc6d998fd1757fab8afafb20bb38d0776e1d9a8bb055
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/compact_flow.mmd
+
+
+            Proposed changes:
+
+            - modify `project/compact_flow.mmd`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-05a984f346ae801f0a84
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/compact_flow.mmd.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-05a984f346ae801f0a84.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/compact_flow.mmd and
+            re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-05a984f346ae801f0a84
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 509caee0eb798937b14bdc6d998fd1757fab8afafb20bb38d0776e1d9a8bb055
+          plan_id: CPLAN-509caee0eb798937b14b
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-e6ab23bec482cc96d669
+          risk_level: medium
+          signal: todo2code_code_change_plan
+        timestamp: '2026-07-30T18:35:55.625703+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:48.337269+00:00'
+    PLF-023:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:55:51.002417+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update
+        tests/test_sprint5.py Source intent: update tests/test_sprint5.py Paths: tests/test_sprint5.py.
+
+
+        Plan id: CPLAN-6d12450c673464f1b391
+
+        Plan hash: 6d12450c673464f1b3910b9f2da78b8d7c4902b5a88a6699925ca894593b69ae
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - tests/test_sprint5.py
+
+
+        Proposed changes:
+
+        - modify `tests/test_sprint5.py`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-0955369f06d6ec65fbf7
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: tests/test_sprint5.py.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-0955369f06d6ec65fbf7.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to tests/test_sprint5.py and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-0955369f06d6ec65fbf7
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        attempt: 0
+        max_attempts: 3
+        queue: default
+        state: ready
+      executor:
+        kind: llm
+        mode: automatic
+      files:
+      - tests/test_sprint5.py
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update tests/test_sprint5.py
+          Source intent: update tests/test_sprint5.py Paths: tests/test_sprint5.py.
+
+
+          Plan id: CPLAN-6d12450c673464f1b391
+
+          Plan hash: 6d12450c673464f1b3910b9f2da78b8d7c4902b5a88a6699925ca894593b69ae
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - tests/test_sprint5.py
+
+
+          Proposed changes:
+
+          - modify `tests/test_sprint5.py`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0955369f06d6ec65fbf7
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: tests/test_sprint5.py.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0955369f06d6ec65fbf7.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to tests/test_sprint5.py and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0955369f06d6ec65fbf7
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:55:51.002417+00:00'
+      id: PLF-023
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update tests/test_sprint5.py
+          Source intent: update tests/test_sprint5.py Paths: tests/test_sprint5.py.
+
+
+          Plan id: CPLAN-6d12450c673464f1b391
+
+          Plan hash: 6d12450c673464f1b3910b9f2da78b8d7c4902b5a88a6699925ca894593b69ae
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - tests/test_sprint5.py
+
+
+          Proposed changes:
+
+          - modify `tests/test_sprint5.py`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0955369f06d6ec65fbf7
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: tests/test_sprint5.py.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0955369f06d6ec65fbf7.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to tests/test_sprint5.py and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0955369f06d6ec65fbf7
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        llm_model: openrouter/qwen/qwen3-coder-next
+        include_project_context: true
+        context_files:
+        - tests/test_sprint5.py
+        patch_mode: true
+        max_patch_attempts: 3
+        risk_class: R1
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      - useful-code-change
+      - autonomous
+      name: '[todo2code] Implement update tests/test_sprint5.py'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-6d12450c673464f1b391
+          diagnostic_ids:
+          - DIAG-0955369f06d6ec65fbf7
+          evidence:
+            artifact:
+              mtime_ns: 1785437750635627830
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files: []
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: update tests/test_sprint5.py
+            Source intent: update tests/test_sprint5.py Paths: tests/test_sprint5.py.
+
+
+            Plan id: CPLAN-6d12450c673464f1b391
+
+            Plan hash: 6d12450c673464f1b3910b9f2da78b8d7c4902b5a88a6699925ca894593b69ae
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - tests/test_sprint5.py
+
+
+            Proposed changes:
+
+            - modify `tests/test_sprint5.py`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-0955369f06d6ec65fbf7
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: tests/test_sprint5.py.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-0955369f06d6ec65fbf7.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to tests/test_sprint5.py and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-0955369f06d6ec65fbf7
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 6d12450c673464f1b3910b9f2da78b8d7c4902b5a88a6699925ca894593b69ae
+          plan_id: CPLAN-6d12450c673464f1b391
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-a699dbfb4a42a0600f42
+          risk_level: medium
+          signal: todo2code_code_change_plan
+          usefulness_score: 16.0
+        timestamp: '2026-07-30T18:55:51.002417+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-30T18:55:51.002417+00:00'
+    PLF-024:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:55:51.212790+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        examples/docker-doql-example/docker-compose.yml Source intent: Update examples/docker-doql-example/docker-compose.yml
+        Paths: examples/docker-doql-example/docker-compose.yml.
+
+
+        Plan id: CPLAN-7e5fecf183d87dcea1dc
+
+        Plan hash: 7e5fecf183d87dcea1dc315aee5b40c638f8b07a165d04f48d4687e23d293cb6
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - examples/docker-doql-example/docker-compose.yml
+
+
+        Proposed changes:
+
+        - modify `examples/docker-doql-example/docker-compose.yml`: Zweryfikować wpis
+        lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-09317df7300bdfdd1ee8
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: examples/docker-doql-example/docker-compose.yml.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-09317df7300bdfdd1ee8.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to examples/docker-doql-example/docker-compose.yml
+        and re-run todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-09317df7300bdfdd1ee8
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        attempt: 0
+        max_attempts: 3
+        queue: default
+        state: ready
+      executor:
+        kind: llm
+        mode: automatic
+      files:
+      - examples/docker-doql-example/docker-compose.yml
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update examples/docker-doql-example/docker-compose.yml
+          Source intent: Update examples/docker-doql-example/docker-compose.yml Paths:
+          examples/docker-doql-example/docker-compose.yml.
+
+
+          Plan id: CPLAN-7e5fecf183d87dcea1dc
+
+          Plan hash: 7e5fecf183d87dcea1dc315aee5b40c638f8b07a165d04f48d4687e23d293cb6
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - examples/docker-doql-example/docker-compose.yml
+
+
+          Proposed changes:
+
+          - modify `examples/docker-doql-example/docker-compose.yml`: Zweryfikować
+          wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-09317df7300bdfdd1ee8
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: examples/docker-doql-example/docker-compose.yml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-09317df7300bdfdd1ee8.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to examples/docker-doql-example/docker-compose.yml
+          and re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-09317df7300bdfdd1ee8
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:55:51.212790+00:00'
+      id: PLF-024
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update examples/docker-doql-example/docker-compose.yml
+          Source intent: Update examples/docker-doql-example/docker-compose.yml Paths:
+          examples/docker-doql-example/docker-compose.yml.
+
+
+          Plan id: CPLAN-7e5fecf183d87dcea1dc
+
+          Plan hash: 7e5fecf183d87dcea1dc315aee5b40c638f8b07a165d04f48d4687e23d293cb6
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - examples/docker-doql-example/docker-compose.yml
+
+
+          Proposed changes:
+
+          - modify `examples/docker-doql-example/docker-compose.yml`: Zweryfikować
+          wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-09317df7300bdfdd1ee8
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: examples/docker-doql-example/docker-compose.yml.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-09317df7300bdfdd1ee8.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to examples/docker-doql-example/docker-compose.yml
+          and re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-09317df7300bdfdd1ee8
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        llm_model: openrouter/qwen/qwen3-coder-next
+        include_project_context: true
+        context_files:
+        - examples/docker-doql-example/docker-compose.yml
+        patch_mode: true
+        max_patch_attempts: 3
+        risk_class: R1
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      - useful-code-change
+      - autonomous
+      name: '[todo2code] Implement Update examples/docker-doql-example/docker-compose.yml'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-7e5fecf183d87dcea1dc
+          diagnostic_ids:
+          - DIAG-09317df7300bdfdd1ee8
+          evidence:
+            artifact:
+              mtime_ns: 1785437750635627830
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1776778518212132639
+              path: examples/docker-doql-example/docker-compose.yml
+              sha256: a447ef1b7f0645a007ec0c35ab51b8196ac8961ca56688e380abc7e616095fbc
+              size_bytes: 8127
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update examples/docker-doql-example/docker-compose.yml
+            Source intent: Update examples/docker-doql-example/docker-compose.yml
+            Paths: examples/docker-doql-example/docker-compose.yml.
+
+
+            Plan id: CPLAN-7e5fecf183d87dcea1dc
+
+            Plan hash: 7e5fecf183d87dcea1dc315aee5b40c638f8b07a165d04f48d4687e23d293cb6
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - examples/docker-doql-example/docker-compose.yml
+
+
+            Proposed changes:
+
+            - modify `examples/docker-doql-example/docker-compose.yml`: Zweryfikować
+            wpis lub dodać jednoznaczne odwołanie do ticketu, commita, pliku albo
+            symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-09317df7300bdfdd1ee8
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: examples/docker-doql-example/docker-compose.yml.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-09317df7300bdfdd1ee8.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to examples/docker-doql-example/docker-compose.yml
+            and re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-09317df7300bdfdd1ee8
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 7e5fecf183d87dcea1dc315aee5b40c638f8b07a165d04f48d4687e23d293cb6
+          plan_id: CPLAN-7e5fecf183d87dcea1dc
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-3c059ecebcf063d58fe6
+          risk_level: medium
+          signal: todo2code_code_change_plan
+          usefulness_score: 13.0
+        timestamp: '2026-07-30T18:55:51.212790+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-30T18:55:51.212790+00:00'
+    PLF-025:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:55:51.442948+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        .koru/project.json Source intent: Update .koru/project.json Paths: .koru/project.json.
+
+
+        Plan id: CPLAN-59e9d377991194eb827f
+
+        Plan hash: 59e9d377991194eb827f2b127e993a7b6d98eb70ab45e2bd4581b4deac17eafe
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - .koru/project.json
+
+
+        Proposed changes:
+
+        - modify `.koru/project.json`: Zweryfikować wpis lub dodać jednoznaczne odwołanie
+        do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-098e483f99d7e59bc543
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: .koru/project.json.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-098e483f99d7e59bc543.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to .koru/project.json and re-run todo2code
+        diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-098e483f99d7e59bc543
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:49.509516+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - .koru/project.json
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update .koru/project.json
+          Source intent: Update .koru/project.json Paths: .koru/project.json.
+
+
+          Plan id: CPLAN-59e9d377991194eb827f
+
+          Plan hash: 59e9d377991194eb827f2b127e993a7b6d98eb70ab45e2bd4581b4deac17eafe
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - .koru/project.json
+
+
+          Proposed changes:
+
+          - modify `.koru/project.json`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-098e483f99d7e59bc543
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: .koru/project.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-098e483f99d7e59bc543.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to .koru/project.json and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-098e483f99d7e59bc543
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:55:51.442948+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:49.509550+00:00'
+      id: PLF-025
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update .koru/project.json
+          Source intent: Update .koru/project.json Paths: .koru/project.json.
+
+
+          Plan id: CPLAN-59e9d377991194eb827f
+
+          Plan hash: 59e9d377991194eb827f2b127e993a7b6d98eb70ab45e2bd4581b4deac17eafe
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - .koru/project.json
+
+
+          Proposed changes:
+
+          - modify `.koru/project.json`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-098e483f99d7e59bc543
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: .koru/project.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-098e483f99d7e59bc543.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to .koru/project.json and re-run todo2code
+          diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-098e483f99d7e59bc543
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      - useful-code-change
+      name: '[todo2code] Implement Update .koru/project.json'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: .koru/project.json'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-59e9d377991194eb827f
+          diagnostic_ids:
+          - DIAG-098e483f99d7e59bc543
+          evidence:
+            artifact:
+              mtime_ns: 1785437750635627830
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1783293551602801286
+              path: .koru/project.json
+              sha256: 407a08efd412fe5da775cfc5a02b227c3a827b470a5374e4da2caf25ef049c71
+              size_bytes: 243
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update .koru/project.json
+            Source intent: Update .koru/project.json Paths: .koru/project.json.
+
+
+            Plan id: CPLAN-59e9d377991194eb827f
+
+            Plan hash: 59e9d377991194eb827f2b127e993a7b6d98eb70ab45e2bd4581b4deac17eafe
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - .koru/project.json
+
+
+            Proposed changes:
+
+            - modify `.koru/project.json`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-098e483f99d7e59bc543
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: .koru/project.json.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-098e483f99d7e59bc543.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to .koru/project.json and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-098e483f99d7e59bc543
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 59e9d377991194eb827f2b127e993a7b6d98eb70ab45e2bd4581b4deac17eafe
+          plan_id: CPLAN-59e9d377991194eb827f
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-2b7b5e9f082fc479db59
+          risk_level: medium
+          signal: todo2code_code_change_plan
+          usefulness_score: 13.0
+        timestamp: '2026-07-30T18:55:51.442948+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:49.509537+00:00'
+    PLF-026:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:55:51.711447+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        code2llm/.code2llm_incremental.json Source intent: Update code2llm/.code2llm_incremental.json
+        Paths: code2llm/.code2llm_incremental.json.
+
+
+        Plan id: CPLAN-60e78145ecc84548b2f0
+
+        Plan hash: 60e78145ecc84548b2f01dd0aeb50fa5623a8ce80b497b25f5fe453b3e26f99d
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - code2llm/.code2llm_incremental.json
+
+
+        Proposed changes:
+
+        - modify `code2llm/.code2llm_incremental.json`: Zweryfikować wpis lub dodać
+        jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-11581f21efd5f3cdd879
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: code2llm/.code2llm_incremental.json.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-11581f21efd5f3cdd879.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to code2llm/.code2llm_incremental.json
+        and re-run todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-11581f21efd5f3cdd879
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:50.571229+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - code2llm/.code2llm_incremental.json
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update code2llm/.code2llm_incremental.json
+          Source intent: Update code2llm/.code2llm_incremental.json Paths: code2llm/.code2llm_incremental.json.
+
+
+          Plan id: CPLAN-60e78145ecc84548b2f0
+
+          Plan hash: 60e78145ecc84548b2f01dd0aeb50fa5623a8ce80b497b25f5fe453b3e26f99d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - code2llm/.code2llm_incremental.json
+
+
+          Proposed changes:
+
+          - modify `code2llm/.code2llm_incremental.json`: Zweryfikować wpis lub dodać
+          jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-11581f21efd5f3cdd879
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: code2llm/.code2llm_incremental.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-11581f21efd5f3cdd879.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to code2llm/.code2llm_incremental.json
+          and re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-11581f21efd5f3cdd879
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:55:51.711447+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:50.571272+00:00'
+      id: PLF-026
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update code2llm/.code2llm_incremental.json
+          Source intent: Update code2llm/.code2llm_incremental.json Paths: code2llm/.code2llm_incremental.json.
+
+
+          Plan id: CPLAN-60e78145ecc84548b2f0
+
+          Plan hash: 60e78145ecc84548b2f01dd0aeb50fa5623a8ce80b497b25f5fe453b3e26f99d
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - code2llm/.code2llm_incremental.json
+
+
+          Proposed changes:
+
+          - modify `code2llm/.code2llm_incremental.json`: Zweryfikować wpis lub dodać
+          jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-11581f21efd5f3cdd879
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: code2llm/.code2llm_incremental.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-11581f21efd5f3cdd879.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to code2llm/.code2llm_incremental.json
+          and re-run todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-11581f21efd5f3cdd879
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      - useful-code-change
+      name: '[todo2code] Implement Update code2llm/.code2llm_incremental.json'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: code2llm/.code2llm_incremental.json'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-60e78145ecc84548b2f0
+          diagnostic_ids:
+          - DIAG-11581f21efd5f3cdd879
+          evidence:
+            artifact:
+              mtime_ns: 1785437750635627830
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files:
+            - mtime_ns: 1775671645383222454
+              path: code2llm/.code2llm_incremental.json
+              sha256: d280f432907e87a2cce33675ebef2f51ee14a15d079a07b6eb0fe8f0c55d7291
+              size_bytes: 11587
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update code2llm/.code2llm_incremental.json
+            Source intent: Update code2llm/.code2llm_incremental.json Paths: code2llm/.code2llm_incremental.json.
+
+
+            Plan id: CPLAN-60e78145ecc84548b2f0
+
+            Plan hash: 60e78145ecc84548b2f01dd0aeb50fa5623a8ce80b497b25f5fe453b3e26f99d
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - code2llm/.code2llm_incremental.json
+
+
+            Proposed changes:
+
+            - modify `code2llm/.code2llm_incremental.json`: Zweryfikować wpis lub
+            dodać jednoznaczne odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-11581f21efd5f3cdd879
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: code2llm/.code2llm_incremental.json.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-11581f21efd5f3cdd879.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to code2llm/.code2llm_incremental.json
+            and re-run todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-11581f21efd5f3cdd879
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: 60e78145ecc84548b2f01dd0aeb50fa5623a8ce80b497b25f5fe453b3e26f99d
+          plan_id: CPLAN-60e78145ecc84548b2f0
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-fe8f77da60f9ce7c2e12
+          risk_level: medium
+          signal: todo2code_code_change_plan
+          usefulness_score: 13.0
+        timestamp: '2026-07-30T18:55:51.711447+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:50.571256+00:00'
+    PLF-027:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-30T18:55:51.960400+00:00'
+      description: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update
+        project/analysis.json Source intent: Update project/analysis.json Paths: project/analysis.json.
+
+
+        Plan id: CPLAN-dee73e37db67953f0c11
+
+        Plan hash: dee73e37db67953f0c1157e62e1d80a702ea95fe8e5ea491082acc1d027c3383
+
+        Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+        Target paths:
+
+        - project/analysis.json
+
+
+        Proposed changes:
+
+        - modify `project/analysis.json`: Zweryfikować wpis lub dodać jednoznaczne
+        odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+        Acceptance criteria:
+
+        - Do not introduce new blocking diagnostics.
+
+        - Re-run todo2code link+diagnose and clear diagnostic DIAG-0b08e0733772439cc118
+        (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+        - Touch only the declared paths: project/analysis.json.
+
+
+        Risk: medium
+
+        - Derived from review_required diagnostic DIAG-0b08e0733772439cc118.
+
+        - Touches 1 declared path.
+
+
+        Rollback: Revert the proposed changes to project/analysis.json and re-run
+        todo2code diagnostics.
+
+
+        Diagnostics:
+
+        - DIAG-0b08e0733772439cc118
+
+
+        Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+        / pipeline before marking the ticket done.'
+      execution:
+        assigned_to: null
+        attempt: 0
+        finished_at: '2026-07-30T20:14:51.615786+00:00'
+        lease_expires_at: null
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/analysis.json
+      history:
+      - action: created
+        message: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/analysis.json
+          Source intent: Update project/analysis.json Paths: project/analysis.json.
+
+
+          Plan id: CPLAN-dee73e37db67953f0c11
+
+          Plan hash: dee73e37db67953f0c1157e62e1d80a702ea95fe8e5ea491082acc1d027c3383
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/analysis.json
+
+
+          Proposed changes:
+
+          - modify `project/analysis.json`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0b08e0733772439cc118
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/analysis.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0b08e0733772439cc118.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/analysis.json and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0b08e0733772439cc118
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+        source: koru task
+        timestamp: '2026-07-30T18:55:51.960400+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - outputs
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-30T20:14:51.615890+00:00'
+      id: PLF-027
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/analysis.json
+          Source intent: Update project/analysis.json Paths: project/analysis.json.
+
+
+          Plan id: CPLAN-dee73e37db67953f0c11
+
+          Plan hash: dee73e37db67953f0c1157e62e1d80a702ea95fe8e5ea491082acc1d027c3383
+
+          Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+          Target paths:
+
+          - project/analysis.json
+
+
+          Proposed changes:
+
+          - modify `project/analysis.json`: Zweryfikować wpis lub dodać jednoznaczne
+          odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+          Acceptance criteria:
+
+          - Do not introduce new blocking diagnostics.
+
+          - Re-run todo2code link+diagnose and clear diagnostic DIAG-0b08e0733772439cc118
+          (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+          - Touch only the declared paths: project/analysis.json.
+
+
+          Risk: medium
+
+          - Derived from review_required diagnostic DIAG-0b08e0733772439cc118.
+
+          - Touches 1 declared path.
+
+
+          Rollback: Revert the proposed changes to project/analysis.json and re-run
+          todo2code diagnostics.
+
+
+          Diagnostics:
+
+          - DIAG-0b08e0733772439cc118
+
+
+          Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+          / pipeline before marking the ticket done.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - todo2code
+      - code-change
+      - discovery
+      - useful-code-change
+      name: '[todo2code] Implement Update project/analysis.json'
+      outputs:
+        artifacts: []
+        notes:
+        - 'koru auto-archive: non-useful target paths: project/analysis.json'
+      priority: high
+      source:
+        context:
+          dedupe_key: todo2code:plan:CPLAN-dee73e37db67953f0c11
+          diagnostic_ids:
+          - DIAG-0b08e0733772439cc118
+          evidence:
+            artifact:
+              mtime_ns: 1785437750635627830
+              path: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+              sha256: 8310c322ed7579e51d7c9a1bbf05b8046d4cc3252f8f4c6ad054b0baf996bc4e
+              size_bytes: 124731
+            files: []
+            kind: todo2code_discovery
+            regenerate_command: t2c pipeline /home/tom/github/semcod/code2llm --nl-mode
+              deterministic --markdown-mode deterministic --no-docs-llm --no-summary-llm
+              --no-communication --out /home/tom/github/semcod/code2llm/.intent-koru-verify
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate code-change-plans.json and compare planHash
+              / artifact.sha256 before assuming this ticket is still current.
+          graph_fingerprint: 5cae5b36b81130a253b864f28b4957121840b4e815c025db2c46d3952a14c978
+          input: 'Wpis wydania nie ma powiązanego commita ani faktu AST: Update project/analysis.json
+            Source intent: Update project/analysis.json Paths: project/analysis.json.
+
+
+            Plan id: CPLAN-dee73e37db67953f0c11
+
+            Plan hash: dee73e37db67953f0c1157e62e1d80a702ea95fe8e5ea491082acc1d027c3383
+
+            Source artifact: .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+
+
+            Target paths:
+
+            - project/analysis.json
+
+
+            Proposed changes:
+
+            - modify `project/analysis.json`: Zweryfikować wpis lub dodać jednoznaczne
+            odwołanie do ticketu, commita, pliku albo symbolu.
+
+
+            Acceptance criteria:
+
+            - Do not introduce new blocking diagnostics.
+
+            - Re-run todo2code link+diagnose and clear diagnostic DIAG-0b08e0733772439cc118
+            (CHANGELOG_WITHOUT_IMPLEMENTATION).
+
+            - Touch only the declared paths: project/analysis.json.
+
+
+            Risk: medium
+
+            - Derived from review_required diagnostic DIAG-0b08e0733772439cc118.
+
+            - Touches 1 declared path.
+
+
+            Rollback: Revert the proposed changes to project/analysis.json and re-run
+            todo2code diagnostics.
+
+
+            Diagnostics:
+
+            - DIAG-0b08e0733772439cc118
+
+
+            Implement only the declared target paths, then re-run `t2c evaluate-code-change`
+            / pipeline before marking the ticket done.'
+          plan_hash: dee73e37db67953f0c1157e62e1d80a702ea95fe8e5ea491082acc1d027c3383
+          plan_id: CPLAN-dee73e37db67953f0c11
+          priority: P1
+          record_ids:
+          - INT-CHANGELOG-56d32ff74a8a3896266f
+          risk_level: medium
+          signal: todo2code_code_change_plan
+          usefulness_score: 12.5
+        timestamp: '2026-07-30T18:55:51.960400+00:00'
+        tool: koru-todo2code-discovery
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-30T20:14:51.615875+00:00'

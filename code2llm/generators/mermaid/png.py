@@ -4,6 +4,7 @@ import os
 import subprocess
 import tempfile
 import json
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional
@@ -15,6 +16,38 @@ from code2llm.core.config import (
 )
 from .validation import validate_mermaid_file
 from .fix import fix_mermaid_file
+
+
+_BROWSER_ENV_VARS = (
+    "PUPPETEER_EXECUTABLE_PATH",
+    "CHROME_PATH",
+    "GOOGLE_CHROME_BIN",
+)
+_BROWSER_COMMANDS = (
+    "google-chrome",
+    "google-chrome-stable",
+    "chromium",
+    "chromium-browser",
+)
+
+
+def _find_browser_executable() -> Optional[str]:
+    """Return an explicit Chrome/Chromium path suitable for Puppeteer.
+
+    Mermaid CLI bundles puppeteer-core, which does not download Chromium on
+    installation. Prefer an explicitly configured browser and otherwise use
+    the system browser already available on the PATH.
+    """
+    for variable in _BROWSER_ENV_VARS:
+        candidate = os.getenv(variable)
+        if candidate and Path(candidate).is_file() and os.access(candidate, os.X_OK):
+            return candidate
+
+    for command in _BROWSER_COMMANDS:
+        candidate = shutil.which(command)
+        if candidate:
+            return candidate
+    return None
 
 
 def _is_png_fresh(mmd_file: Path, output_dir: Path) -> bool:
@@ -115,6 +148,9 @@ def _setup_puppeteer_config() -> tuple[int, int, Optional[str], Optional[str]]:
         puppeteer_cfg = {
             "args": ["--no-sandbox", "--disable-setuid-sandbox"],
         }
+        browser_executable = _find_browser_executable()
+        if browser_executable:
+            puppeteer_cfg["executablePath"] = browser_executable
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".json", delete=False
         ) as tmp_pcfg:

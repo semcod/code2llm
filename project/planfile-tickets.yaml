@@ -8512,5 +8512,21 @@ tickets:
   files:
   - tests/test_format_quality.py
   dedupe_key: test-optimization:tests.test_format_quality.TestAnalysisToon:test_has_coupling_section
+- signal: slow_test_warning
+  title: 'Address slow test: tests.test_format_quality.TestAnalysisToon.test_detects_high_fan_out'
+  description: 'Test `tests.test_format_quality.TestAnalysisToon.test_detects_high_fan_out`
+    took 1.02s to run.
+
+
+    Optimize its setup, mock slow external dependencies, or refactor its logic to
+    reduce overall test suite execution time.'
+  priority: medium
+  labels:
+  - llm-ready
+  - test-optimization
+  - slow-test
+  files:
+  - tests/test_format_quality.py
+  dedupe_key: test-optimization:tests.test_format_quality.TestAnalysisToon:test_detects_high_fan_out
 applied: []
 skipped: []

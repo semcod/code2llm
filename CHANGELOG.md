@@ -2,6 +2,12 @@
 
 ### Fixed
 
+- Duplicate-class analysis no longer recommends consolidating similarly named
+  infrastructure classes across the deliberately independent `doctor-agent`,
+  `repair-agent`, and `validator-agent` execution planes. Pair-aware filtering
+  preserves findings within one agent, while generated checkouts below
+  `work/repos/` are excluded as non-canonical copies. Regression coverage
+  verifies TOON metrics and planfile ticket generation.
 - `SmellDetector._detect_data_clumps()` had the same cross-file false-positive
   bug as `_detect_shotgun_surgery()` (previous entry, same root cause): it
   grouped functions by their argument-*name* set alone, ignoring which file
@@ -54,6 +60,31 @@
   file-scoped findings. 4 new tests
   (`tests/test_smells_shotgun_surgery.py`) — this detector had zero prior
   test coverage. Full suite (282 tests) passes.
+
+## [0.5.175] - 2026-08-01
+
+### Docs
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/CODE_CHANGE.review.md
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/team-summary.md
+- Update CHANGELOG.md
+- Update README.md
+
+### Test
+- Update tests/test_dup_groups.py
+- Update tests/test_mermaid_png.py
+
+### Other
+- Update .intent-koru-verify/latest.json
+- Update .intent-koru-verify/runs/20260730T172249Z-c4cbc2a9/code-change-plans.json
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/CODE_CHANGE.review.json
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/ast.intent.jsonl
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/changelog.intent.jsonl
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/code-change-plans.json
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/code-change-source-patches.json
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/communication.intent.jsonl
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/configuration.intent.jsonl
+- Update .intent-koru-verify/runs/20260730T201453Z-2c0e0243/diagnostics.json
+- ... and 21 more files
 
 ## [0.5.174] - 2026-07-13
 

@@ -46,6 +46,15 @@ INTENTIONAL_DUP_COPY_MARKERS: tuple[str, ...] = (
     "pc2/",
     "examples/",
     "-contract-",
+    "work/repos/",
+)
+
+# These repositories are deliberately separate execution planes.  Classes with
+# similar infrastructure-shaped APIs across two different agents are not
+# consolidation candidates: sharing their implementations would couple the
+# independent diagnostic, repair, and validation boundaries.
+INDEPENDENT_AGENT_REPOSITORIES = frozenset(
+    {"doctor-agent", "repair-agent", "validator-agent"}
 )
 
 
@@ -56,6 +65,25 @@ def is_intentional_duplicate_copy(path: str) -> bool:
         return False
     norm = path.replace("\\", "/").lower()
     return any(marker in norm for marker in INTENTIONAL_DUP_COPY_MARKERS)
+
+
+@lru_cache(maxsize=4096)
+def _independent_agent_repository(path: str) -> str | None:
+    """Return the independent agent repository segment present in *path*."""
+    if not path:
+        return None
+    parts = path.replace("\\", "/").lower().split("/")
+    return next((part for part in parts if part in INDEPENDENT_AGENT_REPOSITORIES), None)
+
+
+@lru_cache(maxsize=4096)
+def is_intentional_duplicate_pair(path_a: str, path_b: str) -> bool:
+    """True when two similar classes belong to intentionally parallel copies."""
+    if is_intentional_duplicate_copy(path_a) or is_intentional_duplicate_copy(path_b):
+        return True
+    repo_a = _independent_agent_repository(path_a)
+    repo_b = _independent_agent_repository(path_b)
+    return repo_a is not None and repo_b is not None and repo_a != repo_b
 
 
 @lru_cache(maxsize=4096)

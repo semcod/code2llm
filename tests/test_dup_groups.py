@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from code2llm.core.models import AnalysisResult, ClassInfo
-from code2llm.exporters.flow_constants import is_intentional_duplicate_copy
+from code2llm.exporters.flow_constants import (
+    is_intentional_duplicate_copy,
+    is_intentional_duplicate_pair,
+)
 from code2llm.exporters.planfile_tickets import collect_planfile_tickets
 from code2llm.exporters.toon.metrics_duplicates import DuplicatesMetricsComputer
 from code2llm.exporters.toon.metrics_health import HealthMetricsComputer
@@ -26,7 +29,21 @@ def test_intentional_copy_paths_are_detected() -> None:
     assert is_intentional_duplicate_copy("/repo/pc1/net-user-pl/handler.py")
     assert is_intentional_duplicate_copy("/repo/examples/demo/foo.py")
     assert is_intentional_duplicate_copy("/repo/urirun-contract-windowpair/x.py")
+    assert is_intentional_duplicate_copy(
+        "/repo/doctor-agent/work/repos/runtime/src/executor.py"
+    )
     assert not is_intentional_duplicate_copy("/repo/app/src/handler.py")
+
+
+def test_independent_agent_repositories_are_an_intentional_pair() -> None:
+    doctor = "/repo/doctor-agent/src/ifuri_doctor/command.py"
+    repair = "/repo/repair-agent/src/repair_agent/command.py"
+    validator = r"C:\repo\validator-agent\src\validator_agent\command.py"
+
+    assert is_intentional_duplicate_pair(doctor, repair)
+    assert is_intentional_duplicate_pair(repair, validator)
+    assert not is_intentional_duplicate_pair(repair, repair)
+    assert not is_intentional_duplicate_pair(repair, "/repo/app/command.py")
 
 
 def test_duplicate_groups_not_pair_count(tmp_path: Path) -> None:
@@ -78,3 +95,46 @@ def test_examples_dir_excluded_from_duplicate_pairs(tmp_path: Path) -> None:
 
     dupes = DuplicatesMetricsComputer(str(project)).detect_duplicates(result)
     assert dupes == []
+
+
+def test_cross_agent_duplicates_are_excluded_but_same_agent_duplicates_remain(
+    tmp_path: Path,
+) -> None:
+    result = AnalysisResult(project_path=str(tmp_path))
+    paths = {
+        "doctor.main": tmp_path / "doctor-agent/src/main.py",
+        "doctor.legacy": tmp_path / "doctor-agent/src/legacy.py",
+        "repair.main": tmp_path / "repair-agent/src/main.py",
+        "validator.main": tmp_path / "validator-agent/src/main.py",
+    }
+    for pkg, path in paths.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# stub\n", encoding="utf-8")
+        result.classes[f"{pkg}.Worker"] = _worker(path, pkg)
+
+    dupes = DuplicatesMetricsComputer(str(tmp_path)).detect_duplicates(result)
+
+    assert len(dupes) == 1
+    assert dupes[0]["fileA"] == "doctor-agent/src/main.py"
+    assert dupes[0]["fileB"] == "doctor-agent/src/legacy.py"
+
+
+def test_cross_agent_duplicates_do_not_create_planfile_ticket(tmp_path: Path) -> None:
+    result = AnalysisResult(project_path=str(tmp_path))
+    for repo, pkg in (
+        ("doctor-agent", "doctor"),
+        ("repair-agent", "repair"),
+        ("validator-agent", "validator"),
+    ):
+        path = tmp_path / repo / "src/command.py"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# stub\n", encoding="utf-8")
+        result.classes[f"{pkg}.Worker"] = _worker(path, pkg)
+
+    tickets = [
+        ticket
+        for ticket in collect_planfile_tickets(result)
+        if ticket.signal == "code2llm_dup"
+    ]
+
+    assert tickets == []

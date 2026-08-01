@@ -293,7 +293,10 @@ def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSugge
 
 def _duplicate_class_pairs(result: AnalysisResult) -> list[tuple[str, str, str]]:
     """Return (class_name, file_a, file_b) for each similar class pair."""
-    from code2llm.exporters.flow_constants import is_intentional_duplicate_copy
+    from code2llm.exporters.flow_constants import (
+        is_intentional_duplicate_copy,
+        is_intentional_duplicate_pair,
+    )
 
     pairs: list[tuple[str, str, str]] = []
     classes = [
@@ -307,6 +310,8 @@ def _duplicate_class_pairs(result: AnalysisResult) -> list[tuple[str, str, str]]
             continue
         for right in classes[index + 1 :]:
             if left.name != right.name:
+                continue
+            if is_intentional_duplicate_pair(left.file, right.file):
                 continue
             right_methods = _method_names(right)
             if len(right_methods) < 3:
