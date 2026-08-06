@@ -61,6 +61,18 @@
   (`tests/test_smells_shotgun_surgery.py`) — this detector had zero prior
   test coverage. Full suite (282 tests) passes.
 
+## [0.5.176] - 2026-08-06
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_dup_groups.py
+
+### Other
+- Update code2llm/exporters/flow_constants.py
+- Update code2llm/exporters/planfile_tickets.py
+
 ## [0.5.175] - 2026-08-01
 
 ### Docs

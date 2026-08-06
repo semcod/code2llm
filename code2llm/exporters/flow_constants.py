@@ -47,6 +47,8 @@ INTENTIONAL_DUP_COPY_MARKERS: tuple[str, ...] = (
     "examples/",
     "-contract-",
     "work/repos/",
+    # Vendored submodules / deployment mirrors (e.g. packages/ ↔ extern/oqlos/packages/).
+    "extern/",
 )
 
 # These repositories are deliberately separate execution planes.  Classes with

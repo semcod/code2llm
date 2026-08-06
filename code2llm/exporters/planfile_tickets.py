@@ -270,7 +270,9 @@ def _duplicate_class_tickets(result: AnalysisResult) -> list[PlanfileTicketSugge
     tickets: list[PlanfileTicketSuggestion] = []
     for class_name, files in sorted(groups.items()):
         rel_files = tuple(sorted(files))
-        if all(is_intentional_duplicate_copy(f) for f in rel_files):
+        # Skip when any path is a vendored/intentional copy tree (packages↔extern
+        # mirrors land here as mixed groups: one intentional, one host copy).
+        if any(is_intentional_duplicate_copy(f) for f in rel_files):
             continue
         tickets.append(
             PlanfileTicketSuggestion(

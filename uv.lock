@@ -633,7 +633,7 @@ wheels = [
 
 [[package]]
 name = "code2llm"
-version = "0.5.175"
+version = "0.5.176"
 source = { editable = "." }
 dependencies = [
     { name = "astroid" },

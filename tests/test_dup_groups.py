@@ -32,7 +32,47 @@ def test_intentional_copy_paths_are_detected() -> None:
     assert is_intentional_duplicate_copy(
         "/repo/doctor-agent/work/repos/runtime/src/executor.py"
     )
+    assert is_intentional_duplicate_copy(
+        "/repo/extern/oqlos/packages/backend-shared-py/src/shared/cqrs/http_relay.py"
+    )
     assert not is_intentional_duplicate_copy("/repo/app/src/handler.py")
+    assert not is_intentional_duplicate_copy(
+        "/repo/packages/backend-shared-py/src/shared/cqrs/http_relay.py"
+    )
+
+
+def test_extern_vendored_mirror_pair_is_not_actionable_dup(tmp_path: Path) -> None:
+    """packages/ ↔ extern/.../packages/ twins must not create DUP tickets."""
+    result = AnalysisResult(project_path=str(tmp_path))
+    host = tmp_path / "packages/backend-shared-py/src/shared/cqrs/http_relay.py"
+    vendored = (
+        tmp_path / "extern/oqlos/packages/backend-shared-py/src/shared/cqrs/http_relay.py"
+    )
+    for path, pkg in (
+        (host, "packages.backend_shared.http_relay"),
+        (vendored, "extern.oqlos.packages.backend_shared.http_relay"),
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# stub\n", encoding="utf-8")
+        cls = _worker(path, pkg)
+        cls.name = "HttpInterServiceRelay"
+        cls.qualified_name = f"{pkg}.HttpInterServiceRelay"
+        cls.methods = [
+            f"{pkg}.HttpInterServiceRelay.send",
+            f"{pkg}.HttpInterServiceRelay.receive",
+            f"{pkg}.HttpInterServiceRelay.close",
+        ]
+        result.classes[cls.qualified_name] = cls
+
+    assert is_intentional_duplicate_pair(str(host), str(vendored))
+    dupes = DuplicatesMetricsComputer(str(tmp_path)).detect_duplicates(result)
+    assert dupes == []
+    tickets = [
+        ticket
+        for ticket in collect_planfile_tickets(result)
+        if ticket.signal == "code2llm_dup"
+    ]
+    assert tickets == []
 
 
 def test_independent_agent_repositories_are_an_intentional_pair() -> None:
