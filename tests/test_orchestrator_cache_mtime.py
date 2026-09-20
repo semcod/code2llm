@@ -27,13 +27,14 @@ def test_copy_cached_export_refreshes_mtime(tmp_path: Path) -> None:
     old_mtime = time.time() - 60 * 60 * 24  # 24h ago
 
     _write(cache_dir / "analysis.toon.yaml", "x: 1\n", old_mtime)
-    _write(cache_dir / "sub" / "inner.md", "# hi\n", old_mtime)
+    # "prompts" is a code2llm-owned subdirectory (refactor prompts).
+    _write(cache_dir / "prompts" / "inner.md", "# hi\n", old_mtime)
 
     before = time.time() - 1
     _copy_cached_export(cache_dir, output_dir, verbose=False)
     after = time.time() + 1
 
-    for rel in ("analysis.toon.yaml", "sub/inner.md"):
+    for rel in ("analysis.toon.yaml", "prompts/inner.md"):
         dest = output_dir / rel
         assert dest.exists(), f"missing {rel}"
         mtime = dest.stat().st_mtime
