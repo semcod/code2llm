@@ -1,7 +1,8 @@
 """Persistent content-addressed cache for code2llm.
 
-Stores per-file analysis results in ~/.code2llm/ keyed by content hash
-(SHA-256), so identical files in different projects share one cache entry.
+Stores per-file analysis results in ~/.code2llm/ keyed by source identity,
+analyzer version and content hash (SHA-256). Models retain the correct source
+path and qualified module name even when files have identical contents.
 
 Layout::
 
@@ -114,8 +115,19 @@ class PersistentCache:
     # ------------------------------------------------------------------
 
     def content_hash(self, filepath: str) -> str:
-        """Key file bytes by analyzer version as well as content."""
-        payload = self._analyzer_version.encode() + b"\0" + Path(filepath).read_bytes()
+        """Key results by analyzer, source identity and content.
+
+        Results contain path/module-qualified models, so equal bytes in two
+        files cannot reuse the same analysis payload.
+        """
+        identity = os.path.relpath(os.path.abspath(filepath), self._project_dir)
+        payload = (
+            self._analyzer_version.encode()
+            + b"\0"
+            + identity.encode()
+            + b"\0"
+            + Path(filepath).read_bytes()
+        )
         return hashlib.sha256(payload).hexdigest()[:16]
 
     def get_file_result(self, filepath: str) -> Optional[Any]:

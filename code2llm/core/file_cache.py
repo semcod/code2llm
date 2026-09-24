@@ -12,8 +12,9 @@ from code2llm import __version__
 
 
 def make_cache_key(file_path: str, content: str) -> str:
-    """Generate a cache key from file stem and MD5 of content."""
-    content_hash = hashlib.md5(content.encode()).hexdigest()[:16]
+    """Bind cached AST/module identities to their source path and analyzer."""
+    payload = os.path.abspath(file_path).encode() + b"\0" + content.encode()
+    content_hash = hashlib.md5(payload).hexdigest()[:16]
     return f"{__version__}_{Path(file_path).stem}_{content_hash}"
 
 
@@ -28,11 +29,12 @@ class FileCache:
 
     def _get_cache_key_stat(self, file_path: str) -> str:
         """Generate cache key from file path, mtime and size (fast, no I/O on content)."""
+        identity = hashlib.sha256(os.path.abspath(file_path).encode()).hexdigest()[:16]
         try:
             s = os.stat(file_path)
-            return f"{self._analyzer_version}_{Path(file_path).stem}_{s.st_mtime_ns}_{s.st_size}"
+            return f"{self._analyzer_version}_{identity}_{s.st_mtime_ns}_{s.st_size}"
         except OSError:
-            return f"{self._analyzer_version}_{Path(file_path).stem}_unknown"
+            return f"{self._analyzer_version}_{identity}_unknown"
 
     def _get_cache_key(self, file_path: str, content: str) -> str:
         """Return a content-addressed cache key for the given file path and content."""

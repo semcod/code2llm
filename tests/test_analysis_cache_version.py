@@ -2,11 +2,38 @@
 
 import hashlib
 import json
+import os
 import pickle
 
 import pytest
 
 from code2llm.core import file_cache, persistent_cache
+
+
+@pytest.mark.parametrize("persistent", [False, True])
+def test_distinct_source_paths_keep_their_own_cached_module_identity(tmp_path, persistent):
+    first = tmp_path / "a" / "index.js"
+    second = tmp_path / "b" / "index.js"
+    for source in (first, second):
+        source.parent.mkdir()
+        source.write_text("const f=()=>true;")
+        os.utime(source, ns=(1_700_000_000_000_000_000, 1_700_000_000_000_000_000))
+    if persistent:
+        cache = persistent_cache.PersistentCache(
+            str(tmp_path), str(tmp_path / "cache"), auto_cleanup=False
+        )
+        get, put = cache.get_file_result, cache.put_file_result
+    else:
+        cache = file_cache.FileCache(str(tmp_path / "cache"))
+        get, put = cache.get_fast, cache.put_fast
+    put(str(first), {"module": "a.index"})
+    assert get(str(second)) is None
+    put(str(second), {"module": "b.index"})
+    assert get(str(first)) == {"module": "a.index"}
+    assert get(str(second)) == {"module": "b.index"}
+    assert file_cache.make_cache_key(str(first), first.read_text()) != file_cache.make_cache_key(
+        str(second), second.read_text()
+    )
 
 
 @pytest.mark.parametrize("fast", [False, True])
