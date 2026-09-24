@@ -38,6 +38,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # The package declares Python >=3.10. Preserve supported release
         # coverage and include the newest version in the locked test matrix.
@@ -78,7 +79,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest pytest-cov pytest-xdist
-          pytest tests/ -q -n 2 --tb=short
+          python -I -m pytest tests/ --import-mode=importlib -q -n 2 --tb=short
 
   publish:
     needs: [build, test]

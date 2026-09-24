@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "code2llm"
-version = "0.5.178"
+version = "0.5.179"
 description = "High-performance Python code flow analysis with optimized TOON format - CFG, DFG, call graphs, and intelligent code queries"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -82,6 +82,9 @@ code2llm = "code2llm.cli:main"
 Homepage = "https://github.com/wronai/stts"
 Repository = "https://github.com/wronai/stts"
 Issues = "https://github.com/wronai/stts/issues"
+
+[tool.setuptools.package-data]
+code2llm = ["templates/*.md"]
 
 [tool.black]
 line-length = 100

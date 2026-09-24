@@ -8,7 +8,7 @@ Includes NLP Processing Pipeline for query normalization, intent matching,
 and entity resolution with multilingual support.
 """
 
-__version__ = "0.5.178"
+__version__ = "0.5.179"
 __author__ = "STTS Project"
 
 # Core analysis components (lightweight, always needed)
