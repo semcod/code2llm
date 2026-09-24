@@ -26,6 +26,7 @@ from .orchestrator_constants import (
     FORMAT_FILENAMES,
     FORMAT_DRY_RUN_FILES,
     FORMAT_LABELS,
+    is_cacheable_export_name,
 )
 from .orchestrator_handlers import (
     _export_mermaid,
@@ -175,9 +176,19 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
 def _copy_cached_export(
     cached_dir: Path, output_dir: Path, verbose: bool = False
 ) -> None:
-    """Copy files from cached export to output directory."""
+    """Copy code2llm-owned files from cached export to output directory.
+
+    Only artifacts produced by code2llm are restored. Foreign files that a
+    previous (pre-ownership-filter) cache entry may have snapshotted are
+    skipped, so restoring a cache hit can never revert newer exports written
+    by other tools into the same output directory.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
-    items = [item for item in cached_dir.iterdir() if item.name != "_complete"]
+    items = [
+        item
+        for item in cached_dir.iterdir()
+        if item.name != "_complete" and is_cacheable_export_name(item.name)
+    ]
 
     # Progress bar for large cache restores
     use_tqdm = _HAS_TQDM and not verbose and len(items) > DEFAULT_PROGRESS_BAR_THRESHOLD
@@ -209,12 +220,21 @@ def _touch_recursive(path: Path) -> None:
 
 
 def _copy_to_cache(output_dir: Path, cache_dir: Path, verbose: bool = False) -> None:
-    """Copy export files to cache directory."""
+    """Copy code2llm-owned export files to cache directory.
+
+    Foreign artifacts that merely live in the output directory (e.g. redup's
+    duplication.toon.yaml, vallm's validation.toon.yaml) are never cached:
+    a cache hit must not be able to restore them over newer foreign exports.
+    """
     cache_dir.mkdir(parents=True, exist_ok=True)
     if not output_dir.exists():
         return
 
-    items = list(output_dir.iterdir())
+    items = [
+        item
+        for item in output_dir.iterdir()
+        if is_cacheable_export_name(item.name)
+    ]
     # Progress bar for large cache saves
     use_tqdm = _HAS_TQDM and not verbose and len(items) > DEFAULT_PROGRESS_BAR_THRESHOLD
     item_iterator = tqdm(items, desc="Saving to cache") if use_tqdm else items
