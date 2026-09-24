@@ -1,7 +1,8 @@
 """Persistent content-addressed cache for code2llm.
 
-Stores per-file analysis results in ~/.code2llm/ keyed by content hash
-(SHA-256), so identical files in different projects share one cache entry.
+Stores per-file analysis results in ~/.code2llm/ keyed by source identity,
+analyzer version and content hash (SHA-256). Models retain the correct source
+path and qualified module name even when files have identical contents.
 
 Layout::
 
@@ -29,6 +30,8 @@ import shutil
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+from code2llm import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +80,7 @@ class PersistentCache:
         ttl_days: Optional[float] = None,
     ):
         self._project_dir = os.path.realpath(project_dir)
+        self._analyzer_version = __version__
         self._root = Path(cache_root or _DEFAULT_ROOT)
         self._project_hash = hashlib.md5(self._project_dir.encode()).hexdigest()[:12]
         self._project_cache = self._root / "projects" / self._project_hash
@@ -111,8 +115,20 @@ class PersistentCache:
     # ------------------------------------------------------------------
 
     def content_hash(self, filepath: str) -> str:
-        """SHA-256 of file bytes — the content-addressed key."""
-        return hashlib.sha256(Path(filepath).read_bytes()).hexdigest()[:16]
+        """Key results by analyzer, source identity and content.
+
+        Results contain path/module-qualified models, so equal bytes in two
+        files cannot reuse the same analysis payload.
+        """
+        identity = os.path.relpath(os.path.abspath(filepath), self._project_dir)
+        payload = (
+            self._analyzer_version.encode()
+            + b"\0"
+            + identity.encode()
+            + b"\0"
+            + Path(filepath).read_bytes()
+        )
+        return hashlib.sha256(payload).hexdigest()[:16]
 
     def get_file_result(self, filepath: str) -> Optional[Any]:
         """Return cached analysis result for *filepath*, or None on miss."""
@@ -197,9 +213,7 @@ class PersistentCache:
 
         Returns the list of relative paths that were removed.
         """
-        current_rel = {
-            os.path.relpath(fp, self._project_dir) for fp in current_filepaths
-        }
+        current_rel = {os.path.relpath(fp, self._project_dir) for fp in current_filepaths}
         files_index = self._manifest["files"]
         stale = [rel for rel in files_index if rel not in current_rel]
         if not stale:
@@ -249,6 +263,7 @@ class PersistentCache:
         if not self._dirty:
             return
         self._manifest["version"] = VERSION
+        self._manifest["analyzer_version"] = self._analyzer_version
         self._manifest["project_dir"] = self._project_dir
         self._manifest["updated_at"] = time.time()
         tmp = self._manifest_path.with_suffix(".tmp")
@@ -256,9 +271,7 @@ class PersistentCache:
         tmp.replace(self._manifest_path)
 
         try:
-            size = sum(
-                f.stat().st_size for f in self._files_dir.iterdir() if f.is_file()
-            )
+            size = sum(f.stat().st_size for f in self._files_dir.iterdir() if f.is_file())
             meta = {
                 "project": self._project_dir,
                 "files_cached": len(self._manifest["files"]),
@@ -274,9 +287,7 @@ class PersistentCache:
     def cache_size_mb(self) -> float:
         """Total size of this project's cache in MB."""
         try:
-            total = sum(
-                f.stat().st_size for f in self._project_cache.rglob("*") if f.is_file()
-            )
+            total = sum(f.stat().st_size for f in self._project_cache.rglob("*") if f.is_file())
             return total / (1024 * 1024)
         except OSError:
             return 0.0
@@ -404,6 +415,7 @@ class PersistentCache:
         self._exports_dir.mkdir(parents=True, exist_ok=True)
         self._manifest = {
             "version": VERSION,
+            "analyzer_version": self._analyzer_version,
             "files": {},
             "project_dir": self._project_dir,
         }
@@ -418,11 +430,19 @@ class PersistentCache:
         if self._manifest_path.exists():
             try:
                 m = json.loads(self._manifest_path.read_text())
-                if m.get("version") == VERSION:
+                if (
+                    m.get("version") == VERSION
+                    and m.get("analyzer_version") == self._analyzer_version
+                ):
                     return m
             except (json.JSONDecodeError, KeyError, OSError):
                 pass
-        return {"version": VERSION, "files": {}, "project_dir": self._project_dir}
+        return {
+            "version": VERSION,
+            "analyzer_version": self._analyzer_version,
+            "files": {},
+            "project_dir": self._project_dir,
+        }
 
     def _compute_run_hash(self, config_dict: Dict) -> str:
         """Compute a short hash combining the manifest file-hashes and the config dict."""
@@ -432,7 +452,7 @@ class PersistentCache:
         config_hash = hashlib.md5(
             json.dumps(config_dict, sort_keys=True, default=str).encode()
         ).hexdigest()[:8]
-        return f"{manifest_hash}_{config_hash}"
+        return f"{self._analyzer_version}_{manifest_hash}_{config_hash}"
 
 
 # ---------------------------------------------------------------------------

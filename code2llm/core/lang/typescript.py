@@ -1,10 +1,6 @@
 import re
 from typing import Dict
-from code2llm.core.lang.base import (
-    calculate_complexity_regex,
-    extract_calls_regex,
-    _extract_declarations,
-)
+from code2llm.core.lang.js_analysis import analyze_js_tree
 
 
 def get_typescript_patterns() -> Dict[str, re.Pattern]:
@@ -55,17 +51,5 @@ def get_typescript_lang_config() -> Dict:
 def analyze_typescript_js(
     content: str, file_path: str, module_name: str, ext: str, stats: Dict
 ) -> Dict:
-    """Analyze TypeScript/JavaScript files using shared extraction."""
-
-    patterns = get_typescript_patterns()
-    lang_config = get_typescript_lang_config()
-
-    result = _extract_declarations(
-        content, file_path, module_name, patterns, stats, lang_config
-    )
-
-    calculate_complexity_regex(content, result, lang="c_family")
-    extract_calls_regex(content, module_name, result)
-
-    stats["files_processed"] += 1
-    return result
+    """Measure actual declarations and their own syntax-bounded bodies."""
+    return analyze_js_tree(content, file_path, module_name, ext, stats)

@@ -39,7 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        # The package declares Python >=3.10. Preserve supported release
+        # coverage and include the newest version in the locked test matrix.
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       
@@ -56,11 +58,27 @@ jobs:
       
       - name: Install package
         run: pip install dist/*.whl
+
+      - name: Verify installed analyzer wheel
+        run: |
+          python -I - <<'PY'
+          from collections import defaultdict
+          from pathlib import Path
+          from importlib.metadata import version
+          import sys
+          import code2llm
+          assert code2llm.__version__ == version('code2llm')
+          from code2llm.core.lang.typescript import analyze_typescript_js
+          assert Path(code2llm.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
+          result = analyze_typescript_js('let pending=null; const pick=()=>true;', 'fixture.js', 'fixture', '.js', defaultdict(int))
+          assert set(result['functions']) == {'fixture.pick'}
+          assert result['functions']['fixture.pick'].complexity['cyclomatic_complexity'] == 1
+          PY
       
       - name: Run tests
         run: |
-          pip install pytest pytest-cov
-          pytest tests/ -v --tb=short
+          pip install pytest pytest-cov pytest-xdist
+          pytest tests/ -q -n 2 --tb=short
 
   publish:
     needs: [build, test]
