@@ -8,11 +8,13 @@ from pathlib import Path
 from typing import Any, Optional, Tuple
 import ast
 
+from code2llm import __version__
+
 
 def make_cache_key(file_path: str, content: str) -> str:
     """Generate a cache key from file stem and MD5 of content."""
     content_hash = hashlib.md5(content.encode()).hexdigest()[:16]
-    return f"{Path(file_path).stem}_{content_hash}"
+    return f"{__version__}_{Path(file_path).stem}_{content_hash}"
 
 
 class FileCache:
@@ -22,14 +24,15 @@ class FileCache:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.ttl_seconds = ttl_hours * 3600
+        self._analyzer_version = __version__
 
     def _get_cache_key_stat(self, file_path: str) -> str:
         """Generate cache key from file path, mtime and size (fast, no I/O on content)."""
         try:
             s = os.stat(file_path)
-            return f"{Path(file_path).stem}_{s.st_mtime_ns}_{s.st_size}"
+            return f"{self._analyzer_version}_{Path(file_path).stem}_{s.st_mtime_ns}_{s.st_size}"
         except OSError:
-            return f"{Path(file_path).stem}_unknown"
+            return f"{self._analyzer_version}_{Path(file_path).stem}_unknown"
 
     def _get_cache_key(self, file_path: str, content: str) -> str:
         """Return a content-addressed cache key for the given file path and content."""
