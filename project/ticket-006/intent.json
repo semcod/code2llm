@@ -1,0 +1,17 @@
+{
+  "ticket": "ticket-006",
+  "summary": "Atomize code smells and hotspots detector with pure modular engine and zero regressions",
+  "allowedPaths": [
+    "code2llm/analysis/smell_engine.py",
+    "code2llm/analysis/smells.py",
+    "packages/code2llm-fast-core/**",
+    "tests/test_smell_engine.py",
+    "project/ticket-006/**"
+  ],
+  "forbiddenPaths": [
+    ".env",
+    ".github/workflows/**"
+  ],
+  "authorization": "SESSION_EXECUTION_AUTHORIZATION",
+  "outcome": "Code smell detection atomized into pure, decoupled functions and backward-compatible SmellDetector facade with 100% test coverage."
+}
