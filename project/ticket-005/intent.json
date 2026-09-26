@@ -1,0 +1,18 @@
+{
+  "ticket": "ticket-005",
+  "summary": "Atomize call graph extraction engine and add native Rust call scanner with zero regressions",
+  "allowedPaths": [
+    "code2llm/analysis/call_graph_engine.py",
+    "code2llm/analysis/call_graph.py",
+    "code2llm/core/lang/_calls.py",
+    "packages/code2llm-fast-core/**",
+    "tests/test_call_graph_engine.py",
+    "project/ticket-005/**"
+  ],
+  "forbiddenPaths": [
+    ".env",
+    ".github/workflows/**"
+  ],
+  "authorization": "SESSION_EXECUTION_AUTHORIZATION",
+  "outcome": "Call graph extraction and call resolution atomized into dedicated pure engine with backward-compatible facades and native Rust fast-path."
+}

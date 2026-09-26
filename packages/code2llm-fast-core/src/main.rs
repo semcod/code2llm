@@ -1,17 +1,21 @@
 use std::env;
 use std::fs;
 use std::io::{self, Read};
-use code2llm_fast_core::{calculate_complexity, extract_function_body_from_lines};
+use code2llm_fast_core::{calculate_complexity, extract_calls_from_body, extract_function_body_from_lines};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let mut lang = "c_family".to_string();
     let mut file_path: Option<String> = None;
     let mut lines: Vec<usize> = Vec::new();
+    let mut extract_calls = false;
     let mut i = 1;
 
     while i < args.len() {
         match args[i].as_str() {
+            "--calls" => {
+                extract_calls = true;
+            }
             "--lang" => {
                 if i + 1 < args.len() {
                     lang = args[i + 1].clone();
@@ -68,8 +72,14 @@ fn main() {
     let mut results: Vec<String> = Vec::with_capacity(lines.len());
     for &start_line in &lines {
         let body = extract_function_body_from_lines(&lines_vec, start_line);
-        let (cc, rank) = calculate_complexity(&body, &lang);
-        results.push(format!("{{\"line\":{},\"cc\":{},\"rank\":\"{}\"}}", start_line, cc, rank));
+        if extract_calls {
+            let calls = extract_calls_from_body(&body);
+            let formatted_calls: Vec<String> = calls.into_iter().map(|c| format!("\"{}\"", c)).collect();
+            results.push(format!("{{\"line\":{},\"calls\":[{}]}}", start_line, formatted_calls.join(",")));
+        } else {
+            let (cc, rank) = calculate_complexity(&body, &lang);
+            results.push(format!("{{\"line\":{},\"cc\":{},\"rank\":\"{}\"}}", start_line, cc, rank));
+        }
     }
 
     println!("[{}]", results.join(","));
