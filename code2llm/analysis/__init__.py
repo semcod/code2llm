@@ -12,6 +12,10 @@ __all__ = [
     "PipelineDetector",
     "PipelineResolver",
     "PipelineClassifier",
+    "calculate_complexity_regex",
+    "calculate_python_complexity",
+    "compute_cyclomatic_complexity",
+    "extract_function_body",
 ]
 
 
@@ -29,6 +33,10 @@ def __getattr__(name):
         "PipelineDetector": ".pipeline_detector",
         "PipelineResolver": ".pipeline_resolver",
         "PipelineClassifier": ".pipeline_classifier",
+        "calculate_complexity_regex": ".complexity",
+        "calculate_python_complexity": ".complexity",
+        "compute_cyclomatic_complexity": ".complexity",
+        "extract_function_body": ".complexity",
     }
     if name in _imports:
         import importlib

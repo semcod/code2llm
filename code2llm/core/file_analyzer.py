@@ -29,8 +29,7 @@ import ast
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from radon.complexity import cc_visit, cc_rank
-
+from code2llm.analysis.complexity import calculate_python_complexity
 from .config import Config
 from .models import ClassInfo, FlowEdge, FlowNode, FunctionInfo, ModuleInfo
 from code2llm.analysis.dfg import DFGExtractor
@@ -176,31 +175,7 @@ class FileAnalyzer:
 
     def _calculate_complexity(self, content: str, file_path: str, result: Dict) -> None:
         """Calculate cyclomatic complexity using radon."""
-        try:
-            complexity_results = cc_visit(content)
-            for entry in complexity_results:
-                # Radon returns a list of objects (Function, Class, Method)
-                name = getattr(entry, "name", "")
-                classname = getattr(entry, "classname", None)
-
-                if classname:
-                    full_name = f"{result['module'].name}.{classname}.{name}"
-                else:
-                    full_name = f"{result['module'].name}.{name}"
-
-                if full_name in result["functions"]:
-                    result["functions"][full_name].complexity = {
-                        "cyclomatic_complexity": entry.complexity,
-                        "cc_rank": cc_rank(entry.complexity),
-                    }
-                elif full_name in result["classes"]:
-                    # We can store class complexity too if needed
-                    result["classes"][full_name].is_state_machine = result["classes"][
-                        full_name
-                    ].is_state_machine or (entry.complexity > 20)
-        except Exception as e:
-            if self.config.verbose:
-                print(f"Error calculating complexity for {file_path}: {e}")
+        calculate_python_complexity(content, file_path, result, verbose=self.config.verbose)
 
     def _perform_deep_analysis(
         self, tree: ast.AST, module_name: str, file_path: str, result: Dict
