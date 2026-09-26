@@ -1,0 +1,15 @@
+[package]
+name = "code2llm-fast-core"
+version = "0.1.0"
+edition = "2021"
+description = "Fast native cyclomatic complexity and AST metric engine for code2llm"
+
+[lib]
+name = "code2llm_fast_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "code2llm-fast-core"
+path = "src/main.rs"
+
+[dependencies]

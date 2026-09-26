@@ -1,0 +1,19 @@
+{
+  "ticket": "ticket-004",
+  "summary": "Atomize cyclomatic complexity engine and introduce native fast-path with zero regressions",
+  "allowedPaths": [
+    "code2llm/analysis/__init__.py",
+    "code2llm/analysis/complexity.py",
+    "code2llm/core/file_analyzer.py",
+    "code2llm/core/lang/_complexity.py",
+    "packages/code2llm-fast-core/**",
+    "tests/test_complexity.py",
+    "project/ticket-004/**"
+  ],
+  "forbiddenPaths": [
+    ".env",
+    ".github/workflows/**"
+  ],
+  "authorization": "SESSION_EXECUTION_AUTHORIZATION",
+  "outcome": "Cyclomatic complexity and body extraction atomized into dedicated pure engine with backward-compatible facade and native Rust fast-path."
+}
