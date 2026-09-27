@@ -5,7 +5,7 @@ to avoid duplication and enable easier maintenance.
 """
 
 import re
-from typing import Dict, FrozenSet, List
+from typing import Dict, List
 
 
 # Format output filenames
@@ -61,7 +61,7 @@ FORMAT_LABELS: Dict[str, str] = {
 
 # Subdirectories written by code2llm handlers (refactor prompts, separated and
 # split export layouts, code2logic candidate output).
-CACHEABLE_EXPORT_DIRS: FrozenSet[str] = frozenset(
+CACHEABLE_EXPORT_DIRS: frozenset[str] = frozenset(
     {
         "prompts",
         "separated",
@@ -73,7 +73,7 @@ CACHEABLE_EXPORT_DIRS: FrozenSet[str] = frozenset(
 # Output files written by handlers that are not covered by the format
 # registries above (mermaid diagrams + rendered PNGs, call graphs, project
 # overview, prompt bundle, file browser index, data structures, code2logic).
-CACHEABLE_EXPORT_EXTRA_FILES: FrozenSet[str] = frozenset(
+CACHEABLE_EXPORT_EXTRA_FILES: frozenset[str] = frozenset(
     {
         "flow.mmd",
         "calls.mmd",
@@ -99,7 +99,7 @@ CACHEABLE_EXPORT_EXTRA_FILES: FrozenSet[str] = frozenset(
 # code2logic oversized-output split parts: project_part2.toon, project_part3…
 _CODE2LOGIC_PART_RE = re.compile(r"project_part\d+\.toon\Z")
 
-_CACHEABLE_EXPORT_FILES: FrozenSet[str] = frozenset(
+_CACHEABLE_EXPORT_FILES: frozenset[str] = frozenset(
     {name for names in FORMAT_DRY_RUN_FILES.values() for name in names}
 ) | frozenset(FORMAT_FILENAMES.values()) | CACHEABLE_EXPORT_EXTRA_FILES
 
