@@ -254,4 +254,32 @@ def native_resolve_call_graph(
     return None
 
 
+def native_find_pipeline_paths(
+    nodes: List[str],
+    edges: List[Tuple[str, str]],
+    min_length: int = 3,
+    max_pipelines: int = 12,
+) -> Optional[List[List[str]]]:
+    """Find pipeline paths using native Rust."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "find_pipeline_paths"):
+        try:
+            return code2llm_rust.find_pipeline_paths(nodes, edges, min_length, max_pipelines)
+        except Exception as e:
+            logger.debug("code2llm_rust.find_pipeline_paths failed: %s", e)
+    return None
+
+
+def native_calculate_call_metrics(
+    functions: List[Tuple[str, List[str], List[str], float]],
+) -> Optional[Tuple[Dict[str, Tuple[int, int, float]], Dict[str, List[str]]]]:
+    """Calculate call metrics (fan_in, fan_out, complexity) and callers using native Rust."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "calculate_call_metrics"):
+        try:
+            return code2llm_rust.calculate_call_metrics(functions)
+        except Exception as e:
+            logger.debug("code2llm_rust.calculate_call_metrics failed: %s", e)
+    return None
+
+
+
 

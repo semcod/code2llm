@@ -65,6 +65,14 @@ Through systematic profiling and code analysis of `code2llm` during multi-langua
 - **Problem**: In `ProjectAnalyzer._build_call_graph`, iterating through every function's call list in Python, executing string `rsplit` operations to find module matches, and building `called_by` with quadratic member checks adds significant runtime on large repositories.
 - **Native Rust Solution**: `calls::resolve_call_graph` resolving simple-to-full name candidate lookups with same-module affinity in a single linear pass in native Rust, returning resolved forward calls, backward caller maps, and root entry points.
 
+### Bottleneck L: Pipeline Path Finding & Component Exploration
+- **Problem**: In `PipelineDetector._find_pipeline_paths`, executing depth-bounded DFS with Python set union copies (`visited | {successor}`) and NetworkX DAG longest path algorithms on large call graphs creates massive interpreter overhead.
+- **Native Rust Solution**: `pipelines::find_pipeline_paths` searching longest paths and weakly connected components directly in native Rust graph structures.
+
+### Bottleneck M: Call Graph Fan-In / Fan-Out Metrics
+- **Problem**: In `calculate_call_metrics`, calculating pairwise caller/callee metrics across thousands of functions in Python dictionaries causes high GC churn.
+- **Native Rust Solution**: `calls::calculate_call_metrics` vectorizing fan-in, fan-out, and caller maps in a single linear-time native pass.
+
 ## 3. Architecture & Refactoring Strategy
 
 To prepare `code2llm` for clean separation and extraction into the `code2llm-rust` package, the following refactoring was implemented:

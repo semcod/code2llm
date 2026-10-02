@@ -150,13 +150,28 @@ class PipelineDetector:
         if se_info is None:
             se_info = self._se_detector.analyze_all(funcs)
 
-        # Build networkx DiGraph
-        graph = self._build_graph(funcs)
-        if graph.number_of_nodes() == 0:
-            return []
+        # Fast path: native Rust pipeline path finding
+        from code2llm.analysis.native_bridge import native_find_pipeline_paths
 
-        # Find pipeline candidates (longest paths in DAG)
-        paths = self._find_pipeline_paths(graph)
+        nodes = list(funcs.keys())
+        edges: List[Tuple[str, str]] = []
+        for qname, fi in funcs.items():
+            for callee in fi.calls:
+                resolved = self._resolver.resolve(callee, funcs, caller=fi)
+                if resolved and resolved != qname:
+                    edges.append((qname, resolved))
+
+        native_paths = native_find_pipeline_paths(
+            nodes, edges, MIN_PIPELINE_LENGTH, MAX_PIPELINES
+        )
+        if native_paths is not None:
+            paths = native_paths
+        else:
+            # Build networkx DiGraph
+            graph = self._build_graph(funcs)
+            if graph.number_of_nodes() == 0:
+                return []
+            paths = self._find_pipeline_paths(graph)
 
         # Build Pipeline objects with stages, purity, domain
         pipelines = self._build_pipelines(paths, funcs, se_info)
