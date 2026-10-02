@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code2graph"
+version = "0.1.0"
+description = "Semantic code graph and topology models for static analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Tom Sapletta", email = "tom@sapletta.com"}
+]
+keywords = ["code-analysis", "graph", "ast", "call-graph", "static-analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["code2graph*"]

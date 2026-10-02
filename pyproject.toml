@@ -68,6 +68,9 @@ license = "Apache-2.0"
 native = [
     "code2llm-rust>=0.1.0",
 ]
+graph = [
+    "code2graph>=0.1.0",
+]
 dev = [
     "pytest>=6.2",
     "pytest-cov>=2.12",
@@ -77,6 +80,7 @@ dev = [
     "mypy>=0.910",
     "costs>=0.1.20",
     "code2llm-rust>=0.1.0",
+    "code2graph>=0.1.0",
 ]
 
 [project.scripts]
