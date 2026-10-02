@@ -61,10 +61,11 @@ from .config import (
 )
 from .models import AnalysisResult, Pattern
 from .file_cache import FileCache
-from .file_filter import FastFileFilter
+from .file_filter import FastFileFilter, _SKIP_DIR_NAMES
 from .file_analyzer import FileAnalyzer, _analyze_single_file
 from .persistent_cache import PersistentCache
 from .refactoring import RefactoringAnalyzer
+from code2llm.analysis.native_bridge import native_walk_project_files
 
 logger = logging.getLogger(__name__)
 
@@ -306,16 +307,34 @@ class ProjectAnalyzer:
     def _collect_files(self, project_path: Path) -> List[Tuple[str, str]]:
         """Collect all source files with their module names for all supported languages.
 
-        Uses a single os.walk traversal with early directory pruning instead of
-        separate rglob calls per extension (~40x speedup on large repos).
+        Uses native Rust parallel walk if available, with transparent fallback to
+        single os.walk traversal with early directory pruning.
         """
+        project_str = str(project_path)
+        project_name = project_path.name
+
+        # Fast path: native Rust directory traversal
+        native_files = native_walk_project_files(
+            project_str,
+            extensions=list(ALL_EXTENSIONS),
+            filenames=list(ALL_FILENAMES),
+            filename_prefixes=list(LANGUAGE_FILENAME_PREFIXES),
+            skip_dirs=list(_SKIP_DIR_NAMES),
+            respect_gitignore=getattr(self.config.filters, "gitignore_enabled", True),
+        )
+        if native_files is not None:
+            filtered = [
+                (f_path, mod_name)
+                for f_path, mod_name in native_files
+                if self.file_filter.should_process(f_path)
+            ]
+            return filtered
+
         files = []
         ext_set = set(ALL_EXTENSIONS)
         filename_set_lower = frozenset(n.lower() for n in ALL_FILENAMES)
         filename_prefixes_lower = tuple(p.lower() for p in LANGUAGE_FILENAME_PREFIXES)
         seen = set()
-        project_str = str(project_path)
-        project_name = project_path.name
 
         for dirpath, dirnames, filenames in os.walk(project_str, topdown=True):
             dirnames[:] = [

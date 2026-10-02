@@ -45,6 +45,14 @@ Through systematic profiling and code analysis of `code2llm` during multi-langua
 - **Problem**: Earlier prototypes (`code2llm-fast-core`) invoked a separate CLI executable via `subprocess.run()`, requiring OS fork/exec, process table manipulation, and JSON serialization per file.
 - **Native Rust Solution**: `code2llm-rust` is compiled as a native Python C-extension via **PyO3** and **Maturin**. Functions release the Python GIL via `py.allow_threads()`, enabling true multi-core parallel computation in Rust while communicating in-process with zero IPC overhead.
 
+### Bottleneck G: Recursive File Walking & Gitignore Scanning
+- **Problem**: Traversal using Python's `os.walk` in conjunction with `FastFileFilter` incurs significant syscall overhead, intermediate string allocations, and directory descent before pruning.
+- **Native Rust Solution**: Parallel directory traversal powered by the `ignore` crate (`discovery.rs`) with early directory pruning of `.git`, `node_modules`, `target`, `dist`, `.venv`, and `.cache` before descending. Modules and file extensions are matched zero-copy in native threads.
+
+### Bottleneck H: Cycle Detection & Dead-Code Scanning Overhead
+- **Problem**: Python `nx.simple_cycles` scales exponentially with cycle density and caps out at 1,000 nodes, while `vulture` dead-code analysis re-scans every source file from the filesystem.
+- **Native Rust Solution**: Linear-time Tarjan SCC ($O(V + E)$) in `cycles.rs` with no node limit, paired with in-memory BFS graph reachability in `reachability.rs` directly on the call graph without touching disk.
+
 ## 3. Architecture & Refactoring Strategy
 
 To prepare `code2llm` for clean separation and extraction into the `code2llm-rust` package, the following refactoring was implemented:
@@ -53,14 +61,20 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
    - Acts as the unified abstraction layer between Python and the native Rust library.
    - Detects presence of `code2llm_rust` dynamically.
    - Provides transparent fallback to pure Python when `code2llm-rust` is absent, guaranteeing 100% backward compatibility and portability.
-2. **`code2llm.analysis.complexity`**:
+2. **`code2llm.core.analyzer`**:
+   - Refactored `_collect_files` to delegate to `native_bridge.native_walk_project_files` with Python fallback.
+3. **`code2llm.analysis.complexity`**:
    - Refactored `estimate_function_complexity`, `compute_cyclomatic_complexity`, and `_rust_batch_complexity` to delegate to `native_bridge`.
-3. **`code2llm.analysis.call_graph_engine`**:
+4. **`code2llm.analysis.call_graph_engine`**:
    - Refactored `_rust_batch_calls` to delegate to `native_bridge.native_batch_calls`.
-4. **`code2llm.core.refactoring`**:
+5. **`code2llm.core.refactoring`**:
    - Refactored `_calculate_centrality` to use `native_bridge.native_betweenness_centrality`.
-5. **`code2llm.analysis.smell_engine`**:
+   - Refactored circular dependency detection to use `native_bridge.native_detect_circular_dependencies`.
+   - Refactored dead-code detection to use `native_bridge.native_compute_reachability`.
+6. **`code2llm.analysis.smell_engine`**:
    - Integrated native candidate detection for God Functions and Data Clumps.
+7. **`code2llm.analysis.coupling`**:
+   - Refactored module interaction and instability computation to delegate to `native_bridge.native_compute_module_coupling`.
 
 ## 4. Published `code2llm-rust` Project
 
@@ -71,7 +85,12 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
   - `src/complexity.rs`: Function boundary extraction and McCabe complexity.
   - `src/calls.rs`: Token-level call extraction.
   - `src/centrality.rs`: Parallel Brandes' betweenness centrality.
+  - `src/cycles.rs`: Linear-time Tarjan SCC cycle detection.
+  - `src/reachability.rs`: Fast in-memory graph reachability.
+  - `src/coupling.rs`: Vectorized module coupling and instability metrics.
+  - `src/discovery.rs`: Parallel gitignore-aware file walker and module resolution.
   - `src/smells.rs`: Anti-pattern candidate detection.
 - **Deliverables**:
   - Compiled release wheel: `packages/code2llm-rust/target/wheels/code2llm_rust-0.1.0-cp313-cp313-manylinux_2_34_x86_64.whl`
   - Python optional dependency: `code2llm[native]` in `pyproject.toml`.
+

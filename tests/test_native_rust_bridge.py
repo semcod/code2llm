@@ -202,3 +202,42 @@ def test_native_compute_module_coupling():
     assert ca == 1  # called by api
     assert ce == 1  # calls db
     assert inst == 0.5
+
+
+def test_native_walk_project_files(tmp_path):
+    """Verify fast native repository file discovery respecting gitignore."""
+    from code2llm.analysis.native_bridge import native_walk_project_files
+
+    # Create dummy files
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "main.py").write_text("def main(): pass")
+    (tmp_path / "src" / "helper.ts").write_text("export function help() {}")
+    (tmp_path / "ignored").mkdir()
+    (tmp_path / "ignored" / "temp.py").write_text("pass")
+    (tmp_path / "node_modules").mkdir()
+    (tmp_path / "node_modules" / "pkg.js").write_text("console.log(1)")
+    (tmp_path / ".git").mkdir()
+    (tmp_path / ".git" / "config.py").write_text("pass")
+
+    # .gitignore
+    (tmp_path / ".gitignore").write_text("ignored/\n")
+
+    files = native_walk_project_files(
+        root=str(tmp_path),
+        extensions=[".py", ".ts"],
+        filenames=[],
+        filename_prefixes=[],
+        skip_dirs=["node_modules", ".git"],
+        respect_gitignore=True,
+    )
+    assert files is not None
+    file_names = [f[0] for f in files]
+    assert any("main.py" in f for f in file_names)
+    assert any("helper.ts" in f for f in file_names)
+    # ignored directory should be skipped by gitignore
+    assert not any("temp.py" in f for f in file_names)
+    # node_modules should be skipped by skip_dirs
+    assert not any("pkg.js" in f for f in file_names)
+    # .git should be skipped
+    assert not any("config.py" in f for f in file_names)
+
