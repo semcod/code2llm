@@ -27,6 +27,7 @@ from ._render_section_helpers import (
     render_external_section,
     render_pipelines_section,
 )
+from code2llm.analysis.native_bridge import native_format_toon_header
 
 
 class ToonRenderer:
@@ -44,6 +45,21 @@ class ToonRenderer:
         ndups = len({d["class_name"] for d in ctx["duplicates"]})
         ncycles = len(ctx["cycles"])
         lang_label = _detect_language_label(result)
+
+        native_header = native_format_toon_header(
+            nfiles,
+            total_lines,
+            lang_label,
+            ctx["timestamp"],
+            avg_cc,
+            critical,
+            nfuncs,
+            ndups,
+            ncycles,
+        )
+        if native_header is not None:
+            return native_header
+
         return [
             f"# code2llm | {nfiles}f {total_lines}L | {lang_label} | {ctx['timestamp']}",
             f"# CC̅={avg_cc} | critical:{critical}/{nfuncs} | dups:{ndups} | cycles:{ncycles}",

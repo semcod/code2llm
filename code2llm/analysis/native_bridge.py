@@ -194,3 +194,51 @@ def native_walk_project_files(
             logger.debug("code2llm_rust.walk_project_files failed: %s", e)
     return None
 
+
+def native_check_changed_files(
+    project_dir: str,
+    filepaths: List[str],
+    manifest_entries: Dict[str, Tuple[str, float, int]],
+    analyzer_version: str,
+) -> Optional[Tuple[List[str], List[str], List[Tuple[str, float]]]]:
+    """Check changed files in parallel using Rayon."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "check_changed_files"):
+        try:
+            return code2llm_rust.check_changed_files(
+                project_dir, filepaths, manifest_entries, analyzer_version
+            )
+        except Exception as e:
+            logger.debug("code2llm_rust.check_changed_files failed: %s", e)
+    return None
+
+
+def native_format_toon_header(
+    nfiles: int,
+    total_lines: int,
+    lang_label: str,
+    timestamp: str,
+    avg_cc: float,
+    critical_cc: int,
+    total_funcs: int,
+    dups: int,
+    cycles: int,
+) -> Optional[List[str]]:
+    """Format header lines for analysis.toon.yaml."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "format_toon_header"):
+        try:
+            return code2llm_rust.format_toon_header(
+                nfiles,
+                total_lines,
+                lang_label,
+                timestamp,
+                avg_cc,
+                critical_cc,
+                total_funcs,
+                dups,
+                cycles,
+            )
+        except Exception as e:
+            logger.debug("code2llm_rust.format_toon_header failed: %s", e)
+    return None
+
+

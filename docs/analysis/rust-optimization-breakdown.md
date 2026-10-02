@@ -53,6 +53,14 @@ Through systematic profiling and code analysis of `code2llm` during multi-langua
 - **Problem**: Python `nx.simple_cycles` scales exponentially with cycle density and caps out at 1,000 nodes, while `vulture` dead-code analysis re-scans every source file from the filesystem.
 - **Native Rust Solution**: Linear-time Tarjan SCC ($O(V + E)$) in `cycles.rs` with no node limit, paired with in-memory BFS graph reachability in `reachability.rs` directly on the call graph without touching disk.
 
+### Bottleneck I: Cache Key Generation & Changed-File Checking
+- **Problem**: In repositories with 5,000+ files, checking `PersistentCache` sequentially in Python via `os.stat` and `hashlib.sha256` adds noticeable latency before analysis even starts.
+- **Native Rust Solution**: Parallel cache checking in `cache.rs` using Rayon to evaluate L1 (mtime + size) and compute multi-threaded SHA-256 for L2 verification with zero GIL overhead.
+
+### Bottleneck J: TOON Diagnostics Rendering
+- **Problem**: Generating and formatting formatted header rows and metrics summaries in Python across thousands of functions and modules causes heavy string/list allocations.
+- **Native Rust Solution**: Native string buffer formatter in `toon.rs` emitting pre-formatted diagnostic lines.
+
 ## 3. Architecture & Refactoring Strategy
 
 To prepare `code2llm` for clean separation and extraction into the `code2llm-rust` package, the following refactoring was implemented:
@@ -75,10 +83,14 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
    - Integrated native candidate detection for God Functions and Data Clumps.
 7. **`code2llm.analysis.coupling`**:
    - Refactored module interaction and instability computation to delegate to `native_bridge.native_compute_module_coupling`.
+8. **`code2llm.core.persistent_cache`**:
+   - Refactored `get_changed_files` to delegate to `native_bridge.native_check_changed_files`.
+9. **`code2llm.exporters.toon.renderer`**:
+   - Refactored `render_header` to delegate to `native_bridge.native_format_toon_header`.
 
 ## 4. Published `code2llm-rust` Project
 
-- **Location**: `packages/code2llm-rust`
+- **Location**: `packages/code2llm-rust` (and standalone `https://github.com/semcod/code2llm-rust`)
 - **Build System**: Maturin (`pyproject.toml`) + Cargo (`Cargo.toml`)
 - **PyO3 Bindings**: CPython extension module `code2llm_rust`
 - **Engine Components**:
@@ -89,8 +101,12 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
   - `src/reachability.rs`: Fast in-memory graph reachability.
   - `src/coupling.rs`: Vectorized module coupling and instability metrics.
   - `src/discovery.rs`: Parallel gitignore-aware file walker and module resolution.
+  - `src/cache.rs`: Multi-threaded file content hashing and cache validation.
+  - `src/toon.rs`: Fast TOON diagnostics formatting.
   - `src/smells.rs`: Anti-pattern candidate detection.
 - **Deliverables**:
   - Compiled release wheel: `packages/code2llm-rust/target/wheels/code2llm_rust-0.1.0-cp313-cp313-manylinux_2_34_x86_64.whl`
+  - Standalone GitHub repository: `https://github.com/semcod/code2llm-rust` with GitHub Actions CI.
   - Python optional dependency: `code2llm[native]` in `pyproject.toml`.
+
 
