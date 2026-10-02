@@ -165,6 +165,6 @@ graph TD
    - Implemented native call graph resolution with $O(1)$ candidate lookups and module affinity matching.
 
 4. **Phase 4 (In Progress - Ecosystem Modularization)**:
-   - **`code2graph` (Complete)**: Extracted graph data models (`AnalysisResult`, `FunctionInfo`, `FlowNode`, `FlowEdge`, `GraphQuery`) into standalone package at `packages/code2graph` and integrated into `code2llm/core/models.py`.
-   - **`code2toon` (Next)**: Extract TOON format specification, serializer, and validator into standalone package.
+   - **`code2graph` (Complete)**: Extracted graph data models (`AnalysisResult`, `FunctionInfo`, `FlowNode`, `FlowEdge`, `GraphQuery`) into standalone package at `packages/code2graph` and published to `https://github.com/semcod/code2graph`.
+   - **`code2toon` (Complete)**: Extracted TOON format specification, parser, validator, and diff engine into standalone package at `packages/code2toon`.
    - **`code2flow`**: Extract visual diagrams and heavy rendering dependencies into standalone package.

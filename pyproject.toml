@@ -71,6 +71,9 @@ native = [
 graph = [
     "code2graph>=0.1.0",
 ]
+toon = [
+    "code2toon>=0.1.0",
+]
 dev = [
     "pytest>=6.2",
     "pytest-cov>=2.12",
@@ -81,6 +84,7 @@ dev = [
     "costs>=0.1.20",
     "code2llm-rust>=0.1.0",
     "code2graph>=0.1.0",
+    "code2toon>=0.1.0",
 ]
 
 [project.scripts]
