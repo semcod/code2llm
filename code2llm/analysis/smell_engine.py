@@ -45,6 +45,48 @@ def detect_god_functions(
     if mutations_by_scope is None:
         mutations_by_scope = {}
 
+    from code2llm.analysis.native_bridge import native_detect_god_functions
+
+    # Prepare input for native Rust detection if available
+    fn_tuples = [
+        (
+            func_name,
+            func_info.file,
+            func_info.line or 0,
+            metrics.get(func_name, {}).get("fan_out", 0),
+            len(mutations_by_scope.get(func_name, [])),
+            int(func_info.complexity.get("cyclomatic_complexity", 1)),
+        )
+        for func_name, func_info in functions.items()
+    ]
+
+    native_candidates = native_detect_god_functions(fn_tuples)
+    if native_candidates is not None:
+        smells: List[CodeSmell] = []
+        for name, file, line, fan_out, mutation_count, complexity, severity in native_candidates:
+            func_info = functions[name]
+            smells.append(
+                CodeSmell(
+                    name=f"God Function: {func_info.name}",
+                    type="god_function",
+                    file=file,
+                    line=line,
+                    severity=severity,
+                    description=(
+                        f"Function '{func_info.name}' is oversized:"
+                        f" CC={complexity}, fan-out={fan_out},"
+                        f" mutations={mutation_count}."
+                    ),
+                    context={
+                        "fan_out": fan_out,
+                        "mutations": mutation_count,
+                        "complexity": complexity,
+                        "function": name,
+                    },
+                )
+            )
+        return smells
+
     smells: List[CodeSmell] = []
     for func_name, func_info in functions.items():
         fn_metrics = metrics.get(func_name, {})

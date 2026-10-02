@@ -28,8 +28,12 @@ pip install -e .
 ### Optional Extras
 
 ```bash
-pip install code2llm[dev]    # development tools
+pip install code2llm[dev]     # development tools
+pip install code2llm[native]  # native Rust acceleration (code2llm-rust)
 ```
+
+## Documentation & Architecture Analysis
+- [Code2llm Performance Bottlenecks & Rust Acceleration Architecture](analysis/rust-optimization-breakdown.md)
 
 ## Quick Start
 

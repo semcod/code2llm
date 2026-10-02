@@ -81,22 +81,31 @@ class RefactoringAnalyzer:
         if len(call_graph) > 0:
             try:
                 node_count = len(call_graph)
-                # For large graphs, use sampling to avoid exponential time complexity
+                k = None
                 if node_count > 500:
                     if self.config.verbose:
                         print(
                             f"  Large graph ({node_count} nodes), using sampled centrality..."
                         )
-                    # Sample adaptively: 10% for large, 20% for medium, cap at 200
                     ratio = 0.1 if node_count > 2000 else 0.2
                     k = min(int(node_count * ratio), 200)
+
+                # Attempt fast native Rust computation first
+                from ..analysis.native_bridge import native_betweenness_centrality
+
+                nodes = [str(n) for n in call_graph.nodes()]
+                edges = [(str(u), str(v)) for u, v in call_graph.edges()]
+                centrality = native_betweenness_centrality(nodes, edges, k=k, normalized=True)
+
+                if centrality is None:
+                    # Fallback to pure NetworkX
                     import networkx as nx
 
-                    centrality = nx.betweenness_centrality(call_graph, k=k)
-                else:
-                    import networkx as nx
+                    if k is not None:
+                        centrality = nx.betweenness_centrality(call_graph, k=k)
+                    else:
+                        centrality = nx.betweenness_centrality(call_graph)
 
-                    centrality = nx.betweenness_centrality(call_graph)
                 for func_name, score in centrality.items():
                     if func_name in result.functions:
                         result.functions[func_name].centrality = score
