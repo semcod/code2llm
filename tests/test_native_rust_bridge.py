@@ -241,3 +241,60 @@ def test_native_walk_project_files(tmp_path):
     # .git should be skipped
     assert not any("config.py" in f for f in file_names)
 
+
+def test_native_check_changed_files(tmp_path):
+    """Verify fast native parallel cache validation."""
+    from code2llm.analysis.native_bridge import native_check_changed_files
+    import hashlib
+
+    # Create test files
+    f1 = tmp_path / "a.py"
+    f1.write_text("print(1)")
+    f2 = tmp_path / "b.py"
+    f2.write_text("print(2)")
+
+    stat1 = f1.stat()
+    stat2 = f2.stat()
+
+    h1 = hashlib.sha256(f"v0.1.0\0{f1}\0print(1)".encode()).hexdigest()[:16]
+    h2 = hashlib.sha256(f"v0.1.0\0{f2}\0print(2)".encode()).hexdigest()[:16]
+
+    manifest = {
+        "a.py": (h1, stat1.st_mtime, stat1.st_size),
+        # b.py has drifted mtime, triggering L2 check where hash mismatches
+        "b.py": ("wronghash1234567", stat2.st_mtime + 10.0, stat2.st_size),
+    }
+
+    res = native_check_changed_files(
+        project_dir=str(tmp_path),
+        filepaths=[str(f1), str(f2)],
+        manifest_entries=manifest,
+        analyzer_version="0.1.0",
+    )
+    assert res is not None
+    changed, cached, refreshed = res
+    assert str(f1) in cached
+    assert str(f2) in changed
+
+
+def test_native_format_toon_header():
+    """Verify native TOON header formatting."""
+    from code2llm.analysis.native_bridge import native_format_toon_header
+
+    lines = native_format_toon_header(
+        nfiles=42,
+        total_lines=1337,
+        lang_label="Python",
+        timestamp="2026-10-02 23:00",
+        avg_cc=3.14,
+        critical_cc=5,
+        total_funcs=100,
+        dups=2,
+        cycles=1,
+    )
+    assert lines is not None
+    assert len(lines) == 2
+    assert "42f 1337L" in lines[0]
+    assert "critical:5/100" in lines[1]
+
+

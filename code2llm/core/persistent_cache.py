@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from code2llm import __version__
+from code2llm.analysis.native_bridge import native_check_changed_files
 
 logger = logging.getLogger(__name__)
 
@@ -172,10 +173,30 @@ class PersistentCache:
 
         Uses L1 (mtime+size) first; falls back to L2 (content hash) when
         mtime changed but size matches — handles touch/copy without edit.
+        Uses native Rust parallel checker when available.
         """
+        files_index = self._manifest["files"]
+
+        # Fast path: native parallel check across threads
+        manifest_entries = {
+            rel: (info["hash"], float(info["mtime"]), int(info["size"]))
+            for rel, info in files_index.items()
+            if isinstance(info, dict) and "hash" in info and "mtime" in info and "size" in info
+        }
+        native_res = native_check_changed_files(
+            self._project_dir, filepaths, manifest_entries, self._analyzer_version
+        )
+        if native_res is not None:
+            changed_res, cached_res, refreshed = native_res
+            for fp, new_mtime in refreshed:
+                rel = os.path.relpath(fp, self._project_dir)
+                if rel in files_index:
+                    files_index[rel]["mtime"] = new_mtime
+                    self._dirty = True
+            return changed_res, cached_res
+
         changed: List[str] = []
         cached: List[str] = []
-        files_index = self._manifest["files"]
 
         for fp in filepaths:
             rel = os.path.relpath(fp, self._project_dir)
