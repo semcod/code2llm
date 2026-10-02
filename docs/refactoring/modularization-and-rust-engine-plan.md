@@ -164,7 +164,7 @@ graph TD
    - Implemented parallel cache validation (`PersistentCache`) with Rayon & SHA-256 in Rust.
    - Implemented native call graph resolution with $O(1)$ candidate lookups and module affinity matching.
 
-4. **Phase 4 (In Progress - Ecosystem Modularization)**:
+4. **Phase 4 (Complete - Ecosystem Modularization)**:
    - **`code2graph` (Complete)**: Extracted graph data models (`AnalysisResult`, `FunctionInfo`, `FlowNode`, `FlowEdge`, `GraphQuery`) into standalone package at `packages/code2graph` and published to `https://github.com/semcod/code2graph`.
-   - **`code2toon` (Complete)**: Extracted TOON format specification, parser, validator, and diff engine into standalone package at `packages/code2toon`.
-   - **`code2flow`**: Extract visual diagrams and heavy rendering dependencies into standalone package.
+   - **`code2toon` (Complete)**: Extracted TOON format specification, parser, validator, and diff engine into standalone package at `packages/code2toon` and published to `https://github.com/semcod/code2toon`.
+   - **`code2flow` (Complete)**: Extracted Mermaid visual flow diagrams, call graph visualizations, and syntax validators into standalone package at `packages/code2flow`.

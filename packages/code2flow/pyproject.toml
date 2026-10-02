@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code2flow"
+version = "0.1.0"
+description = "Mermaid flow diagrams, call graph visualization, and architecture diagrams for code analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Tom Sapletta", email = "tom@sapletta.com"}
+]
+keywords = ["mermaid", "flowchart", "call-graph", "diagram", "code-visualization"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "code2graph>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["code2flow*"]
