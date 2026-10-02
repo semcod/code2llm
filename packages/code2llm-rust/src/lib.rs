@@ -6,6 +6,9 @@ use std::collections::HashMap;
 pub mod calls;
 pub mod centrality;
 pub mod complexity;
+pub mod coupling;
+pub mod cycles;
+pub mod reachability;
 pub mod smells;
 
 /// Extract the body of a function between braces starting at `start_line` (1-indexed).
@@ -65,6 +68,40 @@ fn betweenness_centrality(
     py.allow_threads(|| centrality::betweenness_centrality(&nodes, &edges, k, normalized))
 }
 
+/// Detect circular dependencies using Tarjan's SCC algorithm in linear time O(V + E).
+#[pyfunction]
+#[pyo3(signature = (nodes, edges))]
+fn detect_circular_dependencies(
+    py: Python<'_>,
+    nodes: Vec<String>,
+    edges: Vec<(String, String)>,
+) -> Vec<Vec<String>> {
+    py.allow_threads(|| cycles::detect_circular_dependencies(&nodes, &edges))
+}
+
+/// Compute graph reachability from entry points in O(V + E) memory time.
+#[pyfunction]
+#[pyo3(signature = (nodes, edges, entry_points))]
+fn compute_reachability(
+    py: Python<'_>,
+    nodes: Vec<String>,
+    edges: Vec<(String, String)>,
+    entry_points: Vec<String>,
+) -> HashMap<String, String> {
+    py.allow_threads(|| reachability::compute_reachability(&nodes, &edges, &entry_points))
+}
+
+/// Compute module interactions and coupling metrics across modules.
+#[pyfunction]
+#[pyo3(signature = (func_modules, calls))]
+fn compute_module_coupling(
+    py: Python<'_>,
+    func_modules: Vec<(String, String)>,
+    calls: Vec<(String, String)>,
+) -> (HashMap<String, Vec<String>>, HashMap<String, (usize, usize, f64)>) {
+    py.allow_threads(|| coupling::compute_module_coupling(&func_modules, &calls))
+}
+
 /// Detect god functions natively.
 #[pyfunction]
 #[pyo3(signature = (functions))]
@@ -112,6 +149,9 @@ fn code2llm_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(extract_calls, m)?)?;
     m.add_function(wrap_pyfunction!(batch_calls, m)?)?;
     m.add_function(wrap_pyfunction!(betweenness_centrality, m)?)?;
+    m.add_function(wrap_pyfunction!(detect_circular_dependencies, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_reachability, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_module_coupling, m)?)?;
     m.add_function(wrap_pyfunction!(detect_god_functions, m)?)?;
     m.add_function(wrap_pyfunction!(detect_data_clumps, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;

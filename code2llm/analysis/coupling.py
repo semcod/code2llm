@@ -21,8 +21,24 @@ class CouplingAnalyzer:
         self.result.coupling = coupling_data
         return coupling_data
 
-    def _analyze_module_interactions(self) -> Dict[str, Set[str]]:
+    def _analyze_module_interactions(self) -> Dict[str, List[str]]:
         """Track which modules call which other modules."""
+        from code2llm.analysis.native_bridge import native_compute_module_coupling
+
+        func_modules = [
+            (func_name, func_info.module or func_name.split(".")[0])
+            for func_name, func_info in self.result.functions.items()
+        ]
+        calls = [
+            (func_name, callee)
+            for func_name, func_info in self.result.functions.items()
+            for callee in func_info.calls
+        ]
+        native_res = native_compute_module_coupling(func_modules, calls)
+        if native_res is not None:
+            interactions, _ = native_res
+            return interactions
+
         interactions = {}
         for func_name, func_info in self.result.functions.items():
             caller_mod = func_info.module or func_name.split(".")[0]
