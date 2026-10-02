@@ -155,14 +155,16 @@ graph TD
    - Initial `code2llm-rust` package with PyO3, Rayon, Brandes' centrality (42.3x speedup), CC, and calls.
    - `native_bridge.py` in `code2llm`.
 
-2. **Phase 2 (Tarjan SCC & Native Reachability in `code2llm-rust`)**:
-   - Implement Tarjan's Strongly Connected Components in `code2llm-rust` to eliminate NetworkX cycle detection freeze on >1,000 nodes.
-   - Implement in-memory graph reachability in Rust, completely removing the slow `vulture` file-scanning pass.
+2. **Phase 2 (Complete)**:
+   - Implemented Tarjan's Strongly Connected Components in `code2llm-rust` eliminating NetworkX cycle detection freeze.
+   - Implemented fast in-memory graph reachability and module coupling ($Ca, Ce, I$) in Rust.
 
-3. **Phase 3 (Native Multi-Language Tree-sitter & File Walking)**:
-   - Integrate `walkdir` + `ignore` into `code2llm-rust` for instant parallel file collection.
-   - Embed Tree-sitter grammars in Rust for Python, TypeScript, and Go.
+3. **Phase 3 (Complete)**:
+   - Integrated `ignore` crate into `code2llm-rust` for instant parallel gitignore-aware file collection (`native_walk_project_files`).
+   - Implemented parallel cache validation (`PersistentCache`) with Rayon & SHA-256 in Rust.
+   - Implemented native call graph resolution with $O(1)$ candidate lookups and module affinity matching.
 
-4. **Phase 4 (Repository Split)**:
-   - Extract `code2flow` into standalone package to drop `matplotlib` and image rendering from the core analysis path.
-   - Package `code2toon` as an independent standard for repository state interchange.
+4. **Phase 4 (In Progress - Ecosystem Modularization)**:
+   - **`code2graph` (Complete)**: Extracted graph data models (`AnalysisResult`, `FunctionInfo`, `FlowNode`, `FlowEdge`, `GraphQuery`) into standalone package at `packages/code2graph` and integrated into `code2llm/core/models.py`.
+   - **`code2toon` (Next)**: Extract TOON format specification, serializer, and validator into standalone package.
+   - **`code2flow`**: Extract visual diagrams and heavy rendering dependencies into standalone package.
