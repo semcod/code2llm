@@ -61,6 +61,10 @@ Through systematic profiling and code analysis of `code2llm` during multi-langua
 - **Problem**: Generating and formatting formatted header rows and metrics summaries in Python across thousands of functions and modules causes heavy string/list allocations.
 - **Native Rust Solution**: Native string buffer formatter in `toon.rs` emitting pre-formatted diagnostic lines.
 
+### Bottleneck K: Cross-Module Call Graph Edge Resolution & Entry Points
+- **Problem**: In `ProjectAnalyzer._build_call_graph`, iterating through every function's call list in Python, executing string `rsplit` operations to find module matches, and building `called_by` with quadratic member checks adds significant runtime on large repositories.
+- **Native Rust Solution**: `calls::resolve_call_graph` resolving simple-to-full name candidate lookups with same-module affinity in a single linear pass in native Rust, returning resolved forward calls, backward caller maps, and root entry points.
+
 ## 3. Architecture & Refactoring Strategy
 
 To prepare `code2llm` for clean separation and extraction into the `code2llm-rust` package, the following refactoring was implemented:
@@ -71,6 +75,7 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
    - Provides transparent fallback to pure Python when `code2llm-rust` is absent, guaranteeing 100% backward compatibility and portability.
 2. **`code2llm.core.analyzer`**:
    - Refactored `_collect_files` to delegate to `native_bridge.native_walk_project_files` with Python fallback.
+   - Refactored `_build_call_graph` to delegate to `native_bridge.native_resolve_call_graph` with Python fallback.
 3. **`code2llm.analysis.complexity`**:
    - Refactored `estimate_function_complexity`, `compute_cyclomatic_complexity`, and `_rust_batch_complexity` to delegate to `native_bridge`.
 4. **`code2llm.analysis.call_graph_engine`**:
@@ -95,7 +100,7 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
 - **PyO3 Bindings**: CPython extension module `code2llm_rust`
 - **Engine Components**:
   - `src/complexity.rs`: Function boundary extraction and McCabe complexity.
-  - `src/calls.rs`: Token-level call extraction.
+  - `src/calls.rs`: Token-level call extraction and cross-module call graph resolution.
   - `src/centrality.rs`: Parallel Brandes' betweenness centrality.
   - `src/cycles.rs`: Linear-time Tarjan SCC cycle detection.
   - `src/reachability.rs`: Fast in-memory graph reachability.
@@ -108,5 +113,6 @@ To prepare `code2llm` for clean separation and extraction into the `code2llm-rus
   - Compiled release wheel: `packages/code2llm-rust/target/wheels/code2llm_rust-0.1.0-cp313-cp313-manylinux_2_34_x86_64.whl`
   - Standalone GitHub repository: `https://github.com/semcod/code2llm-rust` with GitHub Actions CI.
   - Python optional dependency: `code2llm[native]` in `pyproject.toml`.
+
 
 
