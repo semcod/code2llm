@@ -74,6 +74,9 @@ graph = [
 toon = [
     "code2toon>=0.1.0",
 ]
+diagrams = [
+    "code2flow>=0.1.0",
+]
 dev = [
     "pytest>=6.2",
     "pytest-cov>=2.12",
@@ -85,6 +88,7 @@ dev = [
     "code2llm-rust>=0.1.0",
     "code2graph>=0.1.0",
     "code2toon>=0.1.0",
+    "code2flow>=0.1.0",
 ]
 
 [project.scripts]
