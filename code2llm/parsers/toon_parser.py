@@ -1,7 +1,13 @@
-#!/usr/bin/env python3
-"""TOON format parser - extracted from validate_toon.py"""
+"""TOON format parser - re-exported from code2toon if installed."""
 
-from pathlib import Path
+try:
+    from code2toon import (
+        parse_toon_content,
+        is_toon_file,
+        load_toon,
+    )
+except ImportError:
+    from pathlib import Path
 
 
 def _parse_header_line(line, data):
