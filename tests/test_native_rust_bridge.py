@@ -323,4 +323,35 @@ def test_native_resolve_call_graph():
     assert entry_points == ["app.cli.run"]
 
 
+def test_native_find_pipeline_paths():
+    """Verify native pipeline path finding."""
+    from code2llm.analysis.native_bridge import native_find_pipeline_paths
+
+    nodes = ["step1", "step2", "step3", "step4", "unrelated"]
+    edges = [("step1", "step2"), ("step2", "step3"), ("step3", "step4")]
+
+    paths = native_find_pipeline_paths(nodes, edges, min_length=3, max_pipelines=5)
+    assert paths is not None
+    assert len(paths) >= 1
+    assert paths[0] == ["step1", "step2", "step3", "step4"]
+
+
+def test_native_calculate_call_metrics():
+    """Verify native call metrics calculation."""
+    from code2llm.analysis.native_bridge import native_calculate_call_metrics
+
+    functions = [
+        ("caller", ["callee"], [], 3.0),
+        ("callee", [], [], 2.0),
+    ]
+
+    res = native_calculate_call_metrics(functions)
+    assert res is not None
+    metrics, called_by = res
+    assert metrics["caller"] == (0, 1, 3.0)
+    assert metrics["callee"] == (1, 0, 2.0)
+    assert called_by["callee"] == ["caller"]
+
+
+
 

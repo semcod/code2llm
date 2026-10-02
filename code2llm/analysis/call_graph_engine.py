@@ -204,6 +204,36 @@ def calculate_call_metrics(
     metrics: Dict[str, Any] | None = None,
 ) -> Dict[str, Dict[str, Any]]:
     """Calculate fan-in, fan-out and populate called_by for all functions."""
+    from code2llm.analysis.native_bridge import native_calculate_call_metrics
+
+    res_metrics = metrics if metrics is not None else {}
+
+    # Fast path: native Rust
+    fn_tuples = []
+    for name, fi in functions.items():
+        calls = list(getattr(fi, "calls", []))
+        called_by = list(getattr(fi, "called_by", []))
+        raw_cc = getattr(fi, "complexity", 1.0)
+        cc_val = float(raw_cc.get("cyclomatic", 1.0) if isinstance(raw_cc, dict) else (raw_cc or 1.0))
+        fn_tuples.append((name, calls, called_by, cc_val))
+
+    native_res = native_calculate_call_metrics(fn_tuples)
+    if native_res is not None:
+        computed_metrics, called_by_map = native_res
+        for name, callers in called_by_map.items():
+            if name in functions:
+                fi = functions[name]
+                if hasattr(fi, "called_by"):
+                    fi.called_by = callers
+        for name, (fan_in, fan_out, cc) in computed_metrics.items():
+            res_metrics[name] = {
+                "fan_in": fan_in,
+                "fan_out": fan_out,
+                "complexity": cc,
+            }
+        return res_metrics
+
+    # Fallback: Python implementation
     for caller_name, caller_info in functions.items():
         calls = getattr(caller_info, "calls", [])
         for callee_name in calls:
@@ -213,7 +243,6 @@ def calculate_call_metrics(
                 if called_by is not None and caller_name not in called_by:
                     called_by.append(caller_name)
 
-    res_metrics = metrics if metrics is not None else {}
     for func_name, func_info in functions.items():
         calls = getattr(func_info, "calls", [])
         called_by = getattr(func_info, "called_by", [])
