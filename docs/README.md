@@ -34,6 +34,7 @@ pip install code2llm[native]  # native Rust acceleration (code2llm-rust)
 
 ## Documentation & Architecture Analysis
 - [Code2llm Performance Bottlenecks & Rust Acceleration Architecture](analysis/rust-optimization-breakdown.md)
+- [Code2llm Ecosystem Modularization & Rust Engine Migration Plan](refactoring/modularization-and-rust-engine-plan.md)
 
 ## Quick Start
 
