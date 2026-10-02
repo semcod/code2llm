@@ -242,3 +242,16 @@ def native_format_toon_header(
     return None
 
 
+def native_resolve_call_graph(
+    functions_with_calls: List[Tuple[str, List[str]]],
+) -> Optional[Tuple[Dict[str, List[str]], Dict[str, List[str]], List[str]]]:
+    """Resolve call graph edges and find entry points natively."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "resolve_call_graph"):
+        try:
+            return code2llm_rust.resolve_call_graph(functions_with_calls)
+        except Exception as e:
+            logger.debug("code2llm_rust.resolve_call_graph failed: %s", e)
+    return None
+
+
+

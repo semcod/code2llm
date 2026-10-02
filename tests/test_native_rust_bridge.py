@@ -298,3 +298,29 @@ def test_native_format_toon_header():
     assert "critical:5/100" in lines[1]
 
 
+def test_native_resolve_call_graph():
+    """Verify native call graph resolution and entry points finding."""
+    from code2llm.analysis.native_bridge import native_resolve_call_graph
+
+    func_calls = [
+        ("app.cli.run", ["parse_args", "app.core.execute"]),
+        ("app.cli.parse_args", []),
+        ("app.core.execute", ["db.connect"]),
+        ("db.connect", []),
+    ]
+
+    res = native_resolve_call_graph(func_calls)
+    assert res is not None
+    resolved_calls, called_by, entry_points = res
+
+    # parse_args should be resolved to app.cli.parse_args
+    assert resolved_calls["app.cli.run"] == ["app.cli.parse_args", "app.core.execute"]
+    assert "app.cli.run" in called_by["app.cli.parse_args"]
+    assert "app.cli.run" in called_by["app.core.execute"]
+    assert "app.core.execute" in called_by["db.connect"]
+
+    # Entry point is only app.cli.run
+    assert entry_points == ["app.cli.run"]
+
+
+

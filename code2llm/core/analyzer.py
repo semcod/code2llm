@@ -65,7 +65,10 @@ from .file_filter import FastFileFilter, _SKIP_DIR_NAMES
 from .file_analyzer import FileAnalyzer, _analyze_single_file
 from .persistent_cache import PersistentCache
 from .refactoring import RefactoringAnalyzer
-from code2llm.analysis.native_bridge import native_walk_project_files
+from code2llm.analysis.native_bridge import (
+    native_walk_project_files,
+    native_resolve_call_graph,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -530,14 +533,30 @@ class ProjectAnalyzer:
                 flush=True,
             )
 
-        # Build lookup maps for O(1) resolution
-        simple_to_full = self._build_simple_name_map(result)
+        # Fast path: native Rust resolution
+        func_calls = [
+            (func_name, list(getattr(func, "calls", [])))
+            for func_name, func in result.functions.items()
+        ]
+        native_res = native_resolve_call_graph(func_calls)
+        if native_res is not None:
+            resolved_calls, called_by, entry_points = native_res
+            for func_name, calls in resolved_calls.items():
+                if func_name in result.functions:
+                    result.functions[func_name].calls = calls
+            for func_name, callers in called_by.items():
+                if func_name in result.functions:
+                    result.functions[func_name].called_by = callers
+            result.entry_points = entry_points
+        else:
+            # Build lookup maps for O(1) resolution
+            simple_to_full = self._build_simple_name_map(result)
 
-        # Map calls between functions
-        self._collect_call_edges(result, simple_to_full)
+            # Map calls between functions
+            self._collect_call_edges(result, simple_to_full)
 
-        # Find entry points
-        self._find_entry_points(result)
+            # Find entry points
+            self._find_entry_points(result)
 
         if self.config.verbose:
             print(
