@@ -65,6 +65,9 @@ dependencies = [
 
 license = "Apache-2.0"
 [project.optional-dependencies]
+native = [
+    "code2llm-rust>=0.1.0",
+]
 dev = [
     "pytest>=6.2",
     "pytest-cov>=2.12",
@@ -73,6 +76,7 @@ dev = [
     "flake8>=3.9",
     "mypy>=0.910",
     "costs>=0.1.20",
+    "code2llm-rust>=0.1.0",
 ]
 
 [project.scripts]

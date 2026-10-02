@@ -71,6 +71,12 @@ def _find_rust_binary() -> Path | None:
 
 def extract_function_body(content: str, start_line: int) -> str:
     """Extract the body of a function between braces from a start line (1-indexed)."""
+    from code2llm.analysis.native_bridge import native_extract_function_body
+
+    native_body = native_extract_function_body(content, start_line)
+    if native_body is not None:
+        return native_body
+
     lines = content.split("\n")
     if start_line < 1 or start_line > len(lines):
         return ""
@@ -106,6 +112,12 @@ def compute_cyclomatic_complexity(body: str, lang: str = "c_family") -> int:
     """Compute McCabe cyclomatic complexity for a given code block."""
     if not body:
         return 1
+    from code2llm.analysis.native_bridge import native_calculate_complexity
+
+    native_res = native_calculate_complexity(body, lang=lang)
+    if native_res is not None:
+        return native_res[0]
+
     pattern = CC_PATTERNS.get(lang, CC_PATTERNS["c_family"])
     return 1 + len(pattern.findall(body))
 
@@ -114,7 +126,13 @@ def estimate_function_complexity(
     content: str, start_line: int, lang: str = "c_family"
 ) -> tuple[int, str]:
     """Estimate cyclomatic complexity and rank for a function starting at line."""
+    from code2llm.analysis.native_bridge import native_calculate_complexity
+
     body = extract_function_body(content, start_line)
+    native_res = native_calculate_complexity(body, lang=lang)
+    if native_res is not None:
+        return native_res
+
     cc = compute_cyclomatic_complexity(body, lang=lang)
     rank = compute_cc_rank(cc)
     return cc, rank
@@ -126,9 +144,28 @@ def _rust_batch_complexity(
     file_path: str | None = None,
     content: str | None = None,
 ) -> dict[int, tuple[int, str]] | None:
-    """Call native Rust binary for fast batch complexity calculation."""
+    """Call native Rust extension or binary for fast batch complexity calculation."""
+    if not lines:
+        return None
+
+    # 1. Native PyO3 extension (zero-subprocess in-memory execution)
+    from code2llm.analysis.native_bridge import native_batch_complexity
+
+    resolved_content = content
+    if resolved_content is None and file_path and Path(file_path).is_file():
+        try:
+            resolved_content = Path(file_path).read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            resolved_content = None
+
+    if resolved_content is not None:
+        native_res = native_batch_complexity(resolved_content, lines, lang=lang)
+        if native_res is not None:
+            return native_res
+
+    # 2. Secondary fallback: CLI binary
     binary = _find_rust_binary()
-    if not binary or not lines:
+    if not binary:
         return None
 
     lines_arg = ",".join(str(l) for l in lines)

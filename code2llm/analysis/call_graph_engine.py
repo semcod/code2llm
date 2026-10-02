@@ -90,9 +90,28 @@ def _rust_batch_calls(
     file_path: str | None = None,
     content: str | None = None,
 ) -> dict[int, list[str]] | None:
-    """Call native Rust binary for fast batch call extraction."""
+    """Call native Rust extension or binary for fast batch call extraction."""
+    if not lines:
+        return None
+
+    # 1. Native PyO3 extension (zero-subprocess in-memory execution)
+    from code2llm.analysis.native_bridge import native_batch_calls
+
+    resolved_content = content
+    if resolved_content is None and file_path and Path(file_path).is_file():
+        try:
+            resolved_content = Path(file_path).read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            resolved_content = None
+
+    if resolved_content is not None:
+        native_res = native_batch_calls(resolved_content, lines)
+        if native_res is not None:
+            return native_res
+
+    # 2. Secondary fallback: CLI binary
     binary = _find_rust_binary()
-    if not binary or not lines:
+    if not binary:
         return None
 
     lines_arg = ",".join(str(l) for l in lines)
