@@ -129,3 +129,43 @@ def native_detect_data_clumps(
         except Exception as e:
             logger.debug("code2llm_rust.detect_data_clumps failed: %s", e)
     return None
+
+
+def native_detect_circular_dependencies(
+    nodes: List[str],
+    edges: List[Tuple[str, str]],
+) -> Optional[List[List[str]]]:
+    """Detect circular dependency cycles natively using Tarjan SCC."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "detect_circular_dependencies"):
+        try:
+            return code2llm_rust.detect_circular_dependencies(nodes, edges)
+        except Exception as e:
+            logger.debug("code2llm_rust.detect_circular_dependencies failed: %s", e)
+    return None
+
+
+def native_compute_reachability(
+    nodes: List[str],
+    edges: List[Tuple[str, str]],
+    entry_points: List[str],
+) -> Optional[Dict[str, str]]:
+    """Compute reachability (reachable / unreachable) from entry points."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "compute_reachability"):
+        try:
+            return code2llm_rust.compute_reachability(nodes, edges, entry_points)
+        except Exception as e:
+            logger.debug("code2llm_rust.compute_reachability failed: %s", e)
+    return None
+
+
+def native_compute_module_coupling(
+    func_modules: List[Tuple[str, str]],
+    calls: List[Tuple[str, str]],
+) -> Optional[Tuple[Dict[str, List[str]], Dict[str, Tuple[int, int, float]]]]:
+    """Compute module interactions and coupling metrics natively."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "compute_module_coupling"):
+        try:
+            return code2llm_rust.compute_module_coupling(func_modules, calls)
+        except Exception as e:
+            logger.debug("code2llm_rust.compute_module_coupling failed: %s", e)
+    return None

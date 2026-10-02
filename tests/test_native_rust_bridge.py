@@ -139,3 +139,66 @@ def test_native_detect_data_clumps():
     params, funcs = clumps[0]
     assert set(params) == {"req", "res", "ctx"}
     assert len(funcs) == 3
+
+
+def test_native_detect_circular_dependencies():
+    """Verify Tarjan SCC cycle detection matches expectation without hanging."""
+    from code2llm.analysis.native_bridge import native_detect_circular_dependencies
+
+    nodes = ["mod_a", "mod_b", "mod_c", "leaf"]
+    edges = [
+        ("mod_a", "mod_b"),
+        ("mod_b", "mod_c"),
+        ("mod_c", "mod_a"),
+        ("mod_c", "leaf"),
+    ]
+    cycles = native_detect_circular_dependencies(nodes, edges)
+    assert cycles is not None
+    assert len(cycles) == 1
+    assert set(cycles[0]) == {"mod_a", "mod_b", "mod_c"}
+
+
+def test_native_compute_reachability():
+    """Verify fast graph reachability marks orphans as unreachable."""
+    from code2llm.analysis.native_bridge import native_compute_reachability
+
+    nodes = ["app.main", "app.init", "app.worker", "app.dead_func"]
+    edges = [
+        ("app.main", "app.init"),
+        ("app.main", "app.worker"),
+    ]
+    entry_points = ["app.main"]
+
+    reach = native_compute_reachability(nodes, edges, entry_points)
+    assert reach is not None
+    assert reach["app.main"] == "reachable"
+    assert reach["app.init"] == "reachable"
+    assert reach["app.worker"] == "reachable"
+    assert reach["app.dead_func"] == "unreachable"
+
+
+def test_native_compute_module_coupling():
+    """Verify module coupling calculation."""
+    from code2llm.analysis.native_bridge import native_compute_module_coupling
+
+    func_modules = [
+        ("api.router", "api"),
+        ("services.user", "services"),
+        ("db.client", "db"),
+    ]
+    calls = [
+        ("api.router", "services.user"),
+        ("services.user", "db.client"),
+    ]
+
+    res = native_compute_module_coupling(func_modules, calls)
+    assert res is not None
+    interactions, metrics = res
+    assert interactions["api"] == ["services"]
+    assert interactions["services"] == ["db"]
+    assert interactions["db"] == []
+
+    ca, ce, inst = metrics["services"]
+    assert ca == 1  # called by api
+    assert ce == 1  # calls db
+    assert inst == 0.5

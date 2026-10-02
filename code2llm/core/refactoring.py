@@ -116,7 +116,20 @@ class RefactoringAnalyzer:
     def _detect_cycles(self, call_graph, result: AnalysisResult) -> None:
         """Detect circular dependencies."""
         try:
-            # Limit cycle detection for large graphs
+            # 1. Native Rust Tarjan SCC algorithm (linear time O(V + E), no node count limit)
+            from ..analysis.native_bridge import native_detect_circular_dependencies
+
+            nodes = [str(n) for n in call_graph.nodes()]
+            edges = [(str(u), str(v)) for u, v in call_graph.edges()]
+            native_cycles = native_detect_circular_dependencies(nodes, edges)
+
+            if native_cycles is not None:
+                if native_cycles:
+                    result.metrics["project"] = result.metrics.get("project", {})
+                    result.metrics["project"]["circular_dependencies"] = native_cycles
+                return
+
+            # 2. Pure Python fallback (NetworkX simple_cycles)
             if len(call_graph) > 1000:
                 if self.config.verbose:
                     print(
@@ -173,7 +186,27 @@ class RefactoringAnalyzer:
         smell_detector.detect()
 
     def _detect_dead_code(self, result: AnalysisResult) -> None:
-        """Use vulture to find dead code and update reachability."""
+        """Use fast native reachability or vulture to find dead code and update reachability."""
+        # 1. Fast in-memory graph reachability (O(V + E), zero disk I/O)
+        from ..analysis.native_bridge import native_compute_reachability
+
+        nodes = list(result.functions.keys())
+        edges = [
+            (fn, callee)
+            for fn, info in result.functions.items()
+            for callee in getattr(info, "calls", [])
+        ]
+        entry_points = getattr(result, "entry_points", [])
+        reach_map = native_compute_reachability(nodes, edges, entry_points)
+        if reach_map:
+            for fn, status in reach_map.items():
+                if fn in result.functions:
+                    result.functions[fn].reachability = status
+
+        # 2. Optional Vulture scan (if enabled and not in fast mode)
+        if self.config.performance.skip_dead_code_detection:
+            return
+
         if self.config.verbose:
             print("Detecting dead code with vulture...")
 
@@ -182,7 +215,6 @@ class RefactoringAnalyzer:
 
             v = vulture.Vulture(verbose=False)
 
-            # vulture.scan takes the code content as a string
             for py_file in Path(result.project_path).rglob("*.py"):
                 if not self.file_filter.should_process(str(py_file)):
                     continue
@@ -197,7 +229,7 @@ class RefactoringAnalyzer:
             if self.config.verbose:
                 print(f"  Vulture found {len(dead_code)} unused items")
 
-            # Map unused code to our functions/classes
+            # Map unused code to our functions/classes with O(1) indexed lookup
             self._map_dead_code_to_items(dead_code, result)
 
             # Mark others as reachable if they are NOT orphans
@@ -208,31 +240,27 @@ class RefactoringAnalyzer:
                 print(f"Error in dead code detection: {e}")
 
     def _map_dead_code_to_items(self, dead_code, result: AnalysisResult) -> None:
-        """Map vulture dead code to our functions/classes."""
+        """Map vulture dead code to our functions/classes using indexed O(1) matching."""
+        # Pre-build (resolved_file_path, line) lookup map to avoid O(N * M) scans
+        func_lookup = {}
+        for func_name, func_info in result.functions.items():
+            key = (str(Path(func_info.file).resolve()), func_info.line)
+            func_lookup[key] = func_info
+
+        cls_lookup = {}
+        for class_name, class_info in result.classes.items():
+            key = (str(Path(class_info.file).resolve()), class_info.line)
+            cls_lookup[key] = class_info
+
         for item in dead_code:
-            if self.config.verbose:
-                item_lineno = getattr(item, "lineno", getattr(item, "first_lineno", 0))
-                print(f"  Vulture item: {item.filename}:{item_lineno} ({item.typ})")
-
-            # Match by file and line
-            item_path = Path(item.filename).resolve()
+            item_path = str(Path(item.filename).resolve())
             item_lineno = getattr(item, "lineno", getattr(item, "first_lineno", 0))
+            key = (item_path, item_lineno)
 
-            # Check functions
-            for func_name, func_info in result.functions.items():
-                func_path = Path(func_info.file).resolve()
-                if func_path == item_path and func_info.line == item_lineno:
-                    func_info.reachability = "unreachable"
-
-            # Check classes
-            for class_name, class_info in result.classes.items():
-                if (
-                    Path(class_info.file).resolve() == item_path
-                    and class_info.line == item_lineno
-                ):
-                    class_info.reachability = (
-                        "unreachable"  # (if we add reachability to ClassInfo too)
-                    )
+            if key in func_lookup:
+                func_lookup[key].reachability = "unreachable"
+            if key in cls_lookup:
+                cls_lookup[key].reachability = "unreachable"
 
     def _mark_reachable_items(self, result: AnalysisResult) -> None:
         """Mark items as reachable if they are NOT orphans."""
