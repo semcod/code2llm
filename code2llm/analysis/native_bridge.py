@@ -169,3 +169,28 @@ def native_compute_module_coupling(
         except Exception as e:
             logger.debug("code2llm_rust.compute_module_coupling failed: %s", e)
     return None
+
+
+def native_walk_project_files(
+    root: str,
+    extensions: List[str],
+    filenames: List[str],
+    filename_prefixes: List[str],
+    skip_dirs: List[str],
+    respect_gitignore: bool = True,
+) -> Optional[List[Tuple[str, str]]]:
+    """Walk project files with fast native gitignore and directory pruning."""
+    if _HAS_NATIVE_RUST and hasattr(code2llm_rust, "walk_project_files"):
+        try:
+            return code2llm_rust.walk_project_files(
+                root,
+                list(extensions),
+                list(filenames),
+                list(filename_prefixes),
+                list(skip_dirs),
+                respect_gitignore,
+            )
+        except Exception as e:
+            logger.debug("code2llm_rust.walk_project_files failed: %s", e)
+    return None
+

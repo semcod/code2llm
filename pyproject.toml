@@ -87,6 +87,10 @@ Homepage = "https://github.com/wronai/stts"
 Repository = "https://github.com/wronai/stts"
 Issues = "https://github.com/wronai/stts/issues"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["code2llm*"]
+
 [tool.setuptools.package-data]
 code2llm = ["templates/*.md"]
 

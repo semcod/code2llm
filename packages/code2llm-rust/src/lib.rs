@@ -8,6 +8,7 @@ pub mod centrality;
 pub mod complexity;
 pub mod coupling;
 pub mod cycles;
+pub mod discovery;
 pub mod reachability;
 pub mod smells;
 
@@ -140,6 +141,30 @@ fn detect_data_clumps(
     py.allow_threads(|| smells::detect_data_clumps_native(&func_params, min_size, min_occurrences))
 }
 
+/// Walk project files with gitignore and fast directory pruning.
+#[pyfunction]
+#[pyo3(signature = (root, extensions, filenames, filename_prefixes, skip_dirs, respect_gitignore = true))]
+fn walk_project_files(
+    py: Python<'_>,
+    root: &str,
+    extensions: Vec<String>,
+    filenames: Vec<String>,
+    filename_prefixes: Vec<String>,
+    skip_dirs: Vec<String>,
+    respect_gitignore: bool,
+) -> Vec<(String, String)> {
+    py.allow_threads(|| {
+        discovery::walk_project_files(
+            root,
+            &extensions,
+            &filenames,
+            &filename_prefixes,
+            &skip_dirs,
+            respect_gitignore,
+        )
+    })
+}
+
 /// Module initialization
 #[pymodule]
 fn code2llm_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -154,6 +179,8 @@ fn code2llm_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(compute_module_coupling, m)?)?;
     m.add_function(wrap_pyfunction!(detect_god_functions, m)?)?;
     m.add_function(wrap_pyfunction!(detect_data_clumps, m)?)?;
+    m.add_function(wrap_pyfunction!(walk_project_files, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
+
