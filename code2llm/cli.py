@@ -29,6 +29,12 @@ _validate_chunked_output = validate_chunked_output
 
 def main():
     """Main CLI entry point."""
+    try:
+        from .autoupdate import check_for_updates
+        check_for_updates("code2llm")
+    except Exception:
+        pass
+
     # Handle special sub-commands first
     special_result = handle_special_commands()
     if special_result is not None:
