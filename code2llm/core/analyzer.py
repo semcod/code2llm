@@ -37,6 +37,7 @@
 # Results from worker processes are plain dicts; _merge_results rebuilds dataclasses.
 
 import logging
+import multiprocessing as mp
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -390,7 +391,14 @@ class ProjectAnalyzer:
             "output_dir": self.config.output_dir,
         }
 
-        with ProcessPoolExecutor(max_workers=workers) as executor:
+        # Use forkserver if available (Linux) to prevent deadlocks with native C/Rust extensions
+        # and multi-threaded runtimes when forking.
+        try:
+            mp_context = mp.get_context("forkserver")
+        except ValueError:
+            mp_context = None
+
+        with ProcessPoolExecutor(max_workers=workers, mp_context=mp_context) as executor:
             # Submit all jobs
             future_to_file = {
                 executor.submit(

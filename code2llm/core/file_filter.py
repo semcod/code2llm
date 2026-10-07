@@ -115,16 +115,22 @@ class FastFileFilter:
             return True
         return not self._gitignore_parser.is_ignored(Path(file_path), self.project_path)
 
-    def _passes_excludes(self, path_lower: str, basename_lower: str) -> bool:
+    def _passes_excludes(
+        self, path_lower: str, basename_lower: str, rel_lower: str | None = None
+    ) -> bool:
         """Check if file passes exclude patterns (True = pass, False = excluded)."""
         # Fast substring excludes
         for pattern in self._simple_excludes:
-            if pattern in path_lower:
+            if pattern in path_lower or (rel_lower and pattern in rel_lower):
                 return False
 
         # Pre-compiled wildcard excludes
         for regex in self._regex_excludes:
-            if regex.match(path_lower) or regex.match(basename_lower):
+            if (
+                regex.match(path_lower)
+                or regex.match(basename_lower)
+                or (rel_lower and regex.match(rel_lower))
+            ):
                 return False
 
         return True
@@ -146,11 +152,20 @@ class FastFileFilter:
         if is_generated_artifact(file_path, self.project_path):
             return False
 
-        return (
-            self._passes_gitignore(file_path)
-            and self._passes_excludes(path_lower, basename_lower)
-            and self._passes_includes(path_lower)
-        )
+        if not self._passes_gitignore(file_path):
+            return False
+
+        rel_lower = None
+        if self.project_path:
+            try:
+                rel_lower = str(Path(file_path).relative_to(self.project_path)).lower()
+            except ValueError:
+                pass
+
+        if not self._passes_excludes(path_lower, basename_lower, rel_lower):
+            return False
+
+        return self._passes_includes(path_lower)
 
     def _passes_line_count(self, line_count: int) -> bool:
         """Check if function passes line count threshold."""
