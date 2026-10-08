@@ -36,10 +36,12 @@
 # Config is serialised to a plain dict before pickling (dataclasses are not picklable).
 # Results from worker processes are plain dicts; _merge_results rebuilds dataclasses.
 
+import hashlib
 import logging
 import multiprocessing as mp
 import os
 import time
+from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -172,7 +174,7 @@ class ProjectAnalyzer:
             cached_results: List[Dict] = []
             for fp in cached_paths:
                 r = pcache.get_file_result(fp)
-                if r is not None:
+                if isinstance(r, dict) and getattr(r.get("module"), "name", None) == path_to_module[fp]:
                     cached_results.append(r)
                 else:
                     changed_paths.append(fp)
@@ -332,7 +334,7 @@ class ProjectAnalyzer:
                 for f_path, mod_name in native_files
                 if self.file_filter.should_process(f_path)
             ]
-            return filtered
+            return self._source_module_names(filtered, project_path)
 
         files = []
         ext_set = set(ALL_EXTENSIONS)
@@ -363,7 +365,32 @@ class ProjectAnalyzer:
                 module_name = self._compute_module_name(rel, filename, project_name)
                 files.append((file_str, module_name))
 
-        return files
+        return self._source_module_names(files, project_path)
+
+    @staticmethod
+    def _source_module_names(files, project_path):
+        """Give colliding logical names distinct, deterministic static identities.
+
+        File/package aliases can coexist on disk. Keeping either under their
+        shared import name would silently overwrite symbols and may bind calls
+        to the wrong file. Unique names retain compatibility; ambiguous names
+        receive source-path identities before analysis, on both file walkers.
+        """
+        counts = Counter(name for _, name in files)
+        reserved = set(counts)
+        selected = {}
+        for file_path, name in sorted(files):
+            if counts[name] == 1:
+                selected[file_path] = name
+                continue
+            relative = Path(file_path).relative_to(project_path).as_posix()
+            digest = hashlib.sha256(relative.encode("utf-8")).hexdigest()
+            candidate = name + ".__source_" + digest
+            while candidate in reserved:
+                candidate += "_"
+            reserved.add(candidate)
+            selected[file_path] = candidate
+        return [(path, selected[path]) for path, _ in files]
 
     def _wrap_tqdm(self, iterator, total: int, desc: str = "Analyzing"):
         """Wrap iterator with tqdm when verbose=False and tqdm is available."""
@@ -433,8 +460,16 @@ class ProjectAnalyzer:
         file_iterator = self._wrap_tqdm(list(enumerate(files, 1)), total=total)
         for i, (file_path, module_name) in file_iterator:
             try:
-                result = analyzer.analyze_file(file_path, module_name)
+                cached = self.cache.get_fast(file_path) if self.cache else None
+                stale_identity = cached is not None and (
+                    not isinstance(cached, dict)
+                    or getattr(cached.get("module"), "name", None) != module_name
+                )
+                selected = FileAnalyzer(self.config, None) if stale_identity else analyzer
+                result = selected.analyze_file(file_path, module_name)
                 if result:
+                    if stale_identity:
+                        self.cache.put_fast(file_path, result)
                     results.append(result)
             except Exception as e:
                 if self.config.verbose:
