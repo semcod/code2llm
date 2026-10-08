@@ -632,8 +632,24 @@ wheels = [
 ]
 
 [[package]]
+name = "code2flow"
+version = "0.1.0"
+source = { editable = "packages/code2flow" }
+dependencies = [
+    { name = "code2graph" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "code2graph", specifier = ">=0.1.0" }]
+
+[[package]]
+name = "code2graph"
+version = "0.1.0"
+source = { editable = "packages/code2graph" }
+
+[[package]]
 name = "code2llm"
-version = "0.5.179"
+version = "0.5.181"
 source = { editable = "." }
 dependencies = [
     { name = "astroid" },
@@ -669,12 +685,28 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "black" },
+    { name = "code2flow" },
+    { name = "code2graph" },
+    { name = "code2llm-rust" },
+    { name = "code2toon" },
     { name = "costs" },
     { name = "flake8" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
+]
+diagrams = [
+    { name = "code2flow" },
+]
+graph = [
+    { name = "code2graph" },
+]
+native = [
+    { name = "code2llm-rust" },
+]
+toon = [
+    { name = "code2toon" },
 ]
 
 [package.dev-dependencies]
@@ -686,7 +718,15 @@ automation = [
 requires-dist = [
     { name = "astroid", specifier = ">=3.0" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=21.0" },
+    { name = "code2flow", marker = "extra == 'dev'", editable = "packages/code2flow" },
+    { name = "code2flow", marker = "extra == 'diagrams'", editable = "packages/code2flow" },
+    { name = "code2graph", marker = "extra == 'dev'", editable = "packages/code2graph" },
+    { name = "code2graph", marker = "extra == 'graph'", editable = "packages/code2graph" },
+    { name = "code2llm-rust", marker = "extra == 'dev'", editable = "packages/code2llm-rust" },
+    { name = "code2llm-rust", marker = "extra == 'native'", editable = "packages/code2llm-rust" },
     { name = "code2logic" },
+    { name = "code2toon", marker = "extra == 'dev'", editable = "packages/code2toon" },
+    { name = "code2toon", marker = "extra == 'toon'", editable = "packages/code2toon" },
     { name = "costs", marker = "extra == 'dev'", specifier = ">=0.1.20" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=3.9" },
     { name = "jinja2", specifier = ">=3.0" },
@@ -715,10 +755,15 @@ requires-dist = [
     { name = "tree-sitter-typescript", specifier = ">=0.21" },
     { name = "vulture", specifier = ">=2.10" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["native", "graph", "toon", "diagrams", "dev"]
 
 [package.metadata.requires-dev]
 automation = [{ name = "goal", marker = "python_full_version >= '3.12'", specifier = ">=2.2.0" }]
+
+[[package]]
+name = "code2llm-rust"
+version = "0.1.0"
+source = { editable = "packages/code2llm-rust" }
 
 [[package]]
 name = "code2logic"
@@ -763,6 +808,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/7a/3a/9481f7f95028954c7
 wheels = [
     { url = "https://files.pythonhosted.org/packages/72/1f/41531e657b0694338324cefbe59e00f84d29113cf8db308c98cc117415db/code2logic-1.0.50-py3-none-any.whl", hash = "sha256:959918078bc2cfb05bbffffcc6245d2bf34ecfa05104dcf5da918e3da8e05ccd", size = 331558, upload-time = "2026-06-29T08:59:19.72Z" },
 ]
+
+[[package]]
+name = "code2toon"
+version = "0.1.0"
+source = { editable = "packages/code2toon" }
+dependencies = [
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pyyaml", specifier = ">=5.4" }]
 
 [[package]]
 name = "colorama"

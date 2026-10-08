@@ -256,3 +256,72 @@ class TestExporters:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+@pytest.mark.parametrize("native", [False, True])
+def test_colliding_package_and_module_keep_every_source_identity(tmp_path, monkeypatch, native):
+    """Logical import aliases must not discard different static source files."""
+    import copy
+    import hashlib
+
+    import code2llm.core.analyzer as implementation
+    reserved = "__source_" + hashlib.sha256(b"pkg/widget.py").hexdigest()
+    files = ["pkg/widget.py", "pkg/widget/__init__.py", "pkg/unique.py", "pkg/widget/" + reserved + ".py"]
+    content = "class Shared:\n    def same(self):\n        return 1\n"
+    for relative in files:
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
+    records = [(str(tmp_path / relative), implementation.ProjectAnalyzer._compute_module_name(
+        relative, Path(relative).name, tmp_path.name)) for relative in files]
+    monkeypatch.setattr(implementation, "native_walk_project_files", lambda *a, **kw: list(reversed(records)) if native else None)
+    config = copy.deepcopy(FAST_CONFIG)
+    config.no_cache = True
+    config.performance.enable_cache = False
+    config.performance.parallel_enabled = False
+    config.filters.min_function_lines = 1
+    analyzer = implementation.ProjectAnalyzer(config, tmp_path)
+    result = analyzer.analyze_project(str(tmp_path))
+    assert {m.file for m in result.modules.values()} == {str(tmp_path / f) for f in files}
+    assert len(result.modules) == len(files)
+    assert "pkg.widget." + reserved in result.modules
+    assert "pkg.unique" in result.modules
+    conflicting = [m.name for m in result.modules.values() if m.file.endswith(("widget.py", "widget/__init__.py"))]
+    assert len(set(conflicting)) == 2 and "pkg.widget" not in conflicting
+    assert {f.file for f in result.functions.values()} == {str(tmp_path / f) for f in files}
+    assert len(result.functions) == len(files)
+    assert len(result.classes) == len(files)
+    assert all(n.function in result.functions for n in result.nodes.values())
+    first = dict(analyzer._collect_files(tmp_path))
+    monkeypatch.setattr(implementation, "native_walk_project_files", lambda *a, **kw: records if native else None)
+    assert dict(analyzer._collect_files(tmp_path)) == first
+
+
+def test_collision_identity_refreshes_warm_caches_when_sibling_changes(tmp_path, monkeypatch):
+    import copy
+
+    import code2llm.core.analyzer as implementation
+    monkeypatch.setattr(implementation, "native_walk_project_files", lambda *a, **kw: None)
+    config = copy.deepcopy(FAST_CONFIG)
+    config.performance.parallel_enabled = False
+    config.performance.enable_cache = True
+    config.performance.cache_dir = str(tmp_path / ".file-cache")
+    config.filters.min_function_lines = 1
+    source = tmp_path / "pkg/widget.py"
+    source.parent.mkdir()
+    source.write_text("def same():\n    return 1\n")
+    analyzer = implementation.ProjectAnalyzer(config, tmp_path)
+    assert set(analyzer.analyze_project(str(tmp_path)).modules) == {"pkg.widget"}
+    sibling = tmp_path / "pkg/widget/__init__.py"
+    sibling.parent.mkdir()
+    sibling.write_text("def same():\n    return 2\n")
+    for _ in range(2):
+        result = analyzer.analyze_project(str(tmp_path))
+        assert {m.file for m in result.modules.values()} == {str(source), str(sibling)}
+        assert len(result.functions) == 2
+        assert "pkg.widget" not in result.modules
+        assert {m.file: m.name for m in result.modules.values()} == dict(analyzer._collect_files(tmp_path))
+    sibling.unlink()
+    result = analyzer.analyze_project(str(tmp_path))
+    assert set(result.modules) == {"pkg.widget"}
+    assert len(result.functions) == 1
