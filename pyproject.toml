@@ -140,3 +140,9 @@ automation = {requires-python = ">=3.12"}
 
 [dependency-groups]
 automation = ["goal>=2.2.0"]
+
+[tool.uv.sources]
+code2graph = { path = "packages/code2graph", editable = true }
+code2toon = { path = "packages/code2toon", editable = true }
+code2flow = { path = "packages/code2flow", editable = true }
+code2llm-rust = { path = "packages/code2llm-rust", editable = true }
