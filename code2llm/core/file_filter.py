@@ -66,6 +66,15 @@ _SKIP_DIR_NAMES = (
             ".serverless",
             ".netlify",
             ".vercel",
+            # Additional heavy directories and vendor bundles
+            "c2004",
+            "c2004-git-backup",
+            "workshop",
+            "managed_components",
+            "vendor",
+            ".subactor",
+            ".worktrees",
+            ".planfile",
         }
     )
     | ARCHIVE_DIR_NAMES
@@ -83,12 +92,30 @@ class FastFileFilter:
         # Split patterns into fast substring checks vs pre-compiled regex
         self._simple_excludes = []
         self._regex_excludes = []
+        self._simple_dir_excludes: set[str] = set()
+        wildcard_patterns = []
         for p in config.exclude_patterns:
             p_lower = p.lower()
+            p_dir = p_lower.removesuffix("/**").removesuffix("/*").rstrip("/")
+            if p_dir and not any(c in p_dir for c in ("*", "?", "[")):
+                self._simple_dir_excludes.add(p_dir)
+                if "/" in p_dir:
+                    self._simple_dir_excludes.add(p_dir.split("/")[-1])
             if any(c in p_lower for c in ("*", "?", "[")):
                 self._regex_excludes.append(re.compile(fnmatch.translate(p_lower)))
+                wildcard_patterns.append(p_lower)
             else:
                 self._simple_excludes.append(p_lower)
+
+        if wildcard_patterns:
+            try:
+                self._combined_regex_excludes = re.compile(
+                    "|".join(f"(?:{fnmatch.translate(p)})" for p in wildcard_patterns)
+                )
+            except Exception:
+                self._combined_regex_excludes = None
+        else:
+            self._combined_regex_excludes = None
 
         self._simple_includes = []
         self._regex_includes = []
@@ -107,7 +134,11 @@ class FastFileFilter:
     def should_skip_dir(self, dirname: str) -> bool:
         """Fast O(1) check: skip this directory entirely during tree walk?"""
         lower = dirname.lower()
-        return lower.startswith(".") or lower in _SKIP_DIR_NAMES
+        return (
+            lower.startswith(".")
+            or lower in _SKIP_DIR_NAMES
+            or lower in self._simple_dir_excludes
+        )
 
     def _passes_gitignore(self, file_path: str) -> bool:
         """Check if file passes gitignore patterns (True = pass, False = excluded)."""
@@ -124,14 +155,23 @@ class FastFileFilter:
             if pattern in path_lower or (rel_lower and pattern in rel_lower):
                 return False
 
-        # Pre-compiled wildcard excludes
-        for regex in self._regex_excludes:
+        # Fast combined regex check
+        if self._combined_regex_excludes is not None:
             if (
-                regex.match(path_lower)
-                or regex.match(basename_lower)
-                or (rel_lower and regex.match(rel_lower))
+                self._combined_regex_excludes.match(path_lower)
+                or self._combined_regex_excludes.match(basename_lower)
+                or (rel_lower and self._combined_regex_excludes.match(rel_lower))
             ):
                 return False
+        else:
+            # Pre-compiled wildcard excludes
+            for regex in self._regex_excludes:
+                if (
+                    regex.match(path_lower)
+                    or regex.match(basename_lower)
+                    or (rel_lower and regex.match(rel_lower))
+                ):
+                    return False
 
         return True
 

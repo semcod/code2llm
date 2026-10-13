@@ -320,12 +320,16 @@ class ProjectAnalyzer:
         project_name = project_path.name
 
         # Fast path: native Rust directory traversal
+        skip_dirs = list(
+            _SKIP_DIR_NAMES
+            | getattr(self.file_filter, "_simple_dir_excludes", set())
+        )
         native_files = native_walk_project_files(
             project_str,
             extensions=list(ALL_EXTENSIONS),
             filenames=list(ALL_FILENAMES),
             filename_prefixes=list(LANGUAGE_FILENAME_PREFIXES),
-            skip_dirs=list(_SKIP_DIR_NAMES),
+            skip_dirs=skip_dirs,
             respect_gitignore=getattr(self.config.filters, "gitignore_enabled", True),
         )
         if native_files is not None:

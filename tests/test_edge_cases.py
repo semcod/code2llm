@@ -238,6 +238,39 @@ class TestFiltering:
 
         assert filter_obj.should_skip_function(3, is_property=True)
 
+    def test_should_skip_dir(self):
+        """Test directory skipping for built-in and custom exclude patterns."""
+        config = FilterConfig(exclude_patterns=["custom_heavy/**", "workshop/*", "vendor_bundle/"])
+        filter_obj = FastFileFilter(config)
+
+        # Built-in heavy dirs
+        assert filter_obj.should_skip_dir("c2004")
+        assert filter_obj.should_skip_dir("c2004-git-backup")
+        assert filter_obj.should_skip_dir("node_modules")
+        assert filter_obj.should_skip_dir(".git")
+        assert filter_obj.should_skip_dir(".subactor")
+
+        # Custom exclude pattern extracted dirs
+        assert filter_obj.should_skip_dir("custom_heavy")
+        assert filter_obj.should_skip_dir("workshop")
+        assert filter_obj.should_skip_dir("vendor_bundle")
+
+        # Normal dirs should not be skipped
+        assert not filter_obj.should_skip_dir("src")
+        assert not filter_obj.should_skip_dir("app")
+        assert not filter_obj.should_skip_dir("lib")
+        assert not filter_obj.should_skip_dir("my_module")
+
+    def test_combined_regex_excludes(self):
+        """Test combined regex exclude filter matching."""
+        config = FilterConfig(exclude_patterns=["*.tmp", "*_backup.*", "legacy/**"])
+        filter_obj = FastFileFilter(config)
+
+        assert not filter_obj.should_process("temp/test.tmp")
+        assert not filter_obj.should_process("code_backup.py")
+        assert not filter_obj.should_process("legacy/old.py")
+        assert filter_obj.should_process("app/main.py")
+
 
 class TestNLPEdgeCases:
     """Test NLP pipeline edge cases."""
