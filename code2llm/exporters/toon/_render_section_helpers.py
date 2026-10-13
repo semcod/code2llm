@@ -6,7 +6,7 @@ language label detection, and pipeline tracing utilities.
 
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from code2llm.core.models import AnalysisResult
 from code2llm.core.config import LANGUAGE_EXTENSIONS
@@ -147,26 +147,33 @@ def _trace_pipeline(start_func: str, result: AnalysisResult, depth: int) -> List
     return chain
 
 
-def _calculate_purity(chain: List[str], result: AnalysisResult) -> float:
+def _calculate_purity(
+    chain: List[str],
+    result: AnalysisResult,
+    name_to_func: Optional[Dict[str, Any]] = None,
+) -> float:
     """Calculate purity ratio (functions without side effects)."""
     if not chain:
         return 0.0
     pure_count = 0
     for func_name in chain:
-        full_name = next(
-            (qname for qname, fi in result.functions.items() if fi.name == func_name),
-            None,
-        )
-        if full_name:
-            func_info = result.functions.get(full_name)
-            if func_info and not getattr(func_info, "has_side_effects", False):
-                pure_count += 1
+        if name_to_func is not None:
+            func_info = name_to_func.get(func_name)
+        else:
+            full_name = next(
+                (qname for qname, fi in result.functions.items() if fi.name == func_name),
+                None,
+            )
+            func_info = result.functions.get(full_name) if full_name else None
+        if func_info and not getattr(func_info, "has_side_effects", False):
+            pure_count += 1
     return pure_count / len(chain)
 
 
 def render_pipelines_section(ctx: Dict[str, Any]) -> List[str]:
     """Render PIPELINES section - data flow pipelines from entry points."""
     result: AnalysisResult = ctx["result"]
+    name_to_func: Dict[str, Any] = {fi.name: fi for fi in result.functions.values()}
     pipelines = []
     for func_name, func_info in result.functions.items():
         if not func_info.called_by and func_info.calls:
@@ -176,7 +183,9 @@ def render_pipelines_section(ctx: Dict[str, Any]) -> List[str]:
                     {
                         "entry": func_name.split(".")[-1],
                         "chain": chain,
-                        "purity": _calculate_purity(chain, result),
+                        "purity": _calculate_purity(
+                            chain, result, name_to_func=name_to_func
+                        ),
                     }
                 )
     if not pipelines:

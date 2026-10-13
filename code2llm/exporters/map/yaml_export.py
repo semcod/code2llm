@@ -58,7 +58,7 @@ def _build_module_entry(
 ) -> Dict[str, Any]:
     """Build the YAML dict for a single module."""
     rel = rel_path(mi.file, result.project_path)
-    lc = file_line_count(mi.file)
+    lc = getattr(mi, "line_count", 0) or file_line_count(mi.file)
     return {
         "path": rel,
         "lines": lc,

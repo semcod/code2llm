@@ -14,7 +14,7 @@ def render_module_list(result: AnalysisResult, is_excluded_path) -> List[str]:
         if is_excluded_path(mi.file):
             continue
         rel = rel_path(mi.file, result.project_path)
-        lc = file_line_count(mi.file)
+        lc = getattr(mi, "line_count", 0) or file_line_count(mi.file)
         modules.append((rel, lc))
 
     lines = [f"M[{len(modules)}]:"]

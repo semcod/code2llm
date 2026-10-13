@@ -65,6 +65,10 @@ def _build_code2logic_cmd(args, source_path: Path, output_dir: Path) -> list[str
         "-o",
         str(output_dir),
     ]
+    excludes = getattr(args, "exclude", None)
+    if excludes:
+        cmd.append("--exclude")
+        cmd.extend(str(x) for x in excludes)
     if not args.verbose:
         cmd.append("-q")
     return cmd

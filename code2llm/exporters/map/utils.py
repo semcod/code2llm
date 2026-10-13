@@ -41,7 +41,7 @@ def count_total_lines(result: AnalysisResult, is_excluded_path) -> int:
     for mi in result.modules.values():
         if mi.file and mi.file not in seen and not is_excluded_path(mi.file):
             seen.add(mi.file)
-            total += file_line_count(mi.file)
+            total += getattr(mi, "line_count", 0) or file_line_count(mi.file)
     return total
 
 

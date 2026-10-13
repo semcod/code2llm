@@ -27,6 +27,10 @@ EXCLUDE_PATTERNS = {
     "egg-info",
     ".tox",
     ".mypy_cache",
+    ".subactor",
+    ".worktrees",
+    ".planfile",
+    ".benchmarks",
     # Backup directories that often contain nested venvs
     ".algitex",
     ".backup",
