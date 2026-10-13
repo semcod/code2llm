@@ -93,7 +93,22 @@ def _hotspot_description(fi: FunctionInfo, fan_out: int) -> str:
     return f"calls {fan_out} functions"
 
 
-_WALK_EXCLUDE = {"venv", ".venv", "node_modules", "__pycache__", ".git", "dist", "build", ".tox", ".mypy_cache", "egg-info"}  # noqa: E501
+_WALK_EXCLUDE = {
+    "venv",
+    ".venv",
+    "node_modules",
+    "__pycache__",
+    ".git",
+    "dist",
+    "build",
+    ".tox",
+    ".mypy_cache",
+    "egg-info",
+    ".subactor",
+    ".worktrees",
+    ".planfile",
+    ".benchmarks",
+}
 
 
 def _fast_line_counts(pp: Path, result) -> Dict[str, int]:
@@ -103,7 +118,11 @@ def _fast_line_counts(pp: Path, result) -> Dict[str, int]:
         if not mi.file:
             continue
         try:
-            lc = len(Path(mi.file).read_text(encoding="utf-8", errors="ignore").splitlines())
+            lc = getattr(mi, "line_count", 0)
+            if not lc:
+                lc = len(
+                    Path(mi.file).read_text(encoding="utf-8", errors="ignore").splitlines()
+                )
             counts[mi.file] = lc
             counts[str(Path(mi.file).relative_to(pp))] = lc
         except Exception:
