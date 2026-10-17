@@ -119,7 +119,7 @@ class PromptEngine:
 
     def _build_context_for_smell(self, smell: CodeSmell) -> Dict[str, Any]:
         """Prepare context data for the Jinja2 template."""
-        source_code = self._get_source_context(smell.file, smell.line)
+        source_code = self._get_source_context(smell.file, smell.line, max_lines=50)
         metrics = self._get_smell_metrics(smell)
         mutations, mutations_summary = self._get_smell_mutations(smell)
         target = smell.name.split(": ")[-1]

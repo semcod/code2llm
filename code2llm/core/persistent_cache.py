@@ -427,6 +427,20 @@ class PersistentCache:
                 except OSError:
                     pass
 
+        if max_size_mb > 0 and self.cache_size_mb() > max_size_mb:
+            export_dirs = sorted(
+                (d for d in self._exports_dir.iterdir() if d.is_dir()),
+                key=lambda d: d.stat().st_mtime,
+            )
+            for export_dir in export_dirs:
+                if self.cache_size_mb() <= max_size_mb:
+                    break
+                try:
+                    shutil.rmtree(export_dir)
+                    removed += 1
+                except OSError:
+                    pass
+
         return removed
 
     def clear(self) -> None:
