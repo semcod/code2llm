@@ -217,6 +217,41 @@ def _build_renderers(
     ]
 
 
+def _render_single_mermaid_png(
+    renderer_name: str,
+    cmd: Optional[List[str]],
+    mmd_file: Path,
+    output_file: Path,
+    timeout: int,
+    max_text_size: int,
+    max_edges: int,
+) -> bool:
+    """Attempt rendering a single Mermaid file with one renderer."""
+    try:
+        if renderer_name == "puppeteer":
+            return generate_with_puppeteer(
+                mmd_file,
+                output_file,
+                timeout,
+                max_text_size=max_text_size,
+                max_edges=max_edges,
+            )
+
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout
+        )
+        if result.returncode == 0:
+            return True
+        print(f"    {renderer_name} failed: {result.stderr.strip()}")
+    except subprocess.TimeoutExpired:
+        print(f"    {renderer_name} timed out")
+    except FileNotFoundError:
+        print(f"    {renderer_name} not available")
+    except Exception as e:
+        print(f"    {renderer_name} error: {e}")
+    return False
+
+
 def _run_mmdc_subprocess(
     renderers: List[tuple],
     mmd_file: Path,
@@ -227,32 +262,16 @@ def _run_mmdc_subprocess(
 ) -> bool:
     """Run mmdc/npx/puppeteer renderers and return success status."""
     for renderer_name, cmd in renderers:
-        try:
-            if renderer_name == "puppeteer":
-                if generate_with_puppeteer(
-                    mmd_file,
-                    output_file,
-                    timeout,
-                    max_text_size=max_text_size,
-                    max_edges=max_edges,
-                ):
-                    return True
-                continue
-
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=timeout
-            )
-            if result.returncode == 0:
-                return True
-            else:
-                print(f"    {renderer_name} failed: {result.stderr.strip()}")
-
-        except subprocess.TimeoutExpired:
-            print(f"    {renderer_name} timed out")
-        except FileNotFoundError:
-            print(f"    {renderer_name} not available")
-        except Exception as e:
-            print(f"    {renderer_name} error: {e}")
+        if _render_single_mermaid_png(
+            renderer_name,
+            cmd,
+            mmd_file,
+            output_file,
+            timeout,
+            max_text_size,
+            max_edges,
+        ):
+            return True
 
     return False
 

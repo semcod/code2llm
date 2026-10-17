@@ -91,7 +91,7 @@ class PerformanceConfig:
     def get_workers(self) -> int:
         """Get effective worker count (auto-detect if set to 0)."""
         if self.parallel_workers <= 0:
-            return _get_optimal_workers(default=4)
+            return _get_optimal_workers(default=4, max_per_gb=2.0)
         return self.parallel_workers
 
     def apply_fast_mode(self) -> None:

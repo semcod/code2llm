@@ -129,7 +129,12 @@ fn count_c_family_branches(body: &str) -> u32 {
             }
         }
 
-        let prev_char = if i > 0 { Some(bytes[i - 1] as char) } else { None };
+        if !body.is_char_boundary(i) {
+            i += 1;
+            continue;
+        }
+
+        let prev_char = if i > 0 { body[..i].chars().next_back() } else { None };
         let prev_word = prev_char.map_or(false, |c| c.is_alphanumeric() || c == '_');
 
         if !prev_word {
@@ -189,7 +194,12 @@ fn count_go_branches(body: &str) -> u32 {
             }
         }
 
-        let prev_char = if i > 0 { Some(bytes[i - 1] as char) } else { None };
+        if !body.is_char_boundary(i) {
+            i += 1;
+            continue;
+        }
+
+        let prev_char = if i > 0 { body[..i].chars().next_back() } else { None };
         let prev_word = prev_char.map_or(false, |c| c.is_alphanumeric() || c == '_');
 
         if !prev_word {
@@ -239,7 +249,12 @@ fn count_rust_branches(body: &str) -> u32 {
             continue;
         }
 
-        let prev_char = if i > 0 { Some(bytes[i - 1] as char) } else { None };
+        if !body.is_char_boundary(i) {
+            i += 1;
+            continue;
+        }
+
+        let prev_char = if i > 0 { body[..i].chars().next_back() } else { None };
         let prev_word = prev_char.map_or(false, |c| c.is_alphanumeric() || c == '_');
 
         if !prev_word {
@@ -311,5 +326,20 @@ mod tests {
         assert_eq!(res.len(), 2);
         assert_eq!(res[0].1, 2);
         assert_eq!(res[1].1, 3);
+    }
+
+    #[test]
+    fn test_multibyte_utf8_and_emoji_do_not_panic() {
+        let rust_body = "fn launch() {\n    let msg = \"🚀 Zażółć gęślą jaźń\";\n    if !msg.is_empty() {\n        match msg.len() {\n            0 => (),\n            _ => (),\n        }\n    }\n}";
+        let (cc_rust, _) = calculate_complexity(rust_body, "rust");
+        assert_eq!(cc_rust, 3);
+
+        let go_body = "func run() {\n    msg := \"🚀 Zażółć\"\n    if len(msg) > 0 {\n        for i := 0; i < 1; i++ {}\n    }\n}";
+        let (cc_go, _) = calculate_complexity(go_body, "go");
+        assert_eq!(cc_go, 3);
+
+        let c_body = "void run() {\n    const char* s = \"🚀 Zażółć\";\n    if (s) { while (*s) { break; } }\n}";
+        let (cc_c, _) = calculate_complexity(c_body, "c_family");
+        assert_eq!(cc_c, 3);
     }
 }

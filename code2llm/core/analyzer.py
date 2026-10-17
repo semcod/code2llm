@@ -440,7 +440,9 @@ class ProjectAnalyzer:
 
             # Collect results as they complete (with optional progress bar)
             completed = 0
-            iterator = self._wrap_tqdm(as_completed(future_to_file), total=len(files))
+            iterator = self._wrap_tqdm(
+                as_completed(future_to_file), total=len(files), desc="Analyzing"
+            )
             for future in iterator:
                 file_path, _ = future_to_file[future]
                 try:
@@ -461,7 +463,9 @@ class ProjectAnalyzer:
         analyzer = FileAnalyzer(self.config, self.cache)
         total = len(files)
 
-        file_iterator = self._wrap_tqdm(list(enumerate(files, 1)), total=total)
+        file_iterator = self._wrap_tqdm(
+            list(enumerate(files, 1)), total=total, desc="Analyzing"
+        )
         for i, (file_path, module_name) in file_iterator:
             try:
                 cached = self.cache.get_fast(file_path) if self.cache else None

@@ -96,6 +96,15 @@ class SmartPrioritizer:
         scored.sort(key=lambda x: x.priority_score, reverse=True)
         return scored
 
+    @staticmethod
+    def _parse_file_ast(file_path: str) -> ast.AST | None:
+        """Parse a Python file into an AST, returning None on error."""
+        try:
+            content = Path(file_path).read_text()
+            return ast.parse(content)
+        except Exception:
+            return None
+
     def _build_import_graph(
         self,
         files: List[Tuple[str, str]],
@@ -105,22 +114,20 @@ class SmartPrioritizer:
         imported_by: Dict[str, Set[str]] = defaultdict(set)
 
         for file_path, module_name in files:
-            try:
-                content = Path(file_path).read_text()
-                tree = ast.parse(content)
+            tree = self._parse_file_ast(file_path)
+            if tree is None:
+                continue
 
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
-                            # Simplified - just record the top-level module
-                            top_module = alias.name.split(".")[0]
-                            imported_by[top_module].add(module_name)
-
-                    elif isinstance(node, ast.ImportFrom) and node.module:
-                        top_module = node.module.split(".")[0]
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        # Simplified - just record the top-level module
+                        top_module = alias.name.split(".")[0]
                         imported_by[top_module].add(module_name)
-            except Exception:
-                pass
+
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    top_module = node.module.split(".")[0]
+                    imported_by[top_module].add(module_name)
 
         return imported_by
 

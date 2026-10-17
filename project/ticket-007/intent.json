@@ -1,0 +1,33 @@
+{
+  "ticket": "ticket-007",
+  "summary": "Fix UTF-8 char boundary panic in code2llm-rust cyclomatic complexity scanner and resolve PERF-AUDIT findings",
+  "allowedPaths": [
+    ".aider.conf.yml",
+    ".cursor/rules/new-project-standard.mdc",
+    ".github/copilot-instructions.md",
+    ".gitignore",
+    ".governance/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "Makefile",
+    "TODO.md",
+    "code2llm/cli_exports/orchestrator.py",
+    "code2llm/core/analyzer.py",
+    "code2llm/core/config.py",
+    "code2llm/core/persistent_cache.py",
+    "code2llm/core/streaming/prioritizer.py",
+    "code2llm/generators/mermaid/png.py",
+    "code2llm/refactor/prompt_engine.py",
+    "examples/docker-doql-example/docker-compose.yml",
+    "packages/code2llm-rust/src/complexity.rs",
+    "project/**",
+    "project/ticket-007/**"
+  ],
+  "forbiddenPaths": [
+    ".env",
+    ".github/workflows/**"
+  ],
+  "authorization": "SESSION_EXECUTION_AUTHORIZATION",
+  "outcome": "Rust complexity scanner checks body.is_char_boundary(i) before slicing &str, passes all unit tests including multi-byte UTF-8 and emojis, and code2llm passes performance audit with 0 findings."
+}

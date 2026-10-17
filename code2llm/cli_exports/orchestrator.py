@@ -252,6 +252,8 @@ def _expand_all_formats(requested: List[str], include_png: bool = False) -> List
     if "all" not in requested:
         return requested[:]
     formats = ["toon", "map", "context", "evolution", "mermaid", "planfile"]
+    if include_png and "mermaid" not in formats:
+        formats.append("mermaid")
     return formats
 
 
