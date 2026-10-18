@@ -10,7 +10,7 @@ from .parser import (
 from .validator import ToonValidator, validate_toon
 from .diff import ToonDiffResult, diff_toon
 
-__version__ = "0.1.0"
+__version__ = "0.5.183"
 
 __all__ = [
     "ToonDocument",

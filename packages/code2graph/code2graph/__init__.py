@@ -15,7 +15,7 @@ from .models import (
 )
 from .query import GraphQuery
 
-__version__ = "0.1.0"
+__version__ = "0.5.183"
 
 __all__ = [
     "BaseModel",

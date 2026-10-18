@@ -8,7 +8,7 @@ from .calls import export_calls
 from .validation import validate_mermaid_file
 from .fix import fix_mermaid_file
 
-__version__ = "0.1.0"
+__version__ = "0.5.183"
 
 __all__ = [
     "export_compact",

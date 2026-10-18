@@ -25,7 +25,7 @@ def read_readme():
 
 setup(
     name="code2llm",
-    version=version,
+    version="0.5.183",
     description="Python code flow analysis tool - CFG, DFG, and call graph extraction",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
