@@ -1032,7 +1032,7 @@ sprint:
 
         - Actor: `koru-ticket-auto`
 
-        - Lease expires: `2026-10-18T13:38:42.212458Z`
+        - Lease expires: `2026-10-18T13:49:00.689017Z`
 
         - Control: planfile://ticket/REL-001
 
@@ -1040,10 +1040,10 @@ sprint:
       execution:
         assigned_to: koru-ticket-auto
         attempt: 0
-        lease_expires_at: '2026-10-18T13:38:37.842455Z'
+        lease_expires_at: '2026-10-18T13:48:52.236730Z'
         max_attempts: 1
         queue: default
-        started_at: '2026-10-18T12:38:40.685204Z'
+        started_at: '2026-10-18T12:49:00.591076Z'
         state: running
       executor:
         handler: python3 /home/tom/.gemini/antigravity-cli/brain/d8947b43-d543-4d1d-9463-043d897b4e0c/scratch/willman_publish_repo.py
@@ -1055,7 +1055,7 @@ sprint:
         changes:
         - execution
         source: planfile.store
-        timestamp: '2026-10-18T12:38:37.843789+00:00'
+        timestamp: '2026-10-18T12:48:52.237803+00:00'
       - action: status_change
         changes:
         - execution
@@ -1065,14 +1065,14 @@ sprint:
         previous_status: open
         source: planfile.store
         status: in_progress
-        timestamp: '2026-10-18T12:38:40.686669+00:00'
+        timestamp: '2026-10-18T12:49:00.592149+00:00'
       - action: update
         changes:
         - description
         source: planfile.store
-        timestamp: '2026-10-18T12:38:42.225001+00:00'
+        timestamp: '2026-10-18T12:49:00.699285+00:00'
       id: REL-001
       name: Fix setup.py and goal.yaml and publish code2llm 0.5.183 via goal -a
       priority: high
       status: in_progress
-      updated_at: '2026-10-18T12:38:42.224972+00:00'
+      updated_at: '2026-10-18T12:49:00.699260+00:00'
