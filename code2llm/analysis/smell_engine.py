@@ -212,22 +212,27 @@ def detect_data_clumps(
 
     for (file, args), funcs in arg_sets.items():
         if len(funcs) >= 2:
-            for func_name in funcs:
+            # Names feed exported ticket identities, so hash/discovery order
+            # must not turn the same finding into a new ticket after restart.
+            ordered_args = sorted(args)
+            ordered_funcs = sorted(funcs)
+            arg_names = ", ".join(ordered_args)
+            for func_name in ordered_funcs:
                 func_info = functions[func_name]
                 smells.append(
                     CodeSmell(
-                        name=f"Data Clump: {', '.join(args)}",
+                        name=f"Data Clump: {arg_names}",
                         type="data_clump",
                         file=func_info.file,
                         line=func_info.line,
                         severity=0.6,
                         description=(
-                            f"Arguments ({', '.join(args)}) are used together"
-                            f" in multiple functions: {', '.join(funcs)}."
+                            f"Arguments ({arg_names}) are used together"
+                            f" in multiple functions: {', '.join(ordered_funcs)}."
                         ),
                         context={
-                            "clump": list(args),
-                            "related_functions": funcs,
+                            "clump": ordered_args,
+                            "related_functions": ordered_funcs,
                         },
                     )
                 )
