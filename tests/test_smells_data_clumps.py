@@ -81,3 +81,54 @@ def test_fewer_than_three_args_never_counted():
     smells = SmellDetector(result)._detect_data_clumps()
 
     assert smells == []
+
+
+def test_exported_clump_tickets_are_stable_across_processes(tmp_path):
+    """The same finding must not create new ticket keys after a process restart."""
+    import json
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+    import textwrap
+
+    script = textwrap.dedent("""\
+        import json
+        import sys
+        from dataclasses import asdict
+        from code2llm.analysis.smells import SmellDetector
+        from code2llm.core.models import AnalysisResult, FunctionInfo
+        from code2llm.exporters.planfile_tickets import _smell_tickets
+
+        reverse = sys.argv[1] == "reverse"
+        functions = [("create_github_pr", 47), ("create_gitlab_mr", 80)]
+        arguments = ["self", "provider", "group", "template"]
+        if reverse:
+            functions.reverse()
+            arguments.reverse()
+        result = AnalysisResult(project_path="/fixture")
+        for name, line in functions:
+            result.functions[name] = FunctionInfo(
+                name=name, qualified_name="publish." + name,
+                file="/fixture/publish.py", line=line, args=arguments,
+            )
+        result.smells = SmellDetector(result)._detect_data_clumps()
+        tickets = [asdict(ticket) for ticket in _smell_tickets(result)]
+        print(json.dumps(sorted(tickets, key=lambda t: t["dedupe_key"]), sort_keys=True))
+        """)
+    outputs = []
+    root = str(Path(__file__).resolve().parents[1])
+    for seed, order in [("1", "forward"), ("2", "forward"), ("42", "reverse")]:
+        env = os.environ.copy()
+        env["PYTHONHASHSEED"] = seed
+        env["PYTHONPATH"] = root + os.pathsep + env.get("PYTHONPATH", "")
+        child = subprocess.run(
+            [sys.executable, "-c", script, order],
+            cwd=tmp_path, env=env, check=True, capture_output=True,
+            text=True, timeout=30,
+        )
+        tickets = json.loads(child.stdout)
+        assert len(tickets) == 2
+        assert len({ticket["dedupe_key"] for ticket in tickets}) == 2
+        outputs.append(tickets)
+    assert outputs[0] == outputs[1] == outputs[2]
