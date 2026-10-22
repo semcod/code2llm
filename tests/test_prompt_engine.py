@@ -17,7 +17,7 @@ def test_tiktoken_truncation():
 
     engine = PromptEngine(result)
     # Mock source context to be very large
-    engine._get_source_context = lambda f, l: "print('Hello world')\n" * 1000
+    engine._get_source_context = lambda f, l, *, max_lines: "print('Hello world')\n" * 1000
 
     prompts = engine.generate_prompts()
     assert len(prompts) == 1
@@ -59,7 +59,7 @@ def test_template_rendering_with_metrics():
     }
 
     engine = PromptEngine(result)
-    engine._get_source_context = lambda f, l: "def complex_func():\n    pass"
+    engine._get_source_context = lambda f, l, *, max_lines: "def complex_func():\n    pass"
 
     prompts = engine.generate_prompts()
     prompt_content = list(prompts.values())[0]
