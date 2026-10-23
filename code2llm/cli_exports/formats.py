@@ -30,6 +30,8 @@ from code2llm.exporters import (
     EvolutionExporter,
     READMEExporter,
     ProjectYAMLExporter,
+    ProjectionsExporter,
+    PROJECTION_FILENAME,
     ToonViewGenerator,
     ContextViewGenerator,
     ArticleViewGenerator,
@@ -194,6 +196,15 @@ def _export_simple_formats(args, result, output_dir: Path, formats):
         exporter.export(result, str(filepath), include_defaults=args.full)
         if args.verbose:
             print(f"  - JSON: {filepath}")
+
+    if "projections" in formats:
+        exporter = ProjectionsExporter()
+        filepath = output_dir / PROJECTION_FILENAME
+        t0 = time.monotonic()
+        exporter.export(result, str(filepath))
+        elapsed = time.monotonic() - t0
+        if args.verbose:
+            print(f"  - PROJECTIONS: {filepath} ({elapsed:.2f}s)")
 
 
 def _export_yaml(args, result, output_dir: Path):

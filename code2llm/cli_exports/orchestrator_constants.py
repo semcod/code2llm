@@ -20,6 +20,7 @@ FORMAT_FILENAMES: Dict[str, str] = {
     "planfile": "planfile-tickets.yaml",
     "readme": "README.md",
     "project-yaml": "project.yaml",
+    "projections": "projections.json",
 }
 
 # Files produced per format in dry-run preview
@@ -33,6 +34,7 @@ FORMAT_DRY_RUN_FILES: Dict[str, List[str]] = {
     "yaml": ["analysis.yaml"],
     "json": ["analysis.json"],
     "readme": ["README.md"],
+    "projections": ["projections.json"],
 }
 
 # Human-readable labels
@@ -47,6 +49,7 @@ FORMAT_LABELS: Dict[str, str] = {
     "planfile": "PLANFILE (ticket suggestions)",
     "readme": "README (documentation)",
     "project-yaml": "PROJECT-YAML (single source of truth)",
+    "projections": "PROJECTIONS (intent retrieval)",
 }
 
 # ---------------------------------------------------------------------------

@@ -97,7 +97,7 @@ Strategy Options (--strategy):
         default="toon",
         help=(
             "Output formats: toon,map,flow,context,code2logic,yaml,json,mermaid,"
-            "evolution,calls,png,project-yaml,planfile,all (default: toon)"
+            "evolution,calls,png,project-yaml,planfile,projections,all (default: toon)"
         ),
     )
 

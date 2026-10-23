@@ -9,6 +9,7 @@ Available exporters:
   - READMEExporter    → README.md           (documentation of all files)
   - YAMLExporter      → analysis.yaml
   - JSONExporter      → analysis.json
+  - ProjectionsExporter → projections.json (bounded symbol catalog for intent retrieval)
   - MermaidExporter   → *.mmd
 
 Registry API:
@@ -33,6 +34,13 @@ from .base import (
 
 # Standard exporters (auto-registered via @export_format decorator)
 from .json_exporter import JSONExporter
+from .projections_exporter import (
+    MAX_RECORDS,
+    PROJECTION_FILENAME,
+    PROJECTION_SCHEMA,
+    ProjectionsExporter,
+    build_projection,
+)
 from .yaml_exporter import YAMLExporter
 from .mermaid_exporter import MermaidExporter
 from .context_exporter import ContextExporter

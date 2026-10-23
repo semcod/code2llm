@@ -26,6 +26,7 @@ When you run `code2llm ./ -f all`, the following files are created:
 |------|--------|---------|--------------|
 | `evolution.toon.yaml` | **YAML** | **📋 Refactoring queue** - Prioritized improvements | 0 refactoring actions needed |
 | `map.toon.yaml` | **YAML** | **🗺️ Structural map + project header** - Modules, imports, exports, signatures, stats, alerts, hotspots, trend | Project architecture overview |
+| `projections.json` | **JSON** | **🔎 Bounded symbol catalog** (`code2llm.projection/v1`) for intent retrieval / external indexers — deterministic, digested, capped at 2048 records | Reuse contract without analyzer internals |
 
 ### 🤖 LLM-Ready Documentation
 
