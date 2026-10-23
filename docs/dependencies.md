@@ -13,6 +13,25 @@ uv sync --locked --group automation --python 3.12
 
 The second command selects an automation environment; use a separate UV_PROJECT_ENVIRONMENT when keeping application and tool environments side by side. `code2llm` itself is excluded from the registry catalog when it is the local editable package.
 
+## Analysis environment (pfix / pipreqs)
+
+The analyzer toolchain (`clickmd` / `code2logic` → `pfix` → `pipreqs`) enters the
+locked dependency graph transitively. `pipreqs` 0.5.0 — the newest published
+release — declares `Requires-Python >=3.8.1,<3.13`, so analyzer runs must not
+use the application `.venv` on Python 3.13 (PLF-036 / issue #26). Until pipreqs
+or pfix publishes a 3.13-compatible release, materialize the pinned analysis
+environment instead:
+
+```sh
+scripts/analysis-env.sh          # create/sync .venv-analysis (Python 3.12, uv.lock)
+scripts/analysis-env.sh --check  # + uv pip check + pipreqs smoke test
+```
+
+The application `.venv` is preserved untouched until the dependency-lock
+review; `.venv-analysis` is disposable and rebuilds deterministically from
+`uv.lock`. Run analyzer entry points with `.venv-analysis/bin/python`.
+
+
 ## Daily updates and verification
 
 [Dependabot configuration](../.github/dependabot.yml) checks the explicit internal package allowlist daily, including weekends, and groups updates in one PR. It includes transitive dependencies and may widen a manifest constraint when needed. Local or Git sources require separate review.
