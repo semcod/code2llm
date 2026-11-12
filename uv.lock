@@ -647,7 +647,7 @@ source = { editable = "packages/code2graph" }
 
 [[package]]
 name = "code2llm"
-version = "0.5.183"
+version = "0.5.184"
 source = { editable = "." }
 dependencies = [
     { name = "astroid" },
