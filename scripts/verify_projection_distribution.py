@@ -13,6 +13,7 @@ import hashlib
 from importlib import metadata
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -107,15 +108,17 @@ def check_artifacts(directory, expected_version):
     wheels = sorted(directory.glob("code2llm-*.whl"))
     sources = sorted(directory.glob("code2llm-*.tar.gz"))
     require(len(wheels) == len(sources) == 1, "Exactly one wheel and one sdist are required")
+    installer = shutil.which("uv")
+    require(installer is not None, "Install uv to qualify isolated distributions")
     results = []
     script = str(Path(__file__).resolve())
     for artifact in [*wheels, *sources]:
         with tempfile.TemporaryDirectory(prefix="projection-install-") as temporary:
             root = Path(temporary)
             environment = root / "venv"
-            venv.EnvBuilder(with_pip=True).create(environment)
+            venv.EnvBuilder().create(environment)
             python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
-            subprocess.run([str(python), "-I", "-m", "pip", "install", str(artifact)],
+            subprocess.run([installer, "pip", "install", "--python", str(python), str(artifact)],
                            cwd=root, check=True, timeout=300)
             observed = subprocess.run([str(python), "-I", script,
                                        "--expected-version", expected_version],
