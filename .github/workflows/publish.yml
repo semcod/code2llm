@@ -79,6 +79,9 @@ jobs:
           assert result['functions']['fixture.pick'].complexity['cyclomatic_complexity'] == 1
           PY
       
+      - name: Install the native extension exercised by release tests
+        run: uv pip install --system ./packages/code2llm-rust
+
       - name: Run tests
         run: |
           pip install pytest pytest-cov pytest-xdist
