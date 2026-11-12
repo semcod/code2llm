@@ -109,7 +109,7 @@ def _try_serve_from_cache(
     args, formats: list, output_dir: Path, source_path: Path
 ) -> bool:
     """Return True and restore output from cache if a valid cached export exists."""
-    cache = PersistentCache(str(source_path))
+    cache = _analysis_export_cache(args, source_path)
     config_dict = _build_export_config(args, formats)
     cached_export_dir = cache.get_export_cache_dir(config_dict)
     if not cached_export_dir:
@@ -122,7 +122,7 @@ def _try_serve_from_cache(
 
 def _save_to_export_cache(args, formats: list, output_dir: Path, source_path: Path) -> None:
     """Persist the just-produced output_dir contents into the export cache."""
-    cache = PersistentCache(str(source_path))
+    cache = _analysis_export_cache(args, source_path)
     config_dict = _build_export_config(args, formats)
     export_cache_dir = cache.create_export_cache_dir(config_dict)
     _copy_to_cache(output_dir, export_cache_dir, verbose=args.verbose)
@@ -130,6 +130,12 @@ def _save_to_export_cache(args, formats: list, output_dir: Path, source_path: Pa
     cache.save()
     if args.verbose:
         print(f"  Export cached at: {export_cache_dir}")
+
+
+def _analysis_export_cache(args, source_path):
+    """Use exactly the manifest namespace that produced the current analysis."""
+    context = getattr(args, "_analysis_cache_context", None)
+    return PersistentCache(str(source_path), **context) if context else PersistentCache(str(source_path))
 
 
 def _run_core_exports(
@@ -156,6 +162,7 @@ def _run_exports(args, result, output_dir: Path, source_path: Optional[Path] = N
     For chunked analysis, exports to subproject subdirectories.
     Supports export-level caching for repeated runs.
     """
+    args._analysis_cache_context = getattr(result, "stats", {}).get("analysis_cache_context")
     requested_formats = [f.strip() for f in args.format.split(",")]
     formats = _expand_all_formats(requested_formats, getattr(args, "png", False))
     if getattr(args, "planfile_apply", False) and "planfile" not in formats:

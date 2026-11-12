@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from code2llm.core.analyzer import ProjectAnalyzer
-from code2llm.core.config import Config
+from code2llm.core.config import Config, analysis_config_digest
 from code2llm.core.persistent_cache import PersistentCache
 
 
@@ -31,31 +31,21 @@ def project(tmp_path, monkeypatch):
     return tmp_path / "project", fake_home / ".code2llm"
 
 
+def _analysis_config(project_dir: Path, root: Path):
+    cfg = Config(output_dir=str(project_dir.parent / "out"), persistent_cache_root=str(root))
+    cfg.performance.parallel_enabled = False
+    cfg.performance.cache_dir = str(root / "file-cache")
+    return cfg
+
+
 def _cache_for(project_dir: Path, root: Path) -> PersistentCache:
-    return PersistentCache(str(project_dir), cache_root=str(root))
+    return PersistentCache(str(project_dir), cache_root=str(root),
+                           analysis_identity=analysis_config_digest(_analysis_config(project_dir, root)))
 
 
 def _run_full_analysis(project_dir: Path, cache_root: Path):
-    """Run ProjectAnalyzer but forced to use our test cache root."""
-    # Patch _DEFAULT_ROOT via a thin PersistentCache subclass injected
-    # into the analyzer module path. Simpler: monkey-patch the class.
-    from code2llm.core import analyzer as analyzer_mod
-
-    orig = analyzer_mod.PersistentCache
-
-    class _PC(orig):  # type: ignore[misc, valid-type]
-        def __init__(self, project_dir_):
-            super().__init__(project_dir_, cache_root=str(cache_root))
-
-    analyzer_mod.PersistentCache = _PC
-    try:
-        cfg = Config(output_dir=str(project_dir.parent / "out"))
-        # Force sequential to avoid multiprocessing pickling our subclass.
-        cfg.performance.parallel_enabled = False
-        a = ProjectAnalyzer(cfg, project_dir)
-        return a.analyze_project(str(project_dir))
-    finally:
-        analyzer_mod.PersistentCache = orig
+    """Use the explicit cache configuration instead of replacing its constructor."""
+    return ProjectAnalyzer(_analysis_config(project_dir, cache_root), project_dir).analyze_project(str(project_dir))
 
 
 def test_first_run_populates_manifest(project):

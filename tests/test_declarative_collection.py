@@ -20,6 +20,7 @@ from code2llm.core.config import (
     ALL_EXTENSIONS,
     ALL_FILENAMES,
     Config,
+    analysis_config_digest,
 )
 from code2llm.core.file_analyzer import FileAnalyzer
 from code2llm.core.persistent_cache import PersistentCache
@@ -97,8 +98,9 @@ def test_modifying_declarative_file_invalidates_cache(iac_project, tmp_path):
     orig = analyzer_mod.PersistentCache
 
     class _PC(orig):
-        def __init__(self, pd):
-            super().__init__(pd, cache_root=str(cache_root), auto_cleanup=False)
+        def __init__(self, pd, **kwargs):
+            kwargs["cache_root"] = str(cache_root)
+            super().__init__(pd, auto_cleanup=False, **kwargs)
 
     analyzer_mod.PersistentCache = _PC
     try:
@@ -108,7 +110,8 @@ def test_modifying_declarative_file_invalidates_cache(iac_project, tmp_path):
         a.analyze_project(str(iac_project))
 
         pc1 = PersistentCache(
-            str(iac_project), cache_root=str(cache_root), auto_cleanup=False
+            str(iac_project), cache_root=str(cache_root), auto_cleanup=False,
+            analysis_identity=analysis_config_digest(cfg)
         )
         assert "pyproject.toml" in pc1._manifest["files"], (
             "declarative files must be tracked in the manifest so that "
@@ -123,7 +126,8 @@ def test_modifying_declarative_file_invalidates_cache(iac_project, tmp_path):
         a2.analyze_project(str(iac_project))
 
         pc2 = PersistentCache(
-            str(iac_project), cache_root=str(cache_root), auto_cleanup=False
+            str(iac_project), cache_root=str(cache_root), auto_cleanup=False,
+            analysis_identity=analysis_config_digest(cfg)
         )
         h2 = pc2._compute_run_hash({"fmt": "toon"})
         assert h1 != h2, (
@@ -143,8 +147,9 @@ def test_dockerfile_edit_invalidates_cache(iac_project, tmp_path):
     orig = analyzer_mod.PersistentCache
 
     class _PC(orig):
-        def __init__(self, pd):
-            super().__init__(pd, cache_root=str(cache_root), auto_cleanup=False)
+        def __init__(self, pd, **kwargs):
+            kwargs["cache_root"] = str(cache_root)
+            super().__init__(pd, auto_cleanup=False, **kwargs)
 
     analyzer_mod.PersistentCache = _PC
     try:
@@ -152,7 +157,8 @@ def test_dockerfile_edit_invalidates_cache(iac_project, tmp_path):
         cfg.performance.parallel_enabled = False
         ProjectAnalyzer(cfg, iac_project).analyze_project(str(iac_project))
         pc1 = PersistentCache(
-            str(iac_project), cache_root=str(cache_root), auto_cleanup=False
+            str(iac_project), cache_root=str(cache_root), auto_cleanup=False,
+            analysis_identity=analysis_config_digest(cfg)
         )
         assert "Dockerfile" in pc1._manifest["files"]
         h1 = pc1._compute_run_hash({"fmt": "toon"})
@@ -161,7 +167,8 @@ def test_dockerfile_edit_invalidates_cache(iac_project, tmp_path):
         ProjectAnalyzer(cfg, iac_project).analyze_project(str(iac_project))
 
         pc2 = PersistentCache(
-            str(iac_project), cache_root=str(cache_root), auto_cleanup=False
+            str(iac_project), cache_root=str(cache_root), auto_cleanup=False,
+            analysis_identity=analysis_config_digest(cfg)
         )
         h2 = pc2._compute_run_hash({"fmt": "toon"})
         assert h1 != h2

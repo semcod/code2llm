@@ -37,6 +37,7 @@
 # Results from worker processes are plain dicts; _merge_results rebuilds dataclasses.
 
 import hashlib
+from dataclasses import fields
 import logging
 import multiprocessing as mp
 import os
@@ -61,6 +62,7 @@ from .config import (
     ALL_FILENAMES,
     LANGUAGE_FILENAME_PREFIXES,
     DEFAULT_PROGRESS_BAR_THRESHOLD,
+    analysis_config_digest,
 )
 from .models import AnalysisResult, Pattern
 from .file_cache import FileCache
@@ -84,11 +86,13 @@ class ProjectAnalyzer:
     ):
         """Initialise the analyser with optional config and project path."""
         self.config = config or FAST_CONFIG
+        self._cache_identity = analysis_config_digest(self.config)
         self.project_path = project_path
         self.cache = (
             FileCache(
                 self.config.performance.cache_dir,
                 self.config.performance.cache_ttl_hours,
+                analysis_identity=self._cache_identity,
             )
             if self.config.performance.enable_cache
             else None
@@ -109,9 +113,11 @@ class ProjectAnalyzer:
                 f"  - Parallel: {self.config.performance.parallel_enabled}, Workers: {workers}"
             )
 
+        hash_started = time.perf_counter()
         pcache, cached_results, files_to_analyze = self._load_from_persistent_cache(
             files, project_path
         )
+        hash_seconds = time.perf_counter() - hash_started
 
         # Watch mode: show what changed
         if getattr(self.config, "watch", False) and files_to_analyze:
@@ -124,11 +130,40 @@ class ProjectAnalyzer:
                 print(f"   ... and {len(files_to_analyze) - 10} more")
             print()
 
+        parse_started = time.perf_counter()
         fresh_results = self._run_analysis(files_to_analyze)
+        parse_seconds = time.perf_counter() - parse_started
         self._store_to_persistent_cache(pcache, files_to_analyze, fresh_results)
 
+        link_started = time.perf_counter()
         merged = self._merge_results(cached_results + fresh_results, str(project_path))
         self._post_process(merged, files, cached_results + fresh_results, start_time)
+        merged.stats["analysis_cache_context"] = {
+            "analysis_identity": self._cache_identity,
+            "cache_root": self.config.persistent_cache_root,
+        }
+        self.incremental_stats = dict(
+            analysis_candidates=len(files_to_analyze), cached_files=len(cached_results),
+            changed_files=sorted(Path(p).relative_to(project_path).as_posix()
+                                 for p, _ in files_to_analyze),
+            deleted_files=getattr(self, "deleted_files", []),
+            hashing_seconds=hash_seconds, parsing_seconds=parse_seconds,
+            linking_seconds=time.perf_counter() - link_started, graph_relinked="full",
+        )
+        return merged
+
+    def analyze_file(self, file_path: str) -> AnalysisResult:
+        """Analyze exactly one source file, without scanning its siblings."""
+        start = time.time()
+        path = Path(file_path).resolve(strict=True)
+        if not path.is_file():
+            raise ValueError("Expected a source file")
+        root = self._resolve_project_path(str(path.parent))
+        module = self._compute_module_name(path.name, path.name, root.name)
+        files = [(str(path), module)]
+        results = self._run_analysis(files)
+        merged = self._merge_results(results, str(root))
+        self._post_process(merged, files, results, start)
         return merged
 
     def _resolve_project_path(self, project_path: str) -> Path:
@@ -162,7 +197,9 @@ class ProjectAnalyzer:
         if getattr(self.config, "no_cache", False):
             return None, [], files
         try:
-            pcache = PersistentCache(str(project_path))
+            pcache = PersistentCache(str(project_path),
+                                     cache_root=getattr(self.config, "persistent_cache_root", None),
+                                     analysis_identity=self._cache_identity)
             file_paths = [fp for fp, _ in files]
             changed_paths, cached_paths = pcache.get_changed_files(file_paths)
             # Drop manifest entries for files that vanished since the last
@@ -170,6 +207,7 @@ class ProjectAnalyzer:
             # manifest) wouldn't shrink on delete and stale exports could
             # be re-used.
             removed = pcache.prune_missing(file_paths)
+            self.deleted_files = sorted(removed)
             path_to_module = dict(files)
             cached_results: List[Dict] = []
             for fp in cached_paths:
@@ -414,13 +452,7 @@ class ProjectAnalyzer:
         workers = min(self.config.performance.get_workers(), len(files))
 
         # Convert config to dict for pickle compatibility
-        config_dict = {
-            "mode": self.config.mode,
-            "max_depth_enumeration": self.config.max_depth_enumeration,
-            "detect_state_machines": self.config.detect_state_machines,
-            "detect_recursion": self.config.detect_recursion,
-            "output_dir": self.config.output_dir,
-        }
+        config_dict = {item.name: getattr(self.config, item.name) for item in fields(self.config)}
 
         # Use forkserver if available (Linux) to prevent deadlocks with native C/Rust extensions
         # and multi-threaded runtimes when forking.
