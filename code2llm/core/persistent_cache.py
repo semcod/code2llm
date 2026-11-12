@@ -16,8 +16,8 @@ Layout::
             └── exports/          # {run_hash}/_complete + copied outputs
 
 Invalidation strategy (fastest-first):
-  L1  mtime + size unchanged  →  cache hit (no I/O on file content)
-  L2  content hash unchanged  →  cache hit (file touched but identical)
+  Content hash unchanged    →  cache hit (including touch without edits)
+  Metadata alone            →  never proves unchanged source bytes
   L3  --no-cache / --force    →  skip cache entirely
 """
 
@@ -26,13 +26,13 @@ import json
 import logging
 import os
 import pickle
+import re
 import shutil
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from code2llm import __version__
-from code2llm.analysis.native_bridge import native_check_changed_files
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +79,18 @@ class PersistentCache:
         cache_root: Optional[str] = None,
         auto_cleanup: Optional[bool] = None,
         ttl_days: Optional[float] = None,
+        analysis_identity: str = "",
     ):
         self._project_dir = os.path.realpath(project_dir)
         self._analyzer_version = __version__
         self._root = Path(cache_root or _DEFAULT_ROOT)
         self._project_hash = hashlib.md5(self._project_dir.encode()).hexdigest()[:12]
+        self._analysis_identity = analysis_identity
         self._project_cache = self._root / "projects" / self._project_hash
+        if analysis_identity:
+            if not re.fullmatch(r"[0-9a-f]{64}", analysis_identity):
+                raise ValueError("Analysis identity must be a SHA-256 digest")
+            self._project_cache /= "analysis-" + analysis_identity
         self._files_dir = self._project_cache / "files"
         self._exports_dir = self._project_cache / "exports"
         self._manifest_path = self._project_cache / "manifest.json"
@@ -171,29 +177,10 @@ class PersistentCache:
     def get_changed_files(self, filepaths: List[str]) -> Tuple[List[str], List[str]]:
         """Split *filepaths* into (changed, cached).
 
-        Uses L1 (mtime+size) first; falls back to L2 (content hash) when
-        mtime changed but size matches — handles touch/copy without edit.
-        Uses native Rust parallel checker when available.
+        Always verifies content. The native metadata shortcut is deliberately
+        excluded until its byte/identity contract is separately qualified.
         """
         files_index = self._manifest["files"]
-
-        # Fast path: native parallel check across threads
-        manifest_entries = {
-            rel: (info["hash"], float(info["mtime"]), int(info["size"]))
-            for rel, info in files_index.items()
-            if isinstance(info, dict) and "hash" in info and "mtime" in info and "size" in info
-        }
-        native_res = native_check_changed_files(
-            self._project_dir, filepaths, manifest_entries, self._analyzer_version
-        )
-        if native_res is not None:
-            changed_res, cached_res, refreshed = native_res
-            for fp, new_mtime in refreshed:
-                rel = os.path.relpath(fp, self._project_dir)
-                if rel in files_index:
-                    files_index[rel]["mtime"] = new_mtime
-                    self._dirty = True
-            return changed_res, cached_res
 
         changed: List[str] = []
         cached: List[str] = []
@@ -206,11 +193,7 @@ class PersistentCache:
                 continue
             try:
                 stat = os.stat(fp)
-                # L1: mtime + size identical → hit
-                if stat.st_mtime == prev["mtime"] and stat.st_size == prev["size"]:
-                    cached.append(fp)
-                    continue
-                # L2: content hash check (size may match but mtime drifted)
+                # Touch/copy and metadata-preserving rewrites both require bytes.
                 h = self.content_hash(fp)
                 if h == prev["hash"]:
                     prev["mtime"] = stat.st_mtime  # refresh mtime in manifest
@@ -402,6 +385,13 @@ class PersistentCache:
         Returns number of items removed.
         """
         removed = 0
+        if not self._analysis_identity:
+            for namespace in self._project_cache.glob("analysis-*"):
+                identity = namespace.name.removeprefix("analysis-")
+                if namespace.is_dir() and not namespace.is_symlink() and re.fullmatch(r"[0-9a-f]{64}", identity):
+                    scoped = PersistentCache(self._project_dir, cache_root=str(self._root),
+                                             auto_cleanup=False, analysis_identity=identity)
+                    removed += scoped.gc(max_age_days=max_age_days, max_size_mb=max_size_mb)
         cutoff = time.time() - (max_age_days * 86400)
 
         # Remove old export dirs
@@ -502,12 +492,26 @@ def get_all_projects(cache_root: Optional[str] = None) -> List[Dict[str, Any]]:
     if not root.exists():
         return projects
     for proj_dir in sorted(root.iterdir()):
-        meta_path = proj_dir / "meta.json"
-        if meta_path.exists():
+        summaries = []
+        candidates = [proj_dir / "meta.json"]
+        candidates.extend(path / "meta.json" for path in sorted(proj_dir.glob("analysis-*"))
+                          if path.is_dir() and not path.is_symlink()
+                          and re.fullmatch(r"analysis-[0-9a-f]{64}", path.name))
+        for meta_path in candidates:
             try:
-                projects.append(json.loads(meta_path.read_text()))
+                metadata = json.loads(meta_path.read_text())
+                if isinstance(metadata, dict) and isinstance(metadata.get("project"), str):
+                    summaries.append(metadata)
             except (json.JSONDecodeError, OSError):
                 pass
+        if summaries:
+            summary = dict(summaries[0])
+            for field in ("files_cached", "cache_size_bytes", "exports"):
+                summary[field] = sum(row.get(field, 0) for row in summaries)
+            summary["updated_at"] = max(row.get("updated_at", 0) for row in summaries)
+            summary["analysis_namespaces"] = [path.parent.name.removeprefix("analysis-")
+                                                for path in candidates[1:] if path.exists()]
+            projects.append(summary)
     return projects
 
 

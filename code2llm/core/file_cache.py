@@ -21,18 +21,24 @@ def make_cache_key(file_path: str, content: str) -> str:
 class FileCache:
     """Cache for parsed AST files."""
 
-    def __init__(self, cache_dir: str = ".code2llm_cache", ttl_hours: int = 24):
+    def __init__(self, cache_dir: str = ".code2llm_cache", ttl_hours: int = 24,
+                 analysis_identity: str = ""):
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.ttl_seconds = ttl_hours * 3600
         self._analyzer_version = __version__
+        self._analysis_identity = analysis_identity
 
     def _get_cache_key_stat(self, file_path: str) -> str:
-        """Generate cache key from file path, mtime and size (fast, no I/O on content)."""
+        """Verify content even when a rewrite preserves mtime and size.
+
+        The method name is retained for private-call compatibility. Metadata
+        alone is never a basis for returning an old analysis payload.
+        """
         identity = hashlib.sha256(os.path.abspath(file_path).encode()).hexdigest()[:16]
         try:
-            s = os.stat(file_path)
-            return f"{self._analyzer_version}_{identity}_{s.st_mtime_ns}_{s.st_size}"
+            content = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()
+            return f"{self._analyzer_version}_{self._analysis_identity}_{identity}_content1_{content}"
         except OSError:
             return f"{self._analyzer_version}_{identity}_unknown"
 
@@ -76,7 +82,7 @@ class FileCache:
             pass
 
     def get_fast(self, file_path: str) -> Optional[Any]:
-        """Get cached analysis result using mtime+size key (call before reading file)."""
+        """Get a cached analysis after verifying current source bytes."""
         cache_key = self._get_cache_key_stat(file_path)
         cache_path = self._get_cache_path(cache_key)
 

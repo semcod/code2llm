@@ -1,10 +1,33 @@
 """Configuration and constants for code2llm."""
 
 import os
+import hashlib
+import json
+import sys
+from pathlib import Path
 import psutil
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import List, Set
 from enum import Enum
+
+
+def analysis_config_digest(config):
+    """Bind private payloads to complete configuration and parser/backend bytes."""
+    encoded = json.dumps({"config": asdict(config), "runtime": analysis_runtime_identity()},
+                         sort_keys=True, separators=(",", ":"),
+                         default=lambda value: sorted(value) if isinstance(value, set) else str(value))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def analysis_runtime_identity():
+    from code2llm.analysis import native_bridge
+
+    native = native_bridge.code2llm_rust
+    path = getattr(native, "__file__", None)
+    return {"parser_runtime": sys.implementation.cache_tag,
+            "native_version": native_bridge.get_native_version(),
+            "native_module_sha256": hashlib.sha256(Path(path).read_bytes()).hexdigest()
+            if path else None}
 
 
 def _get_optimal_workers(default: int = 4, max_per_gb: float = 2.0) -> int:
@@ -200,6 +223,7 @@ class Config:
 
     # Sub-configs for performance
     performance: PerformanceConfig = field(default_factory=PerformanceConfig)
+    persistent_cache_root: str | None = None
     filters: FilterConfig = field(default_factory=FilterConfig)
     depth: DepthConfig = field(default_factory=DepthConfig)
     output: OutputConfig = field(default_factory=OutputConfig)

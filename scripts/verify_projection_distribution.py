@@ -12,6 +12,7 @@ import base64
 import hashlib
 from importlib import metadata
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -98,9 +99,42 @@ def check_installed(expected_version):
         observed = json.loads(first.read_text(encoding="utf-8"))
         require(observed == expected, "Public builder and exporter differ")
         check_document(observed, expected_version)
+    check_incremental_api()
     return {"status": "PASS", "version": expected_version,
             "projection_digest": expected["digest"], "records": len(expected["records"]),
             "source_bytes_verified": False}
+
+
+def check_incremental_api():
+    """Exercise installed public analysis independently of the source test tree."""
+    from copy import deepcopy
+    from code2llm.api import FAST_CONFIG, analyze_file, analyze_incremental
+
+    with tempfile.TemporaryDirectory(prefix="incremental-contract-") as directory:
+        root = Path(directory)
+        project = root / "project"
+        project.mkdir()
+        source = project / "a.py"
+        source.write_text("def first():\n    return 1\n")
+        (project / "b.py").write_text("def other():\n    return 2\n")
+        config = deepcopy(FAST_CONFIG)
+        config.performance.parallel_enabled = False
+        cache = str(root / "private-cache")
+        first = analyze_incremental(str(project), cache_dir=cache, config=config)
+        warm = analyze_incremental(str(project), cache_dir=cache, config=config)
+        require(warm.identity == first.identity and warm.incremental["analysis_candidates"] == 0,
+                "Unchanged installed analysis did not reuse its verified cache")
+        old = source.stat()
+        source.write_text("def later():\n    return 1\n")
+        os.utime(source, ns=(old.st_atime_ns, old.st_mtime_ns))
+        changed = analyze_incremental(str(project), cache_dir=cache, config=config, changed_files=[])
+        cold = analyze_incremental(str(project), cache_dir=cache, config=config, cache_policy="off")
+        require(set(changed.analysis.functions) == set(cold.analysis.functions) == {"a.later", "b.other"},
+                "Metadata-preserving rewrite reused stale installed analysis")
+        require(changed.identity == cold.identity and changed.identity["snapshot_atomic"] is False,
+                "Installed observation has a false snapshot claim")
+        require(set(analyze_file(str(source), config).functions) == {"a.later"},
+                "Installed analyze_file scanned a sibling")
 
 
 def check_artifacts(directory, expected_version):
