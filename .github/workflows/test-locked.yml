@@ -28,3 +28,7 @@ jobs:
         run: uv sync --locked --extra dev --python "${{ matrix.python-version }}"
       - name: Test supported Python versions
         run: uv run --no-sync python -m pytest -q -n 2
+      - name: Build and qualify projection distributions
+        run: |
+          uv build --out-dir dist
+          uv run --no-sync python -I scripts/verify_projection_distribution.py --artifact-directory dist --expected-version "$(cat VERSION)"

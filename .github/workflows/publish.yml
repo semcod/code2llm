@@ -58,7 +58,10 @@ jobs:
           path: dist/
       
       - name: Install package
-        run: pip install dist/*.whl
+        run: pip install uv dist/*.whl
+
+      - name: Qualify installed projection exporter from wheel and sdist
+        run: python -I scripts/verify_projection_distribution.py --artifact-directory dist --expected-version "$(cat VERSION)"
 
       - name: Verify installed analyzer wheel
         run: |
