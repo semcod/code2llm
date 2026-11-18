@@ -2,6 +2,7 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
 
 from types import SimpleNamespace
@@ -101,6 +102,33 @@ def test_collect_planfile_tickets_surfaces_actionable_findings(tmp_path: Path) -
     assert {"code2llm_cc", "code2llm_god", "code2llm_dup"}.issubset(signals)
     assert any(ticket.signal == "code2llm_smell_circular_dependency" for ticket in tickets)
     assert all("llm-ready" in ticket.labels for ticket in tickets)
+
+
+def test_smell_manifest_declares_bounded_acceptance(tmp_path: Path) -> None:
+    result = _sample_result(tmp_path)
+    smell = result.smells[0]
+    smell.type = "data_clump"
+    smell.name = "Data Clump: changed, n, pairs"
+    path = tmp_path / "planfile-tickets.yaml"
+    PlanfileTicketsExporter().export(result, str(path))
+
+    tickets = yaml.safe_load(path.read_text())["tickets"]
+    ticket = next(t for t in tickets if t["signal"] == "code2llm_smell_data_clump")
+    assert ticket["files"] == ["pkg/one.py"]
+    assert ticket["dedupe_key"] == f"code2llm:smell:data_clump:pkg/one.py:1:{smell.name}"
+    _, acceptance = ticket["description"].split("## Acceptance criteria\n")
+    assert "`pkg/one.py`" in acceptance
+    assert "re-run code2llm" in acceptance
+    assert "local tests" in acceptance
+
+
+@pytest.mark.parametrize("invalid_path", ["", "/outside/file.py", "../outside/file.py"])
+def test_smell_without_project_file_keeps_diagnostic_only(tmp_path: Path, invalid_path: str) -> None:
+    result = _sample_result(tmp_path)
+    result.smells[0].file = invalid_path
+    ticket = next(t for t in collect_planfile_tickets(result) if t.signal.startswith("code2llm_smell_"))
+    assert "## Acceptance criteria" not in ticket.description
+    assert result.smells[0].description in ticket.description
 
 
 def test_planfile_exporter_writes_manifest(tmp_path: Path) -> None:
