@@ -340,9 +340,9 @@ def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
         action = "Make the smallest refactor that removes the smell and run local tests."
         if re.fullmatch(r"(?:[\w.-]+/)*[\w.-]+", rel) and ".." not in Path(rel).parts:
             action = (
-                "## Acceptance criteria\n"
+                "Acceptance criteria: "
                 f"Refactor `{rel}` to remove the reported smell while preserving its behavior. "
-                "Run the relevant local tests and re-run code2llm to confirm the finding is gone.\n"
+                "Run the relevant local tests and re-run code2llm to confirm the finding is gone."
             )
         tickets.append(
             PlanfileTicketSuggestion(

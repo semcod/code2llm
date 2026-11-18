@@ -116,7 +116,8 @@ def test_smell_manifest_declares_bounded_acceptance(tmp_path: Path) -> None:
     ticket = next(t for t in tickets if t["signal"] == "code2llm_smell_data_clump")
     assert ticket["files"] == ["pkg/one.py"]
     assert ticket["dedupe_key"] == f"code2llm:smell:data_clump:pkg/one.py:1:{smell.name}"
-    _, acceptance = ticket["description"].split("## Acceptance criteria\n")
+    acceptance = ticket["description"].splitlines()[-1]
+    assert acceptance.startswith("Acceptance criteria: ")
     assert "`pkg/one.py`" in acceptance
     assert "re-run code2llm" in acceptance
     assert "local tests" in acceptance
@@ -127,7 +128,7 @@ def test_smell_without_project_file_keeps_diagnostic_only(tmp_path: Path, invali
     result = _sample_result(tmp_path)
     result.smells[0].file = invalid_path
     ticket = next(t for t in collect_planfile_tickets(result) if t.signal.startswith("code2llm_smell_"))
-    assert "## Acceptance criteria" not in ticket.description
+    assert "Acceptance criteria:" not in ticket.description
     assert result.smells[0].description in ticket.description
 
 
