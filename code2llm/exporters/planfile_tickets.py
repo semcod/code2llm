@@ -337,6 +337,13 @@ def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
         rel = _rel_path(smell.file, result.project_path)
         priority = "high" if smell.severity >= 0.75 else "normal"
         label = re.sub(r"[^a-z0-9-]+", "-", smell.type.lower()).strip("-")
+        action = "Make the smallest refactor that removes the smell and run local tests."
+        if re.fullmatch(r"(?:[\w.-]+/)*[\w.-]+", rel) and ".." not in Path(rel).parts:
+            action = (
+                "Acceptance criteria: "
+                f"Refactor `{rel}` to remove the reported smell while preserving its behavior. "
+                "Run the relevant local tests and re-run code2llm to confirm the finding is gone."
+            )
         tickets.append(
             PlanfileTicketSuggestion(
                 signal=f"code2llm_smell_{smell.type}",
@@ -344,7 +351,7 @@ def _smell_tickets(result: AnalysisResult) -> list[PlanfileTicketSuggestion]:
                 description=(
                     f"code2llm reports `{smell.name}` in `{rel}:{smell.line}`.\n\n"
                     f"{smell.description}\n\n"
-                    "Make the smallest refactor that removes the smell and run local tests."
+                    f"{action}"
                 ),
                 priority=priority,
                 labels=("llm-ready", "code2llm", "code-smell", label),
